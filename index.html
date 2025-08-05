@@ -11,6 +11,27 @@
         <img src="img/logo.gif">
     </header>
     <main>
+        <section>
+            <div class="carousel">
+                <div class="slides">
+<!--                    <img src="img/1.jpg" class="slide active">-->
+<!--                    <img src="img/2.jpg" class="slide">-->
+<!--                    <img src="img/3.jpg" class="slide">-->
+<!--                    <img src="img/4.jpg" class="slide">-->
+<!--                    <img src="img/5.jpg" class="slide">-->
+                    <img src="img/6.jpg" class="slide active">
+                    <img src="img/7.jpg" class="slide">
+                    <img src="img/8.jpg" class="slide">
+                    <img src="img/9.jpg" class="slide">
+                    <img src="img/10.jpg" class="slide">
+                    <img src="img/11.jpg" class="slide">
+                </div>
+                <button class="prev">&#10094;</button>
+                <button class="next">&#10095;</button>
+                <button class="hire">Hire regalia</button>
+                <button class="buy">Buy regalia</button>
+            </div>
+        </section>
         <section class="faq">
             <h1>FAQs.</h1>
             <div class="faqList">
@@ -42,7 +63,7 @@
                 </details>
                 <hr>
                 <details>
-                    <summary>Can someone else collect my robes for me? or return them?</summary>
+                    <summary>Can someone else collect my robes for me? Or return them?</summary>
                     <div>
                         We prefer you come yourself so we can confirm the right sizes have been ordered and to tell you how to wear it correctly. This takes 5-6 minutes.<br>
                         Another person can collect for you if you absolutely cannot do it. Please have them bring your order receipt if possible. Also make sure they know your full name and qualification.
@@ -73,7 +94,7 @@
                 </details>
                 <hr>
                 <details>
-                    <summary>I am not going to graduation, Can I hire my robes for photos?</summary>
+                    <summary>I am not going to graduation. Can I hire my robes for photos?</summary>
                     <div>
                         Yes, Outside of graduation weeks, we do routinely do Casual Hire for photo sessions. Click here for information.
                     </div>
@@ -86,4 +107,35 @@
         <img src="img/map.jpg">
     </footer>
 </body>
+<script>
+    let currentIndex = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+
+    function showSlide(index) {
+        slides.forEach((slide, i) => {
+            slide.classList.toggle('active', i === index);
+        });
+    }
+
+    document.querySelector('.next').addEventListener('click', () => {
+        currentIndex = (currentIndex + 1) % totalSlides;
+        showSlide(currentIndex);
+    });
+
+    document.querySelector('.prev').addEventListener('click', () => {
+        currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+        showSlide(currentIndex);
+    });
+
+    // Optional: Auto-slide every 5 seconds
+    // setInterval(() => {
+    //   currentIndex = (currentIndex + 1) % totalSlides;
+    //   showSlide(currentIndex);
+    // }, 5000);
+
+    // Initialize
+    showSlide(currentIndex);
+</script>
+
 </html>
