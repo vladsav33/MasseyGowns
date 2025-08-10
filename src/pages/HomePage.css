@@ -1,0 +1,64 @@
+.hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 90vh;
+  background-image: url("/hero.jpg");
+  background-size: cover;
+  background-position: center;
+  color: white;
+}
+
+.hero h1 {
+  display: flex;
+  justify-content: center;
+  font-family: "Playfair Display", serif;
+  font-size: clamp(42px, 8vw, 96px);
+  padding-top: clamp(120px, 24vh, 260px);
+  margin-bottom: -15%;
+}
+
+.options {
+  display: flex;
+  justify-content: center;
+  font-weight: 100px;
+  gap: 20px;
+  margin-bottom: 20px;
+  padding-top: -50px;
+}
+
+.HireRegalia {
+  color: aliceblue;
+  border: 2px, solid, rgb(255, 255, 255);
+  padding: 5px;
+  font-weight: bold;
+  font-size: x-large;
+  background-color: rgb(64, 64, 67);
+}
+
+.BuyRegalia {
+  color: aliceblue;
+  border: 2px, solid, white;
+  padding: 5px;
+  font-weight: bold;
+  font-size: x-large;
+  background-color: rgb(64, 64, 67);
+}
+
+.hero p {
+  text-align: center;
+  font-size: clamp(12px, 1.6vw, 16px);
+  max-width: min(1200px, 90%);
+  align-self: center;
+  white-space: nowrap;
+  overflow: auto;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 1200px) {
+  .hero-desc {
+    white-space: normal;
+    text-overflow: clip;
+  }
+}
