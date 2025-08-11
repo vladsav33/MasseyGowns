@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<<<<<<< HEAD
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -15,3 +16,144 @@
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
+=======
+<head>
+    <meta charset="UTF-8">
+    <title>Massey Gowns</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+    <header>
+        <img src="img/logo.gif">
+    </header>
+    <main>
+        <section>
+            <div class="carousel">
+                <div class="slides">
+<!--                    <img src="img/1.jpg" class="slide active">-->
+<!--                    <img src="img/2.jpg" class="slide">-->
+<!--                    <img src="img/3.jpg" class="slide">-->
+<!--                    <img src="img/4.jpg" class="slide">-->
+<!--                    <img src="img/5.jpg" class="slide">-->
+                    <img src="img/6.jpg" class="slide active">
+                    <img src="img/7.jpg" class="slide">
+                    <img src="img/8.jpg" class="slide">
+                    <img src="img/9.jpg" class="slide">
+                    <img src="img/10.jpg" class="slide">
+                    <img src="img/11.jpg" class="slide">
+                </div>
+                <button class="prev">&#10094;</button>
+                <button class="next">&#10095;</button>
+                <button class="hire">Hire regalia</button>
+                <button class="buy">Buy regalia</button>
+            </div>
+        </section>
+        <section class="faq">
+            <h1>FAQs.</h1>
+            <div class="faqList">
+                <details>
+                    <summary>
+                        <span> I will receive a Massey Diploma, What do I wear?</span>
+                    </summary>
+                    <div>
+                        A bachelor gown and a Massey stole. Those who also have degrees have to wear a trencher. If you already hold a degree you may choose to wear the robes of that degree instead of the stole. [Note that you do not wear a stole and a hood together on stage.] You can hire the hood and stole for photographs.<br><br>
+                        If you are receiving a degree and a diploma at these ceremonies you may wear the degree robes for both awards. It is not practicable to change between hood and stole during a ceremony.
+                    </div>
+                </details>
+                <hr>
+                <details>
+                    <summary>Collection and Return Details</summary>
+                    <div>
+                        For Massey Manawatu and UCOL Palmerston North, all collections and returns are from our rooms here on Refectory Road, Massey University.<br>
+                        For Massey graduations in Auckland and Wellington, please collect your robes from the Campus.<br>
+                        An email confirming the collection and return times and location is sent to you 10 days before your graduation.<br>
+                        For more information click here.
+                    </div>
+                </details>
+                <hr>
+                <details>
+                    <summary>Can I have my hire period extended?</summary>
+                    <div>
+                        Anyone needing an extension should email info@masseygowns.org.nz  in advance to arrange it. There is no extra charge providing we have been notified.
+                    </div>
+                </details>
+                <hr>
+                <details>
+                    <summary>Can someone else collect my robes for me? Or return them?</summary>
+                    <div>
+                        We prefer you come yourself so we can confirm the right sizes have been ordered and to tell you how to wear it correctly. This takes 5-6 minutes.<br>
+                        Another person can collect for you if you absolutely cannot do it. Please have them bring your order receipt if possible. Also make sure they know your full name and qualification.
+                    </div>
+                </details>
+                <hr>
+                <details>
+                    <summary>Can my robes be sent to me by courier if I pay the fee?</summary>
+                    <div>
+                        We regret that we are unable to offer this service at graduation times as we are too busy. We would only consider it in very exceptional circumstances.<br>
+                        In general the collection process only takes 5-6 minutes at the counter.<br>
+                        During the rest of the year we often send out courier parcels and charge a standard $20 fee (NZ North Island), $30 fee (NZ South Island) for packing and sending and includes the return courier ticket.<br>
+                    </div>
+                </details>
+                <hr>
+                <details>
+                    <summary>I am receiving two awards at different ceremonies. Do I pay double fees?</summary>
+                    <div>
+                        No. Massey University will alert us that you are going to two ceremonies and we will extend your hire period to cover both. In most cases you will wear the robes of the higher qualification to both ceremonies. Click "What to Wear" for more information.
+                    </div>
+                </details>
+                <hr>
+                <details>
+                    <summary>Can I rehire my robes at some other time, and how much would it cost?</summary>
+                    <div>
+                        For one month after graduation you can reclaim your robes without additional cost. This is our way of thanking you for returning them promptly so that they can be recycled through the ceremonies. After the one month you pay the full graduation fee.
+                    </div>
+                </details>
+                <hr>
+                <details>
+                    <summary>I am not going to graduation. Can I hire my robes for photos?</summary>
+                    <div>
+                        Yes, Outside of graduation weeks, we do routinely do Casual Hire for photo sessions. Click here for information.
+                    </div>
+                </details>
+                <hr>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <img src="img/map.jpg">
+    </footer>
+</body>
+<script>
+    let currentIndex = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+
+    function showSlide(index) {
+        slides.forEach((slide, i) => {
+            slide.classList.toggle('active', i === index);
+        });
+    }
+
+    document.querySelector('.next').addEventListener('click', () => {
+        currentIndex = (currentIndex + 1) % totalSlides;
+        showSlide(currentIndex);
+    });
+
+    document.querySelector('.prev').addEventListener('click', () => {
+        currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+        showSlide(currentIndex);
+    });
+
+    // Optional: Auto-slide every 5 seconds
+    // setInterval(() => {
+    //   currentIndex = (currentIndex + 1) % totalSlides;
+    //   showSlide(currentIndex);
+    // }, 5000);
+
+    // Initialize
+    showSlide(currentIndex);
+</script>
+
+</html>
+>>>>>>> origin/master
