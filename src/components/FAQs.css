@@ -1,0 +1,52 @@
+.faqs {
+  background-color: #202020;
+  margin: 0;
+  padding: 24px 0;
+}
+
+.h2 {
+  color: rgb(78, 149, 211);
+  margin-left: 130px;
+}
+
+.faqs_grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 500px));
+  gap: 100px;
+  padding: 30px 60px;
+  margin: 0 auto;
+  max-width: 1000px;
+}
+
+.faqs_card {
+  color: aliceblue;
+  border: 2px solid rgb(78, 149, 211);
+  border-radius: 20px;
+}
+
+.faqs_head {
+  display: flex;
+  justify-content: center;
+}
+
+.faqs_link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.faqs_title {
+  color: aliceblue;
+  text-decoration: underline;
+}
+
+.faqs_arrow {
+  font-size: 22px;
+  color: aliceblue;
+}
+
+.faqs_desc {
+  text-align: left;
+  padding-left: 20px;
+  padding-right: 10px;
+}

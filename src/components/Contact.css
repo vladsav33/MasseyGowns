@@ -1,0 +1,26 @@
+.contact {
+  background-color: #202020;
+  margin: 0;
+  padding: 24px 0;
+}
+
+.contact_inner {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0 100px;
+}
+
+.contact_map {
+  padding-top: 30px;
+  width: 700px;
+}
+
+.contact_info {
+  color: aliceblue;
+}
+
+.underline {
+  text-decoration: underline;
+  color: aliceblue;
+}

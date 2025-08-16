@@ -1,0 +1,20 @@
+.hireprocess {
+  background-color: #202020;
+  margin: 0;
+  padding: 24px 0;
+}
+
+.process_title {
+  color: rgb(78, 149, 211);
+  margin-left: 130px;
+}
+
+.process_img {
+  width: 1000px;
+  margin: 0 auto;
+}
+
+.img {
+  width: 100%;
+  height: auto;
+}

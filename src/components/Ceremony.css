@@ -1,0 +1,37 @@
+.ceremony {
+  background-color: #202020;
+  margin: 0;
+  padding: 24px 0;
+}
+
+.ceremony_title {
+  display: flex;
+  justify-content: center;
+  color: rgb(78, 149, 211);
+  margin: 0 0 24px;
+  font-size: clamp(20px, 2vw, 28px);
+}
+
+.ceremony_inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin: 0 auto;
+  max-width: 1280px;
+}
+
+.text {
+  color: aliceblue;
+  font-size: large;
+  line-height: 1.6;
+  flex: 0 0 800px;
+}
+
+.cere_link {
+  color: aliceblue;
+  text-decoration: underline;
+}
+
+.cere_img img {
+  width: 100%;
+}

@@ -1,5 +1,10 @@
 import React from "react";
 import Navbar from "../components/Navbar";
+import Ceremony from "../components/Ceremony";
+import FAQs from "../components/FAQs";
+import Contact from "../components/Contact";
+import Footer from "../components/Footer";
+import Hireprocess from "../components/Hireprocess";
 import "./HomePage.css";
 
 function HomePage() {
@@ -21,6 +26,11 @@ function HomePage() {
           for other institutions in the Central Districts.
         </p>
       </div>
+      <Ceremony />
+      <Hireprocess />
+      <FAQs />
+      <Contact />
+      <Footer />
     </div>
   );
 }
