@@ -9,7 +9,7 @@ lerna-debug.log*
 
 # Dependencies & build
 node_modules/
-dist/
+# dist/
 dist-ssr/
 build/
 out-tsc/
