@@ -12,7 +12,7 @@ function HomePage() {
     <div>
       <Navbar />
       <div className="hero">
-        <h1>Academic Dress</h1>
+        <h1>Academic Dress Hire</h1>
         <div className="options">
           <a href="#" className="HireRegalia">
             Hire Regalia

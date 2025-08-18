@@ -5,7 +5,7 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-left">
-        <img src="/new.png" alt="MasseyGowns" className="logo" />
+        <img src="/logo.jpg" alt="MasseyGowns" className="logo" />
       </div>
       <ul className="navbar-menu">
         <li>
@@ -83,7 +83,7 @@ function Navbar() {
           <a href="#">FAQs</a>
         </li>
         <li>
-          <a href="#">CONTACT US</a>
+          <a href="#">Contact Us</a>
         </li>
       </ul>
       <div className="navbar-icons">
