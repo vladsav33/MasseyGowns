@@ -1,0 +1,45 @@
+.ceremony-course-container {
+  margin-top: 20px;
+  font-family: sans-serif;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  color: rgb(106, 106, 106);
+}
+
+h3 {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.dropdown-select {
+  width: 100%;
+  max-width: 400px;
+  padding: 8px 12px;
+  margin: 0 auto 16px auto;
+  font-size: 14px;
+  border: 2px solid #d1d5db;
+  border-radius: 6px;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  display: block;
+  color: rgb(50, 50, 50);
+}
+
+.dropdown-select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.dropdown-select:hover {
+  border-color: #9ca3af;
+}
+
+.info-text {
+  font-size: 13px;
+  margin: 8px 0 16px 0;
+  line-height: 1.4;
+}

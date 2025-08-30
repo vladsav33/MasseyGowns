@@ -1,0 +1,85 @@
+.container {
+    width: 100%;
+    max-width: 700px;
+    margin: 40px auto;
+    text-align: center;
+    font-family: sans-serif;
+  }
+  
+  .progressbar {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    width: 100%;
+  }
+  
+  /* Grey background line */
+  .progressbar::before {
+    content: "";
+    position: absolute;
+    top: 15px; /* aligns with circle center */
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-color: #d1d5db; /* grey line */
+    border-radius: 2px;
+    z-index: 0; /* keep behind circles */
+  }
+  
+  /* Blue progress line */
+  .progress {
+    position: absolute;
+    top: 15px; /* same as grey line */
+    left: 0;
+    height: 4px;
+    background-color: #2563eb; /* blue */
+    border-radius: 2px;
+    transition: width 0.3s ease;
+    z-index: 0; /* behind circles */
+  }
+  
+  /* Step container */
+  .step {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1; /* keep circles above the line */
+  }
+  
+  /* Circles */
+  .circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #fff;
+    border: 2px solid #d1d5db;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: bold;
+    color: #6b7280;
+    transition: all 0.3s ease;
+  }
+  
+  .circle.active {
+    border-color: #2563eb;
+    background-color: #2563eb;
+    color: #fff;
+  }
+  
+  /* Step labels */
+  .stepName {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #6b7280;
+  }
+  
+  .stepName.highlight {
+    color: #2563eb;
+    font-weight: 600;
+  }
+  
