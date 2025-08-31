@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import React, { useState, useEffect } from "react";
+=======
+import React, { useState } from "react";
+>>>>>>> fba400c2e340910728cea75dbb45578af50b9c8e
 import Navbar from "../components/Navbar";
 import "./HireRegalia.css";
 import ProgressBar from "../components/ProgressBar";
@@ -6,6 +10,7 @@ import ProgressButtons from "../components/ProgressButtons";
 import CartItem from "../components/CartItem";
 import CeremonyCourseSelection from "../components/CeremonyCourseSelection";
 import CartList from "../components/CartList";
+<<<<<<< HEAD
 import { getCeremonies } from "../services/hireRegaliaService";
 
 function HireRegalia() {
@@ -17,6 +22,13 @@ function HireRegalia() {
   const [course, setCourse] = useState("");
   const [loading, setLoading] = useState(true); // Added loading state
   const [error, setError] = useState(null); // Added error state
+=======
+
+function HireRegalia() {
+  const [step, setStep] = useState(1);
+  const [ceremony, setCeremony] = useState("");
+  const [course, setCourse] = useState("");
+>>>>>>> fba400c2e340910728cea75dbb45578af50b9c8e
 
   const steps = [
     "Select Regalia",
@@ -25,6 +37,14 @@ function HireRegalia() {
     "Payment Completed",
   ];
 
+<<<<<<< HEAD
+=======
+  const ceremonies = [
+    "Massey University November Graduation 2025",
+    "Casual Hire for Photos",
+  ];
+  
+>>>>>>> fba400c2e340910728cea75dbb45578af50b9c8e
   const courses = [
     "Certificate",
     "Diploma/ Graduate Diploma/ Post Grad Diploma - No Previous Degree Held",
@@ -35,6 +55,7 @@ function HireRegalia() {
     "Doctoral Degree (DEd, DBusAdmin, DClincPysch, DSW)",
     "Higher Doctoral Degree",
   ];
+<<<<<<< HEAD
 
   // Fetch ceremonies on component mount
   useEffect(() => {
@@ -54,6 +75,8 @@ function HireRegalia() {
   
     fetchCeremonies();
   }, []);  
+=======
+>>>>>>> fba400c2e340910728cea75dbb45578af50b9c8e
   
   return (
     <div className="content">
@@ -63,6 +86,7 @@ function HireRegalia() {
       
       {step === 1 && (
         <>
+<<<<<<< HEAD
           {/* Show loading while fetching */}
           {loading && (
             <div style={{ padding: '20px', textAlign: 'center' }}>
@@ -96,6 +120,16 @@ function HireRegalia() {
           )}
           
           {/* Show cart if first ceremony is selected */}
+=======
+          <CeremonyCourseSelection 
+            ceremonies={ceremonies} 
+            ceremony={ceremony} 
+            setCeremony={setCeremony}
+            course={course} 
+            courses={courses} 
+            setCourse={setCourse}
+          />
+>>>>>>> fba400c2e340910728cea75dbb45578af50b9c8e
           {ceremony === ceremonies[0] && (
             <CartList step={step}/>
           )}
