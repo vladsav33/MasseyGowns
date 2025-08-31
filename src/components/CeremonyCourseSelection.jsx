@@ -19,20 +19,12 @@ function CeremonyCourseSelection({
         onChange={(e) => setCeremony(e.target.value)}
       >
         <option value="">Please select a ceremony...</option>
-<<<<<<< HEAD
         {Array.isArray(ceremonies) &&
           ceremonies.map((ceremonyOption) => (
             <option key={ceremonyOption.id} value={ceremonyOption.id}>
               {ceremonyOption.name}
             </option>
           ))}
-=======
-        {ceremonies.map((ceremonyOption, index) => (
-          <option key={index} value={ceremonyOption}>
-            {ceremonyOption}
-          </option>
-        ))}
->>>>>>> fba400c2e340910728cea75dbb45578af50b9c8e
       </select>
 
       {ceremony && ceremony.includes("Casual Hire") && (
