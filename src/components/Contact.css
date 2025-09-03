@@ -1,11 +1,11 @@
 .contact {
-  background-color: green;
+  background-color: rgb(255, 255, 255);
   margin: 0;
   padding: 24px 0;
 }
 
 .contact_email {
-  color: white;
+  color: rgb(0, 0, 0);
   font-weight: bolder;
   font-size: larger;
 }
@@ -29,12 +29,12 @@
 }
 
 .contact_info {
-  color: rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
 }
 
 .underline {
   text-decoration: underline;
-  color: rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
 }
 
 /* 表单样式 */
@@ -47,7 +47,7 @@
 .contact_input {
   padding: 8px;
   border-radius: 4px;
-  border: 1px solid #ccc;
+  border: 1px solid #000000;
   margin-right: 8px;
   font-size: 14px;
   flex: 1;
@@ -61,7 +61,7 @@
   border: none;
   border-radius: 4px;
   background-color: #007bff;
-  color: #fff;
+  color: #000000;
   cursor: pointer;
   font-weight: bold;
   transition: background-color 0.2s;
@@ -83,7 +83,7 @@
 }
 
 .contact_msg.success {
-  color: #4ade80; /* 绿色 */
+  color: #000000; /* 绿色 */
 }
 
 .contact_msg.error {
@@ -110,19 +110,19 @@
   margin: 5px 0;
 }
 .footer_left {
-  color: rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
   line-height: 1.6;
 }
 
 .icons a {
-  color: rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
 }
 .footer_pay {
   width: 150px;
 }
 
 .copy_right {
-  color: white;
+  color: rgb(0, 0, 0);
 }
 
 .visaimg {
