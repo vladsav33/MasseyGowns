@@ -1,12 +1,14 @@
 .hireprocess {
-  background-color: #202020;
+  background-color: #ffffff;
   margin: 0;
   padding: 24px 0;
 }
 
 .process_title {
-  color: rgb(78, 149, 211);
+  color: black;
   margin-left: 130px;
+  font-weight: bolder;
+  font-size: 30px;
 }
 
 .process_img {
