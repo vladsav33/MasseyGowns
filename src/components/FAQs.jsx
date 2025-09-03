@@ -4,9 +4,9 @@ import { Link } from "react-router-dom";
 
 const items = [
   {
-    title: "Ordering and Payment",
-    desc: "Find information on how to order, hire and purchase regalia, pricing, payment options, and other important graduation gown details.",
-    href: "/faqs/ordering-and-payment",
+    title: "Collection and Return Times",
+    desc: "Learn about gown sizing, fitting, collection, and what to bring when picking up or returning your graduation regalia.",
+    href: "/faqs/collection-and-return-times",
   },
   {
     title: "Sizes and Fitting",
@@ -14,14 +14,14 @@ const items = [
     href: "/faqs/sizes-and-fitting",
   },
   {
-    title: "Collection and Return Times",
-    desc: "Learn about gown sizing, fitting, collection, and what to bring when picking up or returning your graduation regalia.",
-    href: "/faqs/collection-and-return-times",
-  },
-  {
     title: "What to Wear",
     desc: "Find out what regalia to wear for your graduation, including gowns, hoods, hats, and institution-specific requirements.",
     href: "/faqs/what-to-wear",
+  },
+  {
+    title: "Ordering and Payment",
+    desc: "Find information on how to order, hire and purchase regalia, pricing, payment options, and other important graduation gown details.",
+    href: "/faqs/ordering-and-payment",
   },
 ];
 

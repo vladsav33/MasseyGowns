@@ -1,37 +1,71 @@
 .ceremony {
-  background-color: #202020;
+  background-color: #ffffff;
   margin: 0;
-  padding: 24px 0;
+  padding-bottom: 24px;
+  margin-bottom: 30px;
 }
 
 .ceremony_title {
   display: flex;
   justify-content: center;
-  color: rgb(78, 149, 211);
-  margin: 0 0 24px;
+  color: rgb(255, 255, 255);
+  margin: 20px 0 10px 0;
   font-size: clamp(20px, 2vw, 28px);
+  font-weight: bolder;
+
+  padding-right: 90px;
+}
+
+.littlebox {
+  background-color: white;
+  transform: rotate(-2deg);
+  color: black;
+  font-weight: bolder;
+  width: 50%;
+  padding: 20px;
+}
+
+.littlebox h2 {
+  transform: rotate(2deg);
+}
+
+.graduation_text {
+  margin-top: 20px;
 }
 
 .ceremony_inner {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 20px;
   margin: 0 auto;
-  max-width: 1280px;
+  width: 85%;
+  background-color: green;
+  border-radius: 30px;
+  overflow: hidden;
 }
 
-.text {
-  color: aliceblue;
+.ceremony_text {
+  color: rgb(255, 255, 255);
   font-size: large;
   line-height: 1.6;
-  flex: 0 0 800px;
+  flex: 0 1 50%;
 }
 
 .cere_link {
-  color: aliceblue;
+  color: rgb(255, 255, 255);
   text-decoration: underline;
+  font-weight: bolder;
+  margin-left: 20px;
+}
+.cere_img {
+  flex: 0 1 50%;
+  display: flex;
 }
 
-.cere_img img {
-  width: 100%;
+.graduation_text p {
+  margin: 20px;
+}
+
+.graduation_text {
+  padding-bottom: 10px;
 }
