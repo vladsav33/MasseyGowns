@@ -57,6 +57,7 @@ export default function Contact() {
 
   return (
     <section className="contact">
+      <h2 className="h2">CONTACT US</h2>
       <div className="contact_inner">
         {/* 左侧 email contact */}
         <div className="contact_left">
