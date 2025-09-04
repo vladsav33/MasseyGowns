@@ -9,14 +9,12 @@ export default function Contact() {
   const [msg, setMsg] = useState({ type: "", text: "" });
   const [honeypot, setHoneypot] = useState("");
 
-  // 简单邮箱校验（前端）
   const isValidEmail = (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMsg({ type: "", text: "" });
 
-    // 蜜罐命中：机器人，直接返回成功但不提交
     if (honeypot) {
       setMsg({ type: "success", text: "Thanks! We received your request." });
       setEmail("");
@@ -37,7 +35,6 @@ export default function Contact() {
       });
 
       if (!res.ok) {
-        // 尝试读取后端返回的错误信息
         let errText = "Submit failed. Please try again later.";
         try {
           const data = await res.json();
@@ -59,12 +56,10 @@ export default function Contact() {
     <section className="contact">
       <h2 className="h2">CONTACT US</h2>
       <div className="contact_inner">
-        {/* 左侧 email contact */}
         <div className="contact_left">
           <h2 className="contact_email">Email Contact</h2>
 
           <form onSubmit={handleSubmit} className="contact_form" noValidate>
-            {/* 蜜罐（对人类不可见） */}
             <input
               className="honeypot"
               autoComplete="off"
@@ -115,12 +110,10 @@ export default function Contact() {
           </p>
         </div>
 
-        {/* 中间 Google Map */}
         <div className="contact_map">
           <Googlemap />
         </div>
 
-        {/* 右侧信息 */}
         <div className="contact_info">
           <h3 className="contact_location">Location</h3>
           <p className="location">

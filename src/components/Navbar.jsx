@@ -88,7 +88,6 @@ function Navbar() {
         </li>
       </ul>
       <div className="navbar-icons">
-        {/*<i className="fa fa-user"></i>*/}
         <i className="fa fa-shopping-bag"></i>
         <i className="fa fa-search"></i>
       </div>

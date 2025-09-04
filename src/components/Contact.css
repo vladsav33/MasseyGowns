@@ -37,7 +37,6 @@
   color: rgb(0, 0, 0);
 }
 
-/* 表单样式 */
 .contact_form {
   margin-top: 10px;
   display: flex;
@@ -76,21 +75,19 @@
   background-color: #0056b3;
 }
 
-/* 成功/错误提示 */
 .contact_msg {
   margin-top: 8px;
   font-size: 14px;
 }
 
 .contact_msg.success {
-  color: #000000; /* 绿色 */
+  color: #000000;
 }
 
 .contact_msg.error {
-  color: #f87171; /* 红色 */
+  color: #f87171;
 }
 
-/* 反垃圾蜜罐（隐藏域） */
 .honeypot {
   position: absolute;
   left: -9999px;
