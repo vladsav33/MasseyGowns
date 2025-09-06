@@ -11,3 +11,23 @@ export const getCeremonies = async () => {
     return [];
   }
 };
+
+export const getCoursesByCeremonyId = async (selectedCeremonyId) => {
+  try {
+    const response = await axios.get(`${API_URL}/degreesbyceremony/${selectedCeremonyId}`);
+    return response.data;
+  } catch (err) {
+    console.error("Error fetching courses:", err);
+    return [];
+  }
+};
+
+export const getItemsByCourseId = async (selectedCourseId) => {
+  try {
+    const response = await axios.get(`${API_URL}/itemsbydegree/${selectedCourseId}`);
+    return response.data;
+  } catch (err) {
+    console.error("Error fetching courses:", err);
+    return [];
+  }
+};

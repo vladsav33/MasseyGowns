@@ -1,27 +1,57 @@
   /* Buttons */
   .btns {
-    margin-top: 20px;
     display: flex;
-    justify-content: center;
     gap: 12px;
-  }
+    justify-content: space-between;
+    padding: 8px 16px;
+}
   
   .btn {
     padding: 8px 16px;
     border-radius: 6px;
     border: none;
-    background-color: #2563eb;
+    background-color: #117832;
     color: #fff;
     font-size: 14px;
     cursor: pointer;
     transition: 0.3s;
+    font-size: x-small;
+    display: flex;
   }
   
   .btn:hover:not(.disabled) {
-    background-color: #1e40af;
+    background-color: #117832;
   }
   
   .btn.disabled {
     background-color: #9ca3af;
     cursor: not-allowed;
   }
+
+
+.checkout-btn {
+  width: 100%;
+  /* background: linear-gradient(135deg, #117832 0%, #117832 100%); */
+  background-color: #117832;
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  margin-top: 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.checkout-btn:hover {
+  background: #288a47;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px #95a99b;
+}
+
+.checkout-btn:active {
+  transform: translateY(0);
+}
