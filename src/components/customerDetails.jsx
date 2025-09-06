@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./customerDetails.css";
+import "./CustomerDetails.css";
 
 function CustomerDetails(item, quantity) {
   const [formData, setFormData] = useState({

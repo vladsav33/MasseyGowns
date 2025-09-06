@@ -5,7 +5,7 @@ import ProgressBar from "../components/ProgressBar";
 import ProgressButtons from "../components/ProgressButtons";
 import CeremonyCourseSelection from "../components/CeremonyCourseSelection";
 import CartList from "../components/CartList";
-import CustomerDetails from "../components/customerDetails";
+import CustomerDetails from "../components/CustomerDetails";
 import Contact from "../components/Contact"
 import {
   getCoursesByCeremonyId,
