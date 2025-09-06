@@ -8,6 +8,8 @@ function CeremonyCourseSelection({
   ceremony,
   ceremonies,
   setCeremony,
+  onCeremonySelect,
+  onCourseSelect
 }) {
   return (
     <div className="ceremony-course-container">
@@ -16,7 +18,10 @@ function CeremonyCourseSelection({
       <select
         className="dropdown-select"
         value={ceremony || ""}
-        onChange={(e) => setCeremony(e.target.value)}
+        onChange={(e) => {
+          setCeremony(e.target.value);
+          onCeremonySelect(e.target.value);
+        }}
       >
         <option value="">Please select a ceremony...</option>
         {Array.isArray(ceremonies) &&
@@ -45,14 +50,18 @@ function CeremonyCourseSelection({
       <select
         className="dropdown-select"
         value={course || ""}
-        onChange={(e) => setCourse(e.target.value)}
+        onChange={(e) => { 
+          setCourse(e.target.value);
+          onCourseSelect(e.target.value);
+        }}
       >
         <option value="">Please select a course...</option>
-        {courses.map((courseOption, index) => (
-          <option key={index} value={courseOption}>
-            {courseOption}
-          </option>
-        ))}
+        {Array.isArray(courses) &&
+          courses.map((courseOption) => (
+            <option key={courseOption.id} value={courseOption.id}>
+              {courseOption.degreeName}
+            </option>
+          ))}
       </select>
     </div>
   );

@@ -3,7 +3,7 @@ import Navbar from "../components/Navbar";
 import Ceremony from "../components/Ceremony";
 import FAQs from "../components/FAQs";
 import Contact from "../components/Contact";
-import Footer from "../components/Footer";
+//import Footer from "../components/Footer";
 import Hireprocess from "../components/Hireprocess";
 import "./HomePage.css";
 
@@ -12,25 +12,37 @@ function HomePage() {
     <div>
       <Navbar />
       <div className="hero">
-        <h1>Academic Dress Hire</h1>
-        <div className="options">
-          <a href="#" className="HireRegalia">
-            Hire Regalia
-          </a>
-          <a href="#" className="BuyRegalia">
-            Buy Regalia
-          </a>
+        <div className="bigbox">
+          <div className="image">
+            <img src="./img.png" alt="picture" className="picture" />
+          </div>
+          <div className="text">
+            <h1>Academic</h1>
+            <h1>Dress Hire</h1>
+            <h2>A service provided by</h2>
+            <div className="green-box">
+              <h3>Graduate Women Manawatu</h3>
+              <h3>Charitable Trust Inc.</h3>
+            </div>
+            <p>
+              Home of academic dress for the Massey University graduations{" "}
+              <br /> and also for other institutions in the Central Districts.
+            </p>
+            <div className="options">
+              <a href="#" className="HireRegalia">
+                Hire Regalia
+              </a>
+              <a href="#" className="BuyRegalia">
+                Buy Regalia
+              </a>
+            </div>
+          </div>
         </div>
-        <p>
-          Home of academic dress for the Massey University graduations and also
-          for other institutions in the Central Districts.
-        </p>
       </div>
       <Ceremony />
       <Hireprocess />
       <FAQs />
       <Contact />
-      <Footer />
     </div>
   );
 }

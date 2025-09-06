@@ -1,3 +1,7 @@
 .content {
     color: rgb(33, 33, 33);
 }
+
+.cart-label {
+    text-align: center;
+}

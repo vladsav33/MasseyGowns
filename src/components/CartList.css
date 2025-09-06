@@ -1,7 +1,10 @@
 .cart-container {
-  max-width: 700px;
-  margin: 0 auto;
-  padding: 20px;
+  width: 100%;
+    max-width: 90%;
+    margin: 40px auto;
+    text-align: center;
+    font-family: sans-serif;
+    padding: 3%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
@@ -18,7 +21,7 @@
   font-size: 1.25rem;
   font-weight: 700;
   margin-bottom: 16px;
-  color: #111827;
+  color: #0a4a1e;
 }
 
 .summary-row {
@@ -26,21 +29,51 @@
   justify-content: space-between;
   font-size: 0.95rem;
   margin: 8px 0;
-  color: #374151;
+  color: #000000;
 }
 
 .summary-row.total {
   font-weight: 700;
   font-size: 1.1rem;
-  color: #111827;
-  border-top: 2px solid #e5e7eb;
+  color: #0a4a1e;
+  border-top: 2px solid #d4dbd7;
   padding-top: 12px;
   margin-top: 16px;
 }
 
-.checkout-btn {
-  width: 100%;
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+.donate-btn {
+  width: 30%;
+  background-color: #117832;
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  margin-top: 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.donate-btn:focus {
+  border: none;
+  outline: none;
+}
+
+.donate-btn:hover {
+  background: #288a47;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px #95a99b;
+}
+
+.donate-btn:active {
+  transform: translateY(0);
+}
+
+.cancel-btn {
+  width: 30%;
+  background-color: #7d7e7d;
   color: white;
   border: none;
   padding: 14px;
@@ -54,14 +87,26 @@
   letter-spacing: 0.5px;
 }
 
-.checkout-btn:hover {
-  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+.cancel-btn:focus {
+  border: none;
+  outline: none;
 }
 
-.checkout-btn:active {
+.cancel-btn:hover {
+  background: #9f9f9f;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px #b6b5b5;
+}
+
+.cancel-btn:active {
   transform: translateY(0);
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;  
 }
 
 .empty-cart {
@@ -75,4 +120,14 @@
   font-size: 4rem;
   margin-bottom: 16px;
   display: block;
+}
+
+.donation {
+  text-align: left;
+}
+
+.dialog-content {
+  text-align: justify;
+  padding: 0%;
+  margin-top: 0%;
 }

@@ -1,17 +1,8 @@
 import React from "react";
 import "./Navbar.css";
-import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 function Navbar() {
-  const [menu, setMenu] = useState([]);
-
-  useEffect(() => {
-    fetch("https://gownapi-dsbyfdeydah3aadr.newzealandnorth-01.azurewebsites.net/degreesandceremonies")
-        .then((res) => res.json())
-        .then((data) => setMenu(data))
-        .catch((err) => console.error("Failed to fetch menu:", err));
-  }, []);
-
   return (
     <nav className="navbar">
       <div className="navbar-left">
@@ -19,7 +10,7 @@ function Navbar() {
       </div>
       <ul className="navbar-menu">
         <li>
-          <a href="#">HOME</a>
+          <Link to="/">HOME</Link>
         </li>
         <li className="has-dropdown">
           <a href="#" className="menu-link">
@@ -27,22 +18,32 @@ function Navbar() {
           </a>
           <section className="dropdown_panel">
             <div className="dropdown_casual">
-              {menu.map((menuItem, i) => {
-                  console.log(menuItem);
-                  return (
-                <li className={menuItem.children ? "has-dropdown" : ""}>
-                  <h4>{menuItem.name}</h4>
-                  {menuItem.children && menuItem.children.length > 0 && (
-                    <ul className="drondown-list">
-                      {menuItem.children.map((child, j) => (
-                        <li key={j}>
-                          <a href="#">{child.name}</a>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+              <h4>Casual Hire for Photos</h4>
+              <ul>
+                <li>
+                  <a href="#">Certificate</a>
                 </li>
-              )})}
+                <li>
+                  <a href="#">Diploma / Graduate Diploma / Post Grad Diploma</a>
+                </li>
+                <li>
+                  <a href="#">Bachelor Degree</a>
+                </li>
+                <li>
+                  <a href="#">Master Degree</a>
+                </li>
+                <li>
+                  <a href="#">PhD Degree</a>
+                </li>
+                <li>
+                  <a href="#">
+                    Doctoral Degree (DEd, DBusAdmin, DClinPsych, DSW)
+                  </a>
+                </li>
+                <li>
+                  <a href="#">Higher Doctoral Degree</a>
+                </li>
+              </ul>
             </div>
           </section>
         </li>
@@ -80,14 +81,13 @@ function Navbar() {
           </section>
         </li>
         <li>
-          <a href="#">FAQs</a>
+          <Link to="/faqs">FAQs</Link>
         </li>
         <li>
           <a href="#">Contact Us</a>
         </li>
       </ul>
       <div className="navbar-icons">
-        <i className="fa fa-user"></i>
         <i className="fa fa-shopping-bag"></i>
         <i className="fa fa-search"></i>
       </div>

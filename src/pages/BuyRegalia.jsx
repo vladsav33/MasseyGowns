@@ -1,16 +1,12 @@
-import React from "react";
-import Navbar from "../components/Navbar";
+import React, { useState } from "react";
 import "./BuyRegalia.css";
 
 function BuyRegalia() {
-  return (
-    <div>
-      <Navbar />
-
-
-      <Footer />
-    </div>
-  );
+    return (
+        <>
+            <p>Buy</p>
+        </>
+    );
 }
 
 export default BuyRegalia;

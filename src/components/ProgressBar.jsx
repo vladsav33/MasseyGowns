@@ -4,6 +4,7 @@ import "./ProgressBar.css";
 function ProgressBar({ step, steps }) {
   return (
     <div className="container">
+      <h2>Hire Regalia</h2>
       {/* Progress Bar */}
       <div className="progressbar">
         {/* Blue line that grows */}
@@ -27,9 +28,9 @@ function ProgressBar({ step, steps }) {
       </div>
 
       {/* Current Step Message */}
-      <div className="content">
+      {/* <div className="content">
         <h2>{steps[step - 1]}</h2>
-      </div>
+      </div> */}
 
 
     </div>

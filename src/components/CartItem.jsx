@@ -1,74 +1,133 @@
 import React, { useState } from "react";
 import "./CartItem.css";
 
-function CartItem({ item, onIncrease, onDecrease, onRemove, onOptionChange }) {
+function CartItem({
+  item,
+  quantity,
+  step,
+  onIncrease,
+  onDecrease,
+  onRemove,
+  onOptionChange,
+}) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
     <div className="cart-item">
       <img
-        src={item.image}
-        alt={item.title}
+        src={item.picture}
+        alt={item.name}
         className="item-image"
         onError={(e) => {
           e.target.src =
             "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0zNSA0MEg2NVY0NEgzNVY0MFpNMzUgNTBINjVWNTRIMzVWNTBaTTM1IDYwSDU1VjY0SDM1VjYwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K";
         }}
       />
-
-      <div className="item-details">
-        <div className="title-container">
-          <h4
-            className="item-title clickable"
-            onClick={() => setIsDialogOpen(true)}
-            onMouseEnter={() => setShowTooltip(true)}
-            onMouseLeave={() => setShowTooltip(false)}
-          >
-            {item.title}
-            <span className="info-icon">*</span>
-          </h4>
-
-          {/* Tooltip */}
-          {showTooltip && <div className="tooltip">Click to view details</div>}
-        </div>
-        <p className="item-category">{item.category}</p>
-        <p className="item-price">{item.price}</p>
-        <p className="item-size">Size: {item.size}</p>
-
-        {/* Dynamic Options */}
-        {item.options &&
-          item.options.map((option, index) => (
-            <div key={index} className="item-option">
-              <label>{option.label}:</label>
-              <select
-                className="option-select"
-                value={option.value}
-                onChange={(e) =>
-                  onOptionChange(item.id, option.label, e.target.value)
-                }
+      {step === 1 ? (
+        <>
+          <div className="item-details">
+            <div className="title-container">
+              <h4
+                className="item-title clickable"
+                onClick={() => setIsDialogOpen(true)}
+                onMouseEnter={() => setShowTooltip(true)}
+                onMouseLeave={() => setShowTooltip(false)}
               >
-                {option.choices.map((choice, choiceIndex) => (
-                  <option key={choiceIndex} value={choice}>
-                    {choice}
-                  </option>
-                ))}
-              </select>
+                {item.name}
+                {/* <span className="info-icon">*</span> */}
+              </h4>
             </div>
-          ))}
-      </div>
+            <p className="item-category">{item.category}</p>
+            <p className="item-price">{item.hirePrice}</p>
+            {/* <p className="item-size">Size: {item.size}</p> */}
 
+            {/* Dynamic Options */}
+            {item.options &&
+              item.options.map((option, index) => (
+                <div key={index} className="item-option">
+                  <label>{option.label}:</label>
+                  <select
+                    className="option-select"
+                    value={option.value}
+                    onChange={(e) =>
+                      onOptionChange(item.id, option.label, e.target.value)
+                    }
+                  >
+                    {option.choices.map((choice, choiceIndex) => (
+                      <option key={choiceIndex} value={choice}>
+                        {choice}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ))}
+          </div>
+        </>
+      ) : (
+        <div className="item-details">
+          <p>
+            <span className="item-title">{item.name} </span>
+            <span className="item-category">({item.category})</span>
+          </p>
+
+          {/* Display selected options */}
+          {item.options && item.options.length > 0 && (
+            <div className="item-options">
+              {item.options.map((option, index) => (
+                <div key={index} className="option-row">
+                  <span className="option-label">{option.label}:</span>
+                  <span className="option-value">{option.value}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="item-pricing">
+            <div className="price-row">
+              <span>Unit Price:</span>
+              <span>${parseFloat(item.hirePrice || 0).toFixed(2)}</span>
+            </div>
+
+            <div className="price-row">
+              <span>Quantity:</span>
+              <span>{quantity}</span>
+            </div>
+
+            <div className="price-row">
+              <span>Subtotal:</span>
+              <span>
+                ${(parseFloat(item.hirePrice || 0) * quantity).toFixed(2)}
+              </span>
+            </div>
+
+            <div className="price-row">
+              <span>Tax (10%):</span>
+              <span>
+                ${(parseFloat(item.hirePrice || 0) * quantity * 0.1).toFixed(2)}
+              </span>
+            </div>
+
+            <div className="price-row total-row">
+              <span>Total:</span>
+              <span>
+                ${(parseFloat(item.hirePrice || 0) * quantity * 1.1).toFixed(2)}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="item-controls">
         <div className="quantity-controls">
           <button
             onClick={onDecrease}
             className="quantity-btn"
-            disabled={item.quantity <= 1}
+            disabled={quantity <= 1}
             aria-label="Decrease quantity"
           >
             −
           </button>
-          <span className="quantity">{item.quantity}</span>
+          <span className="quantity">{quantity}</span>
           <button
             onClick={onIncrease}
             className="quantity-btn"
@@ -85,15 +144,14 @@ function CartItem({ item, onIncrease, onDecrease, onRemove, onOptionChange }) {
           Remove
         </button>
       </div>
-
-{/* Dialog Box */}
+      {/* Dialog Box */}
       {isDialogOpen && (
         <div className="dialog-overlay" onClick={() => setIsDialogOpen(false)}>
           <div className="dialog-box" onClick={(e) => e.stopPropagation()}>
             <div className="dialog-header">
               <button
                 className="close-btn"
-                onClick={() => setIsDialogOpen(false)}                
+                onClick={() => setIsDialogOpen(false)}
                 aria-label="Close dialog"
               >
                 ✕
@@ -102,7 +160,7 @@ function CartItem({ item, onIncrease, onDecrease, onRemove, onOptionChange }) {
 
             {/* Add your dialog content here */}
             <div className="dialog-content">
-              <h3>{item.title}</h3>
+              <h3>{item.name}</h3>
               <p>{item.description}</p>
             </div>
           </div>
