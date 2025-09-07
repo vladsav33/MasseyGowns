@@ -1,10 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CartItem from "./CartItem.jsx";
 import "./CartList.css";
 
 function CartList({ step, items, item, setItems, setItem }) {
   const [donationQuantity, setDonationQuantity] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Load cart from localStorage on mount
+  useEffect(() => {
+    const savedCart = localStorage.getItem("cart");
+    if (savedCart) {
+      try {
+        setItems(JSON.parse(savedCart));
+      } catch {
+        console.error("Failed to parse cart from localStorage");
+      }
+    }
+  }, [setItems]);
+
+  // Save cart to localStorage whenever items change
+  useEffect(() => {
+    if (items && items.length > 0) {
+      localStorage.setItem("cart", JSON.stringify(items));
+    } else {
+      localStorage.removeItem("cart"); // clear when empty
+    }
+  }, [items]);
 
   // Add donation to cart
   const handleAddDonationToCart = () => {
@@ -16,10 +37,9 @@ function CartList({ step, items, item, setItems, setItem }) {
       quantity: donationQuantity,
       isDonation: true,
     };
+
     setDonationQuantity(1);
-
     setItems([...items, donationItem]);
-
     setIsDialogOpen(false);
   };
 
@@ -94,7 +114,7 @@ function CartList({ step, items, item, setItems, setItem }) {
     totalPrice + totalDonationPrice + taxOnItems + taxOnDonations;
 
   return (
-    <div className="cart-container">
+    <div className="cart">
       {items.length > 0 ? (
         <>
           <h4>You have {items.length} items in your cart</h4>
@@ -110,6 +130,7 @@ function CartList({ step, items, item, setItems, setItem }) {
               onOptionChange={handleOptionChange}
             />
           ))}
+          <div></div>
 
           {step === 2 && (
             <div>
@@ -129,12 +150,12 @@ function CartList({ step, items, item, setItems, setItem }) {
                 </button>
               </div>
 
-              {/* Oder Summary */}
+              {/* Order Summary */}
               <div className="cart-summary">
                 <h3>Order Summary</h3>
                 <div className="summary-row">
                   <span>Total Items:</span>
-                  <span>{totalItems}</span>
+                  <span>{items.length}</span>
                 </div>
 
                 <div className="summary-row">
@@ -213,12 +234,6 @@ function CartList({ step, items, item, setItems, setItem }) {
                 </div>
 
                 <div className="donation-section">
-                  {/* <div className="price-display">
-                    <span className="currency">$</span>
-                    <span className="amount">2.00</span>
-                    <span className="per-item">per donation</span>
-                  </div> */}
-
                   <div className="quantity-controls">
                     <label>Number of $2 donations:</label>
                     <input

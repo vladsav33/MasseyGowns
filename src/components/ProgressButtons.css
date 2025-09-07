@@ -1,37 +1,62 @@
-  /* Buttons */
-  .btns {
-    display: flex;
-    gap: 12px;
-    justify-content: space-between;
-    padding: 8px 16px;
+/* Buttons */
+.btns {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 8px 16px;
+  margin-top: 20px;
 }
-  
-  .btn {
-    padding: 8px 16px;
-    border-radius: 6px;
-    border: none;
-    background-color: #117832;
-    color: #fff;
-    font-size: 14px;
-    cursor: pointer;
-    transition: 0.3s;
-    font-size: x-small;
-    display: flex;
-  }
-  
-  .btn:hover:not(.disabled) {
-    background-color: #117832;
-  }
-  
-  .btn.disabled {
-    background-color: #9ca3af;
-    cursor: not-allowed;
-  }
 
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  background-color: #117832;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: x-small;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 32px;
+  box-shadow: 0 2px 4px rgba(17, 120, 50, 0.2);
+}
 
+.btn:hover:not(.disabled) {
+  background-color: #288a47;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(17, 120, 50, 0.3);
+}
+
+.btn:active:not(.disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(17, 120, 50, 0.2);
+}
+
+.btn.disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn.disabled:hover {
+  background-color: #9ca3af;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Specific button styling */
+.btn.prev {
+  font-weight: bold;
+}
+
+/* Checkout button */
 .checkout-btn {
   width: 100%;
-  /* background: linear-gradient(135deg, #117832 0%, #117832 100%); */
   background-color: #117832;
   color: white;
   border: none;
@@ -44,14 +69,53 @@
   transition: all 0.2s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  box-shadow: 0 4px 8px rgba(17, 120, 50, 0.2);
 }
 
 .checkout-btn:hover {
   background: #288a47;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px #95a99b;
+  box-shadow: 0 6px 12px rgba(17, 120, 50, 0.3);
 }
 
 .checkout-btn:active {
   transform: translateY(0);
+  box-shadow: 0 4px 8px rgba(17, 120, 50, 0.2);
+}
+
+.checkout-btn:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .btns {
+    gap: 8px;
+    padding: 8px 12px;
+  }
+  
+  .btn {
+    padding: 6px 12px;
+    min-width: 36px;
+    height: 28px;
+  }
+  
+  .checkout-btn {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Focus states for accessibility */
+.btn:focus {
+  outline: 2px solid #117832;
+  outline-offset: 2px;
+}
+
+.checkout-btn:focus {
+  outline: 2px solid #117832;
+  outline-offset: 2px;
 }

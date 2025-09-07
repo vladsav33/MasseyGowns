@@ -1,92 +1,142 @@
 .container {
-    width: 100%;
-    max-width: 90%;
-    margin: 40px auto;
-    text-align: center;
-    font-family: sans-serif;
-    /* padding: 3%; */
-  }
+  width: 100%;
+  max-width: 90%;
+  margin: 40px auto;
+  text-align: center;
+  font-family: sans-serif;
+}
 
-  h2 {
-    text-align: left;
-    /* color: #117832; */
-    /* font-family: 'Amethysta'; */
+h2 {
+  text-align: left;
+}
+
+.progressbar {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  width: 100%;
+}
+
+/* Grey background line */
+.progressbar::before {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background-color: #d1d5db;
+  border-radius: 2px;
+  z-index: 0;
+}
+
+/* Progress line - now with green to blue gradient */
+.progress {
+  position: absolute;
+  top: 15px;
+  left: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #22c55e 0%, #2563eb 100%);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  z-index: 0;
+}
+
+/* Step container */
+.step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* Circles - Default state */
+.circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #fff;
+  border: 2px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: bold;
+  color: #6b7280;
+  transition: all 0.3s ease;
+}
+
+/* Completed steps - Green */
+.circle.completed {
+  border-color: #22c55e;
+  background-color: #22c55e;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+}
+
+/* Current/In-progress step - Blue */
+.circle.current {
+  border-color: #2563eb;
+  background-color: #2563eb;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+  }
+  50% {
+    box-shadow: 0 2px 12px rgba(37, 99, 235, 0.5);
+  }
+  100% {
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+  }
+}
+
+/* Step labels - Default */
+.stepName {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #6b7280;
+  transition: all 0.3s ease;
+}
+
+/* Completed step labels - Green */
+.stepName.completed {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+/* Current step label - Blue */
+.stepName.current {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .container {
+    max-width: 95%;
+    margin: 20px auto;
+  }
+  
+  .circle {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+  
+  .stepName {
+    font-size: 11px;
+    margin-top: 6px;
   }
   
   .progressbar {
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 40px;
-    width: 100%;
+    margin-bottom: 30px;
   }
-  
-  /* Grey background line */
-  .progressbar::before {
-    content: "";
-    position: absolute;
-    top: 15px;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background-color: #d1d5db;
-    border-radius: 2px;
-    z-index: 0;
-  }
-  
-  /* Blue progress line */
-  .progress {
-    position: absolute;
-    top: 15px;
-    left: 0;
-    height: 4px;
-    background-color: #2563eb;
-    border-radius: 2px;
-    transition: width 0.3s ease;
-    z-index: 0;
-  }
-  
-  /* Step container */
-  .step {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-    z-index: 1;
-  }
-  
-  /* Circles */
-  .circle {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background-color: #fff;
-    border: 2px solid #d1d5db;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: bold;
-    color: #6b7280;
-    transition: all 0.3s ease;
-  }
-  
-  .circle.active {
-    border-color: #2563eb;
-    background-color: #2563eb;
-    color: #fff;
-  }
-  
-  /* Step labels */
-  .stepName {
-    margin-top: 8px;
-    font-size: 13px;
-    color: #6b7280;
-  }
-  
-  .stepName.highlight {
-    color: #2563eb;
-    font-weight: 600;
-  }
-  
+}

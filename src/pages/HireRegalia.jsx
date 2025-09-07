@@ -6,29 +6,52 @@ import ProgressButtons from "../components/ProgressButtons";
 import CeremonyCourseSelection from "../components/CeremonyCourseSelection";
 import CartList from "../components/CartList";
 import CustomerDetails from "../components/CustomerDetails";
-import Contact from "../components/Contact"
+import Contact from "../components/Contact";
 import {
   getCoursesByCeremonyId,
   getCeremonies,
-  getItemsByCourseId
+  getItemsByCourseId,
 } from "../services/hireRegaliaService";
 
 function HireRegalia() {
-  const [step, setStep] = useState(1);
+  const action = 0; // Hire
+  // ---- SESSION STATES (loaded from localStorage if available) ----
+  const [step, setStep] = useState(() => {
+    return Number(localStorage.getItem("step")) || 1;
+  });
 
-  const [ceremony, setCeremony] = useState("");
+  const [ceremony, setCeremony] = useState(
+    () => localStorage.getItem("ceremony") || ""
+  );
   const [ceremonies, setCeremonies] = useState([]);
-  const [selectedCeremonyId, setSelectedCeremonyId] = useState(null);
+  const [selectedCeremonyId, setSelectedCeremonyId] = useState(() => {
+    return localStorage.getItem("selectedCeremonyId")
+      ? Number(localStorage.getItem("selectedCeremonyId"))
+      : null;
+  });
 
-  const [course, setCourse] = useState("");
+  const [course, setCourse] = useState(
+    () => localStorage.getItem("course") || ""
+  );
   const [courses, setCourses] = useState([]);
-  const [selectedCourseId, setSelectedCourseId] = useState(null);
+  const [selectedCourseId, setSelectedCourseId] = useState(() => {
+    return localStorage.getItem("selectedCourseId")
+      ? Number(localStorage.getItem("selectedCourseId"))
+      : null;
+  });
 
-  const [item, setItem] = useState("");
-  const [items, setItems] = useState([]);
+  const [item, setItem] = useState(() => {
+    const saved = localStorage.getItem("item");
+    return saved ? JSON.parse(saved) : "";
+  });
 
-  const [loading, setLoading] = useState(true); // Added loading state
-  const [error, setError] = useState(null); // Added error state
+  const [items, setItems] = useState(() => {
+    const saved = localStorage.getItem("items");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const steps = [
     "Select Regalia",
@@ -37,6 +60,40 @@ function HireRegalia() {
     "Payment Completed",
   ];
 
+  // ---- PERSIST TO LOCALSTORAGE WHEN STATES CHANGE ----
+  useEffect(() => {
+    localStorage.setItem("step", step);
+  }, [step]);
+
+  useEffect(() => {
+    localStorage.setItem("ceremony", ceremony);
+  }, [ceremony]);
+
+  useEffect(() => {
+    if (selectedCeremonyId !== null) {
+      localStorage.setItem("selectedCeremonyId", selectedCeremonyId);
+    }
+  }, [selectedCeremonyId]);
+
+  useEffect(() => {
+    localStorage.setItem("course", course);
+  }, [course]);
+
+  useEffect(() => {
+    if (selectedCourseId !== null) {
+      localStorage.setItem("selectedCourseId", selectedCourseId);
+    }
+  }, [selectedCourseId]);
+
+  useEffect(() => {
+    localStorage.setItem("item", JSON.stringify(item));
+  }, [item]);
+
+  useEffect(() => {
+    localStorage.setItem("items", JSON.stringify(items));
+  }, [items]);
+
+  // ---- API CALLS ----
   // Get ceremonies
   useEffect(() => {
     const fetchCeremonies = async () => {
@@ -95,11 +152,21 @@ function HireRegalia() {
     fetchItems();
   }, [selectedCourseId]);
 
+  // ---- RENDER ----
   return (
     <div className="content">
       <Navbar />
+      {/* <h2>Hire Regalia</h2> */}
+      <div></div>
       <ProgressBar step={step} steps={steps} />
-      <ProgressButtons step={step} setStep={setStep} steps={steps} iselectedCeremonyId={selectedCeremonyId} selectedCourseId={selectedCourseId} />
+      <ProgressButtons
+      action={action}
+        step={step}
+        setStep={setStep}
+        steps={steps}
+        selectedCeremonyId={selectedCeremonyId}
+        selectedCourseId={selectedCourseId}
+      />
 
       {step === 1 && (
         <>
@@ -141,7 +208,13 @@ function HireRegalia() {
 
           {/* Show items base on selected ceremony and course */}
           {!loading && (
-            <CartList step={step} item={item} items={items} setItem={setItem} setItems={setItems}/>
+            <CartList
+              step={step}
+              item={item}
+              items={items}
+              setItem={setItem}
+              setItems={setItems}
+            />
           )}
         </>
       )}
@@ -149,18 +222,35 @@ function HireRegalia() {
       {step === 2 && (
         <div>
           <h2 className="cart-label">Shopping Cart</h2>
-          <CartList step={step} item={item} items={items} setItem={setItem} setItems={setItems}/>
+          <CartList
+            step={step}
+            item={item}
+            items={items}
+            setItem={setItem}
+            setItems={setItems}
+          />
         </div>
       )}
 
-      {step === 3 && 
-      <div>
-        <CustomerDetails item={item} quantity={item.quantity || 1}></CustomerDetails>
-      </div>}
+      {step === 3 && (
+        <div>
+          <CustomerDetails
+            item={item}
+            quantity={item.quantity || 1}
+          ></CustomerDetails>
+        </div>
+      )}
 
       {step === 4 && <div>{/* Payment Completed content goes here */}</div>}
 
-      <ProgressButtons step={step} setStep={setStep} steps={steps} selectedCeremonyId={selectedCeremonyId} selectedCourseId={selectedCourseId} />
+      <ProgressButtons
+        action={action}
+        step={step}
+        setStep={setStep}
+        steps={steps}
+        selectedCeremonyId={selectedCeremonyId}
+        selectedCourseId={selectedCourseId}
+      />
 
       <Contact />
     </div>

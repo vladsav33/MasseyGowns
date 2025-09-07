@@ -51,75 +51,72 @@ function CustomerDetails(item, quantity) {
   return (
     <>
       {/* Customer Details */}
-      <form
-        onSubmit={handleSubmit}
-        className="max-w-3xl mx-auto p-6 bg-white shadow rounded-lg space-y-6"
-      >
-        <h1 className="text-2xl font-bold text-gray-00">Place Order</h1>
+      <form onSubmit={handleSubmit} className="customer-form">
+        <h1 className="form-title">Place Order</h1>
 
         {/* Email */}
-        <div>
-          <label className="block mb-1 text-gray-700">Email*</label>
+        <div className="form-group">
+          <label className="form-label">Email*</label>
           <input
             type="email"
             name="email"
             placeholder="Email"
             value={formData.email}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="form-input"
             required
           />
         </div>
 
         {/* First & Last Name */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block mb-1 text-gray-700">First Name*</label>
+        <div className="form-row">
+          <div className="form-group">
+            <label className="form-label">First Name*</label>
             <input
               type="text"
               name="firstName"
               value={formData.firstName}
               onChange={handleInputChange}
               placeholder="First Name"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              className="form-input"
               required
             />
           </div>
-          <div>
-            <label className="block mb-1 text-gray-700">Last Name*</label>
+          <div className="form-group">
+            <label className="form-label">Last Name*</label>
             <input
               type="text"
               name="lastName"
               value={formData.lastName}
               onChange={handleInputChange}
               placeholder="Last Name"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              className="form-input"
               required
             />
           </div>
         </div>
 
         {/* Address, City, Postcode */}
-        <div>
-          <label className="block mb-1 text-gray-700">Address*</label>
+        <div className="form-group">
+          <label className="form-label">Address*</label>
           <input
             type="text"
             name="address"
             value={formData.address}
             onChange={handleInputChange}
             placeholder="Address"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="form-input"
             required
           />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="form-row-three">
           <input
             type="text"
             name="city"
             value={formData.city}
             onChange={handleInputChange}
             placeholder="City"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="form-input"
           />
           <input
             type="text"
@@ -127,13 +124,13 @@ function CustomerDetails(item, quantity) {
             value={formData.postcode}
             onChange={handleInputChange}
             placeholder="Postcode"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="form-input"
           />
           <select
             name="country"
             value={formData.country}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="form-select"
           >
             <option value="">Country</option>
             {countries.map((country) => (
@@ -145,27 +142,27 @@ function CustomerDetails(item, quantity) {
         </div>
 
         {/* Student ID */}
-        <div>
-          <label className="block mb-1 text-gray-700">Student ID*</label>
+        <div className="form-group">
+          <label className="form-label">Student ID*</label>
           <input
             type="text"
             name="studentId"
             value={formData.studentId}
             onChange={handleInputChange}
             placeholder="Student ID"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="form-input"
           />
         </div>
 
         {/* Phone & Mobile */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="form-row">
           <input
             type="tel"
             name="phoneNumber"
             value={formData.phoneNumber}
             onChange={handleInputChange}
             placeholder="Phone Number"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="form-input"
           />
           <input
             type="tel"
@@ -173,46 +170,49 @@ function CustomerDetails(item, quantity) {
             value={formData.mobile}
             onChange={handleInputChange}
             placeholder="Mobile"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="form-input"
           />
         </div>
 
         {/* Terms & Conditions */}
-        <div className="flex items-center space-x-2">
+        <div className="checkbox-group">
           <input
             type="checkbox"
             name="termsAccepted"
             checked={formData.termsAccepted}
             onChange={handleInputChange}
-            className="w-5 h-5"
+            className="checkbox-input"
+            id="termsAccepted"
             required
           />
-          <label className="text-gray-600">
+          <label htmlFor="termsAccepted" className="checkbox-label">
             I've read and agree to all Terms and Conditions
           </label>
         </div>
 
         {/* Payment Methods */}
-        <div>
-          <h3 className="font-semibold text-gray-700 mb-2">Payment</h3>
-          <div className="space-y-2">
-            <label className="flex items-center space-x-2">
+        <div className="payment-section">
+          <h3 className="payment-title">Payment</h3>
+          <div className="payment-options">
+            <label className="radio-label">
               <input
                 type="radio"
                 name="paymentMethod"
                 value="account2Account"
                 checked={formData.paymentMethod === "account2Account"}
                 onChange={handleInputChange}
+                className="radio-input"
               />
               <span>Account2Account (on-line)</span>
             </label>
-            <label className="flex items-center space-x-2">
+            <label className="radio-label">
               <input
                 type="radio"
                 name="paymentMethod"
                 value="purchaseOrder"
                 checked={formData.paymentMethod === "purchaseOrder"}
                 onChange={handleInputChange}
+                className="radio-input"
               />
               <span>Purchase Order (University Staff only)</span>
             </label>
@@ -223,16 +223,17 @@ function CustomerDetails(item, quantity) {
                 value={formData.purchaseOrder}
                 onChange={handleInputChange}
                 placeholder="Purchase Order #"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                className="form-input purchase-order-input"
               />
             )}
-            <label className="flex items-center space-x-2">
+            <label className="radio-label">
               <input
                 type="radio"
                 name="paymentMethod"
                 value="creditCard"
                 checked={formData.paymentMethod === "creditCard"}
                 onChange={handleInputChange}
+                className="radio-input"
               />
               <span>Credit Card (Verifone)</span>
             </label>
@@ -240,23 +241,20 @@ function CustomerDetails(item, quantity) {
         </div>
 
         {/* Message */}
-        <div>
-          <label className="block mb-1 text-gray-700">Message</label>
+        <div className="form-group">
+          <label className="form-label">Message</label>
           <textarea
             name="message"
             value={formData.message}
             onChange={handleInputChange}
             placeholder="If you require a wide gown or have any other queries..."
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="form-textarea"
             rows="4"
           />
         </div>
 
         {/* Submit */}
-        <button
-          type="submit"
-          className="w-full order-btn"
-        >
+        <button type="submit" className="order-btn">
           PLACE ORDER
         </button>
       </form>

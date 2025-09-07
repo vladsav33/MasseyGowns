@@ -1,41 +1,171 @@
-.item-summary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    border-bottom: 1px solid #eee;
-    padding: 0.75rem 0;
+/* CustomerDetails.css */
+
+.customer-form {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+  background-color: white;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #374151;
+  margin: 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  box-sizing: border-box;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #196337;
+  box-shadow: 0 0 0 3px #b8cabf;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 6rem;
+  font-family: inherit;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-row-three {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox-input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+}
+
+.checkbox-label {
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.payment-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.payment-title {
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.5rem 0;
+}
+
+.payment-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.radio-input {
+  margin: 0;
+}
+
+.purchase-order-input {
+  margin-top: 0.5rem;
+}
+
+.order-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #227a45 0%, #237b46 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 4px 14px 0 rgba(34, 197, 94, 0.3);
+  text-transform: uppercase;
+}
+
+.order-btn:hover {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px 0 rgba(34, 197, 94, 0.4);
+}
+
+.order-btn:focus {
+  outline: none;
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  box-shadow: 0 6px 20px 0 rgba(34, 197, 94, 0.4), 0 0 0 3px rgba(34, 197, 94, 0.3);
+}
+
+.order-btn:active {
+  background: linear-gradient(135deg, #15803d 0%, #14532d 100%);
+  transform: translateY(0);
+  box-shadow: 0 2px 8px 0 rgba(34, 197, 94, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .customer-form {
+    margin: 1rem;
+    padding: 1rem;
   }
-  
-  .item-image {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 6px;
+
+  .form-row,
+  .form-row-three {
+    grid-template-columns: 1fr;
   }
-  
-  .item-info {
-    flex: 1;
+
+  .form-title {
+    font-size: 1.25rem;
   }
-  
-  .item-title {
-    font-weight: 600;
-    margin: 0;
-  }
-  
-  .item-options {
-    font-size: 0.9rem;
-    color: #555;
-    margin-top: 2px;
-  }
-  
-  .item-total {
-    font-weight: 700;
-    color: #222;
-    white-space: nowrap;
-  }
-  
-  .order-btn {
-    background-color: #117832;
-    color: white;
-  }
+}
