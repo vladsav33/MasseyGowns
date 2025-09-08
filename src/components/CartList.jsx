@@ -2,32 +2,36 @@ import React, { useState, useEffect } from "react";
 import CartItem from "./CartItem.jsx";
 import "./CartList.css";
 
-function CartList({ step, items, item, setItems, setItem }) {
+function CartList({ step, items, setItems }) {
   const [donationQuantity, setDonationQuantity] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  // Centralized cart updater (single source of truth)
+  const updateCart = (next) => {
+    setItems((prev) => {
+      const updated = typeof next === "function" ? next(prev) : next;
+      if (updated && updated.length > 0) {
+        localStorage.setItem("cart", JSON.stringify(updated));
+      } else {
+        localStorage.removeItem("cart");
+      }
+      return updated;
+    });
+  };
+
   // Load cart from localStorage on mount
   useEffect(() => {
-    const savedCart = localStorage.getItem("cart");
-    if (savedCart) {
+    const saved = localStorage.getItem("cart");
+    if (saved) {
       try {
-        setItems(JSON.parse(savedCart));
+        setItems(JSON.parse(saved));
       } catch {
         console.error("Failed to parse cart from localStorage");
       }
     }
   }, [setItems]);
 
-  // Save cart to localStorage whenever items change
-  useEffect(() => {
-    if (items && items.length > 0) {
-      localStorage.setItem("cart", JSON.stringify(items));
-    } else {
-      localStorage.removeItem("cart"); // clear when empty
-    }
-  }, [items]);
-
-  // Add donation to cart
+  // --- Cart actions ---
   const handleAddDonationToCart = () => {
     const donationItem = {
       id: Date.now(),
@@ -39,13 +43,23 @@ function CartList({ step, items, item, setItems, setItem }) {
     };
 
     setDonationQuantity(1);
-    setItems([...items, donationItem]);
+    updateCart([...items, donationItem]);
     setIsDialogOpen(false);
   };
 
-  // Quantity handlers
+  const handleAddItemToCart = (itemData) => {
+    const newItem = {
+      ...itemData,
+      selectedOptions: {}, // initialize empty object
+      quantity: 1,
+    };
+  
+    updateCart([...items, newItem]);
+  };
+  
+
   const handleIncrease = (id) => {
-    setItems(
+    updateCart(
       items.map((item) =>
         item.id === id ? { ...item, quantity: (item.quantity || 1) + 1 } : item
       )
@@ -53,7 +67,7 @@ function CartList({ step, items, item, setItems, setItem }) {
   };
 
   const handleDecrease = (id) => {
-    setItems(
+    updateCart(
       items.map((item) =>
         item.id === id && (item.quantity || 1) > 1
           ? { ...item, quantity: item.quantity - 1 }
@@ -63,30 +77,33 @@ function CartList({ step, items, item, setItems, setItem }) {
   };
 
   const handleRemove = (id) => {
-    setItems(items.filter((item) => item.id !== id));
+    updateCart((prev) => prev.filter((it) => it.id !== id));
   };
-
   const handleOptionChange = (itemId, optionLabel, newValue) => {
-    setItems(
-      items.map((item) => {
-        if (item.id === itemId) {
-          const updatedOptions = item.options.map((option) =>
-            option.label === optionLabel
-              ? { ...option, value: newValue }
-              : option
-          );
-          return { ...item, options: updatedOptions };
-        }
-        return item;
-      })
-    );
+    const updatedItems = items.map((item) => {
+      if (item.id === itemId) {
+        return {
+          ...item,
+          selectedOptions: {
+            ...item.selectedOptions, // preserve other options
+            [optionLabel]: newValue, // save the selected value
+          },
+        };
+      }
+      return item;
+    });
+  
+    setItems(updatedItems);
+    localStorage.setItem("cart", JSON.stringify(updatedItems)); // ✅ persist to localStorage
   };
+  
+  
+  
 
-  // Price utilities
+  // --- Price utilities ---
   const getNumericPrice = (priceString) =>
     parseFloat(String(priceString || 0).replace("$", "")) || 0;
 
-  // Totals
   const totalItems = items
     .filter((item) => !item.isDonation)
     .reduce((acc, item) => acc + (item.quantity || 1), 0);
@@ -130,7 +147,6 @@ function CartList({ step, items, item, setItems, setItem }) {
               onOptionChange={handleOptionChange}
             />
           ))}
-          <div></div>
 
           {step === 2 && (
             <div>

@@ -15,86 +15,57 @@ import {
 
 function HireRegalia() {
   const action = 0; // Hire
-  // ---- SESSION STATES (loaded from localStorage if available) ----
-  const [step, setStep] = useState(() => {
-    return Number(localStorage.getItem("step")) || 1;
-  });
 
-  const [ceremony, setCeremony] = useState(
-    () => localStorage.getItem("ceremony") || ""
-  );
+  // ---- STATES ----
+  const [step, setStep] = useState(() => Number(localStorage.getItem("step")) || 1);
+
   const [ceremonies, setCeremonies] = useState([]);
   const [selectedCeremonyId, setSelectedCeremonyId] = useState(() => {
-    return localStorage.getItem("selectedCeremonyId")
-      ? Number(localStorage.getItem("selectedCeremonyId"))
-      : null;
+    const saved = localStorage.getItem("selectedCeremonyId");
+    return saved ? Number(saved) : null;
   });
 
-  const [course, setCourse] = useState(
-    () => localStorage.getItem("course") || ""
-  );
   const [courses, setCourses] = useState([]);
   const [selectedCourseId, setSelectedCourseId] = useState(() => {
-    return localStorage.getItem("selectedCourseId")
-      ? Number(localStorage.getItem("selectedCourseId"))
-      : null;
+    const saved = localStorage.getItem("selectedCourseId");
+    return saved ? Number(saved) : null;
   });
+
+  const [courseChanged, setCourseChanged] = useState(false);
 
   const [item, setItem] = useState(() => {
     const saved = localStorage.getItem("item");
-    return saved ? JSON.parse(saved) : "";
+    return saved ? JSON.parse(saved) : {};
   });
 
   const [items, setItems] = useState(() => {
-    const saved = localStorage.getItem("items");
+    const saved = localStorage.getItem("cart");
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const steps = [
-    "Select Regalia",
-    "Place Order",
-    "Customer Details",
-    "Payment Completed",
-  ];
+  const steps = ["Select Regalia", "Place Order", "Customer Details", "Payment Completed"];
 
-  // ---- PERSIST TO LOCALSTORAGE WHEN STATES CHANGE ----
+  // ---- PERSIST TO LOCALSTORAGE ----
+  useEffect(() => localStorage.setItem("step", step), [step]);
   useEffect(() => {
-    localStorage.setItem("step", step);
-  }, [step]);
-
-  useEffect(() => {
-    localStorage.setItem("ceremony", ceremony);
-  }, [ceremony]);
-
-  useEffect(() => {
-    if (selectedCeremonyId !== null) {
+    if (selectedCeremonyId !== null)
       localStorage.setItem("selectedCeremonyId", selectedCeremonyId);
-    }
   }, [selectedCeremonyId]);
-
   useEffect(() => {
-    localStorage.setItem("course", course);
-  }, [course]);
-
-  useEffect(() => {
-    if (selectedCourseId !== null) {
+    if (selectedCourseId !== null)
       localStorage.setItem("selectedCourseId", selectedCourseId);
-    }
   }, [selectedCourseId]);
-
+  useEffect(() => localStorage.setItem("item", JSON.stringify(item)), [item]);
   useEffect(() => {
-    localStorage.setItem("item", JSON.stringify(item));
-  }, [item]);
-
-  useEffect(() => {
-    localStorage.setItem("items", JSON.stringify(items));
+    if (items?.length) localStorage.setItem("cart", JSON.stringify(items));
+    else localStorage.removeItem("cart");
   }, [items]);
 
   // ---- API CALLS ----
-  // Get ceremonies
+  // Fetch Ceremonies
   useEffect(() => {
     const fetchCeremonies = async () => {
       try {
@@ -108,14 +79,17 @@ function HireRegalia() {
         setLoading(false);
       }
     };
-
     fetchCeremonies();
   }, []);
 
-  // Get Courses
+  // Fetch Courses when Ceremony changes
   useEffect(() => {
     const fetchCourses = async () => {
-      if (!selectedCeremonyId) return;
+      if (!selectedCeremonyId) {
+        setCourses([]);
+        setSelectedCourseId(null);
+        return;
+      }
 
       try {
         setLoading(true);
@@ -132,35 +106,49 @@ function HireRegalia() {
     fetchCourses();
   }, [selectedCeremonyId]);
 
-  // Get Items
-  useEffect(() => {
-    const fetchItems = async () => {
-      if (!selectedCourseId) return;
+  // Fetch Items only if courseChanged is true
+  // Fetch Items only if courseChanged is true
+useEffect(() => {
+  if (!selectedCourseId) return;
 
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getItemsByCourseId(selectedCourseId);
-        setItems(Array.isArray(data) ? data : []);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const savedCart = localStorage.getItem("cart");
 
-    fetchItems();
-  }, [selectedCourseId]);
+  if (!courseChanged && savedCart) {
+    // ✅ Load from localStorage only on initial load
+    setItems(JSON.parse(savedCart));
+    return;
+  }
+
+  if (!courseChanged) return; // don't fetch if nothing changed
+
+  // Clear old items before fetching new ones
+  setItems([]);
+  setItem({});
+
+  const fetchItems = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getItemsByCourseId(selectedCourseId);
+      setItems(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchItems();
+}, [selectedCourseId, courseChanged]);
+
 
   // ---- RENDER ----
   return (
     <div className="content">
       <Navbar />
-      {/* <h2>Hire Regalia</h2> */}
-      <div></div>
       <ProgressBar step={step} steps={steps} />
       <ProgressButtons
-      action={action}
+        action={action}
         step={step}
         setStep={setStep}
         steps={steps}
@@ -170,14 +158,8 @@ function HireRegalia() {
 
       {step === 1 && (
         <>
-          {/* Show loading while fetching */}
-          {loading && (
-            <div style={{ padding: "20px", textAlign: "center" }}>
-              Loading data...
-            </div>
-          )}
+          {loading && <div style={{ padding: "20px", textAlign: "center" }}>Loading data...</div>}
 
-          {/* Show error if API fails */}
           {error && (
             <div
               style={{
@@ -192,29 +174,24 @@ function HireRegalia() {
             </div>
           )}
 
-          {/* Show component when not loading */}
           {!loading && (
             <CeremonyCourseSelection
               ceremonies={ceremonies}
-              ceremony={ceremony}
-              setCeremony={setCeremony}
-              course={course}
+              ceremony={selectedCeremonyId}
+              setCeremony={setSelectedCeremonyId}
               courses={courses}
-              setCourse={setCourse}
-              onCeremonySelect={setSelectedCeremonyId}
-              onCourseSelect={setSelectedCourseId}
+              course={selectedCourseId}
+              setCourse={setSelectedCourseId}
+              onCeremonySelect={(id) => setSelectedCeremonyId(id)}
+              onCourseSelect={(id) => {
+                setSelectedCourseId(id);
+                setCourseChanged(true); // mark as changed
+              }}
             />
           )}
 
-          {/* Show items base on selected ceremony and course */}
           {!loading && (
-            <CartList
-              step={step}
-              item={item}
-              items={items}
-              setItem={setItem}
-              setItems={setItems}
-            />
+            <CartList step={step} item={item} items={items} setItem={setItem} setItems={setItems} />
           )}
         </>
       )}
@@ -222,24 +199,11 @@ function HireRegalia() {
       {step === 2 && (
         <div>
           <h2 className="cart-label">Shopping Cart</h2>
-          <CartList
-            step={step}
-            item={item}
-            items={items}
-            setItem={setItem}
-            setItems={setItems}
-          />
+          <CartList step={step} item={item} items={items} setItem={setItem} setItems={setItems} />
         </div>
       )}
 
-      {step === 3 && (
-        <div>
-          <CustomerDetails
-            item={item}
-            quantity={item.quantity || 1}
-          ></CustomerDetails>
-        </div>
-      )}
+      {step === 3 && <CustomerDetails item={item} quantity={item.quantity || 1} />}
 
       {step === 4 && <div>{/* Payment Completed content goes here */}</div>}
 

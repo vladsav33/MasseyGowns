@@ -68,20 +68,20 @@ function CartItem({
                 <label>{option.label}:</label>
                 <select
                   className="option-select"
-                  value={""}
+                  value={item.selectedOptions?.[option.label] || ""} // bind selected value
                   onChange={(e) =>
                     onOptionChange(item.id, option.label, e.target.value)
                   }
                   required
                 >
                   <option value="">Please select...</option>
-                  {option.choices.map((choice, choiceIndex) => (
-                    <option key={choiceIndex} value={choice}>
+                  {option.choices.map((choice, idx) => (
+                    <option key={idx} value={choice}>
                       {choice}
                     </option>
                   ))}
                 </select>
-              </div>
+              </div>                            
             ))}
         </div>
       ) : (
@@ -98,7 +98,7 @@ function CartItem({
               {item.options.map((option, index) => (
                 <div key={index} className="option-row">
                   <span className="option-label">{option.label}:</span>
-                  <span className="option-value">{option.value}</span>
+                  <span className="option-value">{item.selectedOptions?.[option.label] || "—"}</span>
                 </div>
               ))}
             </div>
