@@ -1,9 +1,9 @@
 const API_BASE = import.meta.env.VITE_GOWN_API_BASE;
 
-// get faq list
+// Get faq list
 export async function fetchFAQs() {
   const controller = new AbortController();
-  // set time out
+  // Set time out
   const timeout = setTimeout(() => controller.abort(), 8000);
 
   try {
@@ -18,10 +18,10 @@ export async function fetchFAQs() {
       throw new Error(`API request failed: ${res.status}`);
     }
 
-    return await res.json(); // [{id, question, answer}, ...]
+    return await res.json();
   } catch (err) {
     clearTimeout(timeout);
-    console.error("❌ FAQ API error:", err);
+    console.error("FAQ API error:", err);
     throw err;
   }
 }
