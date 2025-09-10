@@ -13,9 +13,9 @@ function Navbar() {
           <Link to="/">HOME</Link>
         </li>
         <li className="has-dropdown">
-          <a href="#" className="menu-link">
+          <Link to="/hireregalia" className="menu-link">
             HIRE REGALIA
-          </a>
+          </Link>
           <section className="dropdown_panel">
             <div className="dropdown_casual">
               <h4>Casual Hire for Photos</h4>
