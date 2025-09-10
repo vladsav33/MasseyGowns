@@ -22,7 +22,7 @@ function BuyRegalia() {
   });
 
   const [items, setItems] = useState(() => {
-    const saved = localStorage.getItem("items");
+    const saved = localStorage.getItem("cart");
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -73,7 +73,7 @@ function BuyRegalia() {
 
             {/* Show component when not loading */}
             {/* {!loading && ( */}
-            <BuySelectRegalia />
+            <BuySelectRegalia setItems={setItems} />
             {/* )} */}
 
             {/* Show items base on selected ceremony and course */}
@@ -93,6 +93,7 @@ function BuyRegalia() {
           <div>
             <h2 className="cart-label">Shopping Cart</h2>
             <CartList
+              action={action}
               step={step}
               item={item}
               items={items}

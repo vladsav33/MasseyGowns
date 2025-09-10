@@ -12,7 +12,7 @@ import {
   getCoursesByCeremonyId,
   getCeremonies,
   getItemsByCourseId,
-} from "../services/hireRegaliaService";
+} from "../services/HireBuyRegaliaService";
 
 function HireRegalia() {
   const action = 0; // Hire
@@ -208,6 +208,7 @@ function HireRegalia() {
               items={items}
               setItem={setItem}
               setItems={setItems}
+              action={action}
             />
           )}
         </>
@@ -222,6 +223,7 @@ function HireRegalia() {
             items={items}
             setItem={setItem}
             setItems={setItems}
+            action={action}
           />
         </div>
       )}

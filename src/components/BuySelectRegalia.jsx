@@ -1,21 +1,22 @@
 import "./BuySelectRegalia.css";
 import React, { useState, useEffect } from "react";
-import { ShoppingCart, Plus, Minus, Trash2 } from "lucide-react";
-import { getItems } from "../services/hireRegaliaService";
+import { getItems, getItemSets } from "../services/HireBuyRegaliaService";
 
-const placeholderSvg =
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNGM0Y0RjYiLz48cGF0aCBkPSJNNSA4NUg5NVY5MEg1Vjg1Wk01IDUwSDk1VjU1SDVWNDVaTTM1IDQwSDY1VjQ0SDM1VjQwWiIgZmlsbD0iIzlDQTNBRiIvPjwvc3ZnPg==";
+const placeholderSvg = "data:image/svg+xml;base64,...";
 
-const BuySelectRegalia = () => {
-  const [activeTab, setActiveTab] = useState("individual");
-  const [cart, setCart] = useState([]);
-  //   const [showCart, setShowCart] = useState(false);
-
+const BuySelectRegalia = ({ setItems }) => {
+  const [activeTab, setActiveTab] = useState("sets"); // show sets by default
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [items, setItems] = useState([]);
 
+  // individual items
+  const [items, setItemsLocal] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
+
+  // degree sets
+  const [sets, setSets] = useState([]);
+  const [loadingSets, setLoadingSets] = useState(true);
+  const [errorSets, setErrorSets] = useState(null);
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -24,7 +25,8 @@ const BuySelectRegalia = () => {
         setError(null);
         const data = await getItems();
         const safe = Array.isArray(data) ? data : [];
-        setItems(safe);
+        setItemsLocal(safe);
+
         const firstCategory =
           safe
             .filter((x) => x?.buyPrice != null)
@@ -40,29 +42,46 @@ const BuySelectRegalia = () => {
     fetchItems();
   }, []);
 
+  // ----------------------------
+  // Fetch degree sets
+  // ----------------------------
+  useEffect(() => {
+    const fetchSets = async () => {
+      try {
+        setLoadingSets(true);
+        setErrorSets(null);
+        const data = await getItemSets();
+        setSets(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setErrorSets(err?.message || "Failed to load degree sets");
+      } finally {
+        setLoadingSets(false);
+      }
+    };
+    fetchSets();
+  }, []);
 
-  // Group items by category (only show things that are buyable; hide null buyPrice)
   const itemsByCategory = React.useMemo(() => {
     const map = new Map();
     for (const it of items || []) {
-      if (it?.buyPrice == null) continue; // only show purchasable
+      if (it?.buyPrice == null) continue; 
       const cat = it?.category || "Other";
       if (!map.has(cat)) map.set(cat, []);
-      // build a stable UI id: some ids in your payload repeat across degreeId, so combine:
       map.get(cat).push({
         ...it,
-        uiId: `${it.degreeId}-${it.id}`, // unique per degree+item
+        uiId: `${it.degreeId}-${it.id}`,
       });
     }
-    // sort categories alpha, items by name
     const obj = {};
-    [...map.keys()].sort().forEach((k) => {
-      obj[k] = map
-        .get(k)
-        .sort((a, b) =>
-          String(a.name || "").localeCompare(String(b.name || ""))
-        );
-    });
+    [...map.keys()]
+      .sort()
+      .forEach((k) => {
+        obj[k] = map
+          .get(k)
+          .sort((a, b) =>
+            String(a.name || "").localeCompare(String(b.name || ""))
+          );
+      });
     return obj;
   }, [items]);
 
@@ -71,80 +90,63 @@ const BuySelectRegalia = () => {
     [itemsByCategory]
   );
 
-  const addToCart = (item, type = "individual") => {
-    const cartItem = {
-      ...item,
-      price: item?.buyPrice ?? item?.price ?? 0,
-      cartId: `${item.uiId || item.id}-${Date.now()}`,
-      type,
+  // ----------------------------
+  // Helpers
+  // ----------------------------
+  const renderImage = (base64) =>
+    base64 && typeof base64 === "string"
+      ? `data:image/jpeg;base64,${base64}`
+      : placeholderSvg;
+
+  const pushToCart = (newItem) => {
+    const prev = JSON.parse(localStorage.getItem("cart") || "[]");
+    const updated = [...prev, newItem];
+    localStorage.setItem("cart", JSON.stringify(updated));
+    if (typeof setItems === "function") setItems(updated);
+  };
+
+  // add to cart for individual products (buy flow)
+  const addIndividualToCart = (product) => {
+    const newItem = {
+      id: `${product.degreeId ?? "NA"}-${product.id}-${Date.now()}`,
+      name: product.name,
+      category: product.category,
+      description: product.description,
+      pictureBase64: product.pictureBase64 ?? null,
+      // Cart expects hirePrice; map buy price into it so totals work
+      hirePrice: Number(product.buyPrice) || 0,
+      buyPrice: product.buyPrice ?? null, // keep original if you need later
       quantity: 1,
+      options: product.options || [],
+      selectedOptions: {},
+      type: "individual",
     };
-    setCart((prev) => [...prev, cartItem]);
-    localStorage.setItem("cart");
-    if (!showCart) setShowCart(true);
+    pushToCart(newItem);
   };
 
-  const updateQuantity = (cartId, newQuantity) => {
-    if (newQuantity <= 0) {
-      removeFromCart(cartId);
-      return;
-    }
-    setCart((prev) =>
-      prev.map((item) =>
-        item.cartId === cartId ? { ...item, quantity: newQuantity } : item
-      )
-    );
-  };
-
-  const removeFromCart = (cartId) => {
-    setCart((prev) => prev.filter((item) => item.cartId !== cartId));
-  };
-
-  const getTotalPrice = () => {
-    return cart.reduce(
-      (total, item) => total + (item.price || 0) * item.quantity,
-      0
-    );
-  };
-
-  //   const getTotalItems = () => {
-  //     return cart.reduce((total, item) => total + item.quantity, 0);
-  //   };
-
-  // ----------------------------
-  // Render helpers
-  // ----------------------------
-  const renderImage = (base64) => {
-    if (base64 && typeof base64 === "string") {
-      return `data:image/jpeg;base64,${base64}`;
-    }
-    // fallback to your placeholder image or your static jpg
-    return placeholderSvg;
+  // add to cart for a set (buy flow)
+  const addSetToCart = (setItem) => {
+    const newItem = {
+      id: `set-${setItem.id}-${Date.now()}`,
+      name: setItem.name,
+      category: setItem.category || "Set",
+      description: setItem.description,
+      pictureBase64: setItem.pictureBase64 ?? null,
+      // Map buyPrice into hirePrice field for cart math
+      hirePrice: Number(setItem.buyPrice) || 0,
+      buyPrice: setItem.buyPrice ?? null,
+      quantity: 1,
+      options: [],
+      selectedOptions: {},
+      type: "set",
+    };
+    pushToCart(newItem);
   };
 
   return (
     <div className="regalia-shop">
-      {/* Header */}
-      {/* <header className="shop-header">
-        <div className="header-container">
-          <div className="header-content">
-            <h1 className="shop-title">Graduation Regalia Store</h1>
-            <button
-              onClick={() => setShowCart((v) => !v)}
-              className="cart-button"
-            >
-              <ShoppingCart size={20} />
-              Cart ({getTotalItems()})
-              {cart.length > 0 && (
-                <span className="cart-badge">{getTotalItems()}</span>
-              )}
-            </button>
-          </div>
-        </div>
-      </header> */}
-
       <div className="main-container">
-        {/* Tab Navigation */}
+        {/* Tabs */}
         <div className="tabs-section">
           <div className="tabs-border">
             <nav className="tabs-nav">
@@ -169,23 +171,64 @@ const BuySelectRegalia = () => {
         </div>
 
         <div className="content-grid">
-          {/* Main Content */}
           <div className="main-content">
+            {/* --------- Sets Tab --------- */}
             {activeTab === "sets" && (
               <div>
                 <h2 className="section-title">Complete Degree Sets</h2>
-                <div className="empty-cart">
-                  {/* You can wire this to another API once sets are available */}
-                  Degree sets are coming soon.
-                </div>
+
+                {loadingSets && <p className="muted">Loading degree sets…</p>}
+                {errorSets && <p className="error-text">{errorSets}</p>}
+
+                {!loadingSets && !errorSets && sets.length === 0 && (
+                  <div className="empty-cart">No degree sets available.</div>
+                )}
+
+                {!loadingSets && !errorSets && sets.length > 0 && (
+                  <div className="items-grid">
+                    {sets.map((s) => (
+                      <div key={`set-${s.id}`} className="product-card">
+                        <div className="product-image">
+                          {/* Uncomment if you’ll have images
+                          <img
+                            src={renderImage(s.pictureBase64)}
+                            alt={s.name}
+                            className="item-image-topic"
+                            onError={(e) => (e.currentTarget.src = placeholderSvg)}
+                          /> */}
+                        </div>
+                        <div className="product-info">
+                          <span className="item-category">{s.category || "Set"}</span>
+                          <h4 className="product-name">{s.name}</h4>
+                          {s.description ? (
+                            <p className="product-description">{s.description}</p>
+                          ) : (
+                            <p className="product-description muted">&nbsp;</p>
+                          )}
+                          <div className="product-footer">
+                            <span className="product-price">
+                              ${Number(s.buyPrice ?? 0).toFixed(2)}
+                            </span>
+                            <button
+                              onClick={() => addSetToCart(s)}
+                              className="add-to-cart-btn"
+                            >
+                              Add to Cart
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
+            {/* --------- Individual Items Tab --------- */}
             {activeTab === "individual" && (
               <div>
                 <h2 className="section-title">Shop by Category</h2>
 
-                {/* CATEGORY SELECTOR (single select) */}
                 <div className="category-select-row">
                   <label className="category-label" htmlFor="categorySelect">
                     Category:
@@ -209,7 +252,6 @@ const BuySelectRegalia = () => {
                   </select>
                 </div>
 
-                {/* ACCORDION-LIKE EXPAND AREA */}
                 <div className="category-accordion">
                   {loading && <p className="muted">Loading items…</p>}
                   {error && <p className="error-text">{error}</p>}
@@ -231,26 +273,27 @@ const BuySelectRegalia = () => {
                       </div>
 
                       <div className="items-grid">
-                        {itemsByCategory[selectedCategory]?.map((item) => (
-                          <div key={item.uiId} className="product-card">
+                        {itemsByCategory[selectedCategory]?.map((product) => (
+                          <div key={product.uiId} className="product-card">
                             <div className="product-image">
+                              {/* Uncomment when images are ready
                               <img
-                                src={renderImage(item.pictureBase64)}
-                                alt={item.name}
+                                src={renderImage(product.pictureBase64)}
+                                alt={product.name}
                                 className="item-image-topic"
                                 onError={(e) => {
                                   e.currentTarget.src = placeholderSvg;
                                 }}
-                              />
+                              /> */}
                             </div>
                             <div className="product-info">
                               <span className="item-category">
-                                {item.category}
+                                {product.category}
                               </span>
-                              <h4 className="product-name">{item.name}</h4>
-                              {item.description ? (
+                              <h4 className="product-name">{product.name}</h4>
+                              {product.description ? (
                                 <p className="product-description">
-                                  {item.description}
+                                  {product.description}
                                 </p>
                               ) : (
                                 <p className="product-description muted">
@@ -259,10 +302,10 @@ const BuySelectRegalia = () => {
                               )}
                               <div className="product-footer">
                                 <span className="product-price">
-                                  ${Number(item.buyPrice).toFixed(2)}
+                                  ${Number(product.buyPrice).toFixed(2)}
                                 </span>
                                 <button
-                                  onClick={() => addToCart(item)}
+                                  onClick={() => addIndividualToCart(product)}
                                   className="add-to-cart-btn"
                                 >
                                   Add to Cart
@@ -277,75 +320,8 @@ const BuySelectRegalia = () => {
                 </div>
               </div>
             )}
+            {/* --------- /Individual Items Tab --------- */}
           </div>
-
-          {/* Cart Sidebar */}
-          {/* {showCart && ( */}
-          <div className="cart-sidebar">
-            <div className="cart-container">
-              <h3 className="cart-title">
-                <ShoppingCart size={20} />
-                Shopping Cart
-              </h3>
-
-              {cart.length === 0 ? (
-                <p className="empty-cart">Your cart is empty</p>
-              ) : (
-                <>
-                  <div className="cart-items">
-                    {cart.map((item) => (
-                      <div key={item.cartId} className="cart-item">
-                        <div className="cart-item-header">
-                          <div className="cart-item-info">
-                            <h4 className="cart-item-name">{item.name}</h4>
-                            <span className="cart-item-type">
-                              {item.type === "set"
-                                ? "Complete Set"
-                                : "Individual Item"}
-                            </span>
-                          </div>
-                          <button
-                            onClick={() => removeFromCart(item.cartId)}
-                            className="remove-btn"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-
-                        <div className="cart-item-footer">
-                          <div className="quantity-controls">
-                            <button
-                              onClick={() =>
-                                updateQuantity(item.cartId, item.quantity - 1)
-                              }
-                              className="quantity-btn"
-                            >
-                              <Minus size={16} />
-                            </button>
-                            <span className="quantity-display">
-                              {item.quantity}
-                            </span>
-                            <button
-                              onClick={() =>
-                                updateQuantity(item.cartId, item.quantity + 1)
-                              }
-                              className="quantity-btn"
-                            >
-                              <Plus size={16} />
-                            </button>
-                          </div>
-                          <span className="item-total">
-                            ${(item.price * item.quantity).toFixed(2)}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-          {/* )} */}
         </div>
       </div>
     </div>

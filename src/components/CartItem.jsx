@@ -38,12 +38,12 @@ function CartItem({
             "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0zNSA0MEg2NVY0NEgzNVY0MFpNMzUgNTBINjVWNTRIMzVWNTBaTTM1IDYwSDU1VjY0SDM1VjYwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K";
         }}
       />
-      <div className="hire-ribbon">Hire</div>
-      {/* {action === 0 ? (
-        <div className="hire-ribbon">Hire</div>
-      ) : (
-        <div className="hire-ribbon">Buy</div>
-      )} */}
+      {item.name !== "Donation" &&
+        (item.buyPrice === null ? (
+          <div className="hire-ribbon">Hire</div>
+        ) : (
+          <div className="buy-ribbon">Buy</div>
+        ))}
 
       {step === 1 ? (
         // Step 1 view (with options and editable fields)
@@ -81,7 +81,7 @@ function CartItem({
                     </option>
                   ))}
                 </select>
-              </div>                            
+              </div>
             ))}
         </div>
       ) : (
@@ -98,7 +98,9 @@ function CartItem({
               {item.options.map((option, index) => (
                 <div key={index} className="option-row">
                   <span className="option-label">{option.label}:</span>
-                  <span className="option-value">{item.selectedOptions?.[option.label] || "—"}</span>
+                  <span className="option-value">
+                    {item.selectedOptions?.[option.label] || "—"}
+                  </span>
                 </div>
               ))}
             </div>

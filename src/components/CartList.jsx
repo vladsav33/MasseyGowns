@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import CartItem from "./CartItem.jsx";
 import "./CartList.css";
 
-function CartList({ step, items, setItems }) {
+function CartList({ step, items, setItems, action }) {
   const [donationQuantity, setDonationQuantity] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -140,6 +140,7 @@ function CartList({ step, items, setItems }) {
               key={item.id}
               item={item}
               step={step}
+              action={action}
               quantity={item.quantity || 1}
               onIncrease={() => handleIncrease(item.id)}
               onDecrease={() => handleDecrease(item.id)}

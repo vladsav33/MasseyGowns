@@ -110,7 +110,6 @@ function CustomerDetails({ item, items = [], step, setStep, steps }) {
     };
   }, []);
 
-
   // Use props if provided, otherwise load from localStorage
   const cart =
     items.length > 0 ? items : JSON.parse(localStorage.getItem("cart") || "[]");
@@ -369,30 +368,53 @@ function CustomerDetails({ item, items = [], step, setStep, steps }) {
         <h2 className="summary-title">Cart Summary</h2>
         {cart.length > 0 ? (
           <>
-            {cart.map((item) => (
-              <div key={item.id} className="summary-card">
-                <div className="summary-info">
-                  <p className="summary-name">{item.name}</p>
+            {cart.map((item) => {
+              const isDonation = item.name === "Donation";
+              const isHire = !isDonation && item.buyPrice == null; // hire items have no buyPrice
+              const isBuy = !isDonation && item.buyPrice != null;
 
-                  {item.selectedOptions &&
-                    Object.entries(item.selectedOptions).map(
-                      ([label, value]) => (
-                        <p key={label} className="summary-option">
-                          {label}: <strong>{value}</strong>
-                        </p>
-                      )
-                    )}
-                </div>
-                <div className="summary-price">
-                  ${(item.hirePrice || 0).toFixed(2)} × {item.quantity || 1}
-                  <br />
-                  <strong>
-                    ${((item.hirePrice || 0) * (item.quantity || 1)).toFixed(2)}
-                  </strong>
-                </div>
-              </div>
-            ))}
+              return (
+                <div
+                  key={item.id}
+                  className="summary-card"
+                  style={{ position: "relative" }}
+                >
+                  {/* Hire / Buy ribbon */}
+                  {/* {!isDonation &&
+                    (isHire ? (
+                      <div className="hire-ribbon">Hire</div>
+                    ) : (
+                      <div className="buy-ribbon">Buy</div>
+                    ))} */}
 
+                  <div className="summary-info">
+                    <p className="summary-name">{item.name}</p>
+
+                    {item.selectedOptions &&
+                      Object.entries(item.selectedOptions).map(
+                        ([label, value]) => (
+                          <p key={label} className="summary-option">
+                            {label}: <strong>{value}</strong>
+                          </p>
+                        )
+                      )}
+                  </div>
+
+                  <div className="summary-price">
+                    ${(item.hirePrice || 0).toFixed(2)} × {item.quantity || 1}
+                    <br />
+                    <strong>
+                      $
+                      {((item.hirePrice || 0) * (item.quantity || 1)).toFixed(
+                        2
+                      )}
+                    </strong>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Total */}
             <div className="summary-total">
               <span>Total</span>
               <span>${total.toFixed(2)}</span>

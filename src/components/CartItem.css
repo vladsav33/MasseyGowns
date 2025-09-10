@@ -38,6 +38,20 @@
     transform: rotate(-15deg);
     box-shadow: 0 2px 8px rgba(15, 86, 30, 0.4);
   }
+
+  .buy-ribbon {
+    position: absolute;
+    top: 15px;
+    right: -5px;
+    background: #af2b13;
+    color: white;
+    padding: 6px 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    transform: rotate(-15deg);
+    box-shadow: 0 2px 8px rgba(69, 22, 19, 0.4);
+  }
   
   .hire-ribbon::before {
     content: '';
@@ -45,6 +59,15 @@
     left: 0;
     bottom: -5px;
     border-left: 5px solid #0f6529;
+    border-bottom: 5px solid transparent;
+  }
+
+  .buy-ribbon::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    border-left: 5px solid #982511;
     border-bottom: 5px solid transparent;
   }
   
