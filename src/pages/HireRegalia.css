@@ -3,5 +3,9 @@
 }
 
 .cart-label {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #374151;
+    margin: 0;
     text-align: center;
-}
+  }

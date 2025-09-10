@@ -45,16 +45,17 @@ function ProgressButtons({
           <button
             className={`btn ${
               step === steps.length ||
-              (!selectedCeremonyId && !selectedCourseId)
+              (!selectedCeremonyId && !selectedCourseId) || step===3
                 ? "disabled"
                 : ""
             }`}
             onClick={
-              !selectedCeremonyId && !selectedCourseId ? undefined : handleNext
+              (!selectedCeremonyId && !selectedCourseId) || step===3 ? undefined : handleNext
             }
             disabled={
               step === steps.length ||
               (!selectedCeremonyId && !selectedCourseId)
+              || step===3
             }
           >
             &gt;
@@ -71,9 +72,9 @@ function ProgressButtons({
           </button>
 
           <button
-            className={`btn ${step === steps.length ? "disabled" : ""}`}
-            onClick={handleNext}
-            disabled={step === steps.length}
+            className={`btn ${step === steps.length || step===3 ? "disabled" : ""}`}
+            onClick={step===3 ? undefined : handleNext}
+            disabled={step === steps.length && step===3}
           >
             &gt;
           </button>

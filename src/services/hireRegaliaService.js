@@ -12,6 +12,20 @@ export const getCeremonies = async () => {
   }
 };
 
+// export const getCeremonies = async () => {
+//   const cached = localStorage.getItem("ceremonies");
+//   if (cached) return JSON.parse(cached);
+
+//   try {
+//     const response = await axios.get(`${API_URL}/ceremonies`);
+//     localStorage.setItem("ceremonies", JSON.stringify(response.data));
+//     return response.data;
+//   } catch (err) {
+//     console.error("Error fetching ceremonies:", err);
+//     return [];
+//   }
+// };
+
 export const getCoursesByCeremonyId = async (selectedCeremonyId) => {
   try {
     const response = await axios.get(`${API_URL}/degreesbyceremony/${selectedCeremonyId}`);
@@ -28,6 +42,16 @@ export const getItemsByCourseId = async (selectedCourseId) => {
     return response.data;
   } catch (err) {
     console.error("Error fetching courses:", err);
+    return [];
+  }
+};
+
+export const getItems = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/items`);
+    return response.data;
+  } catch (err) {
+    console.error("Error fetching items:", err);
     return [];
   }
 };

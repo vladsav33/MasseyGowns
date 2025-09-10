@@ -1,0 +1,47 @@
+.tac {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+  line-height: 1.6;
+}
+.tac__title {
+  font-size: 2rem;
+  margin-bottom: 4px;
+}
+.tac__updated {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+}
+.tac__section {
+  margin: 28px 0;
+}
+.tac__section h2 {
+  margin-bottom: 8px;
+}
+.tac__section h3 {
+  margin: 16px 0 6px;
+}
+.tac__fees {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 16px;
+}
+.tac__fees dt {
+  font-weight: 500;
+}
+.tac__fees dd {
+  margin: 0;
+  text-align: right;
+}
+.tac__address {
+  margin-top: 12px;
+  white-space: pre-line;
+}
+a {
+  color: #0ea5e9;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}

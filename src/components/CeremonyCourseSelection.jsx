@@ -2,18 +2,16 @@ import React, { useEffect } from "react";
 import "./CeremonyCourseSelection.css";
 
 function CeremonyCourseSelection({
-  course,            // selectedCourseId (number | null)
-  courses,           // array of courses
-  setCourse,         // setSelectedCourseId
-  ceremony,          // selectedCeremonyId (number | null)
-  ceremonies,        // array of ceremonies
-  setCeremony,       // setSelectedCeremonyId
-  onCeremonySelect,  // (id) => ...
-  onCourseSelect,    // (id) => ...
+  course,            
+  courses,           
+  setCourse,         
+  ceremony,          
+  ceremonies,       
+  setCeremony,       
+  onCeremonySelect,  
+  onCourseSelect,   
 }) {
-  // Restore saved IDs into parent state on mount.
-  // IMPORTANT: we do NOT call onCeremonySelect/onCourseSelect here
-  // so that the parent doesn't think the user actively changed anything.
+  
   useEffect(() => {
     const savedCeremonyId = localStorage.getItem("selectedCeremonyId");
     const savedCourseId = localStorage.getItem("selectedCourseId");

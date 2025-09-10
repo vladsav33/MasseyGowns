@@ -47,15 +47,15 @@ function CartList({ step, items, setItems }) {
     setIsDialogOpen(false);
   };
 
-  const handleAddItemToCart = (itemData) => {
-    const newItem = {
-      ...itemData,
-      selectedOptions: {}, // initialize empty object
-      quantity: 1,
-    };
+  // const handleAddItemToCart = (itemData) => {
+  //   const newItem = {
+  //     ...itemData,
+  //     selectedOptions: {}, // initialize empty object
+  //     quantity: 1,
+  //   };
   
-    updateCart([...items, newItem]);
-  };
+  //   updateCart([...items, newItem]);
+  // };
   
 
   const handleIncrease = (id) => {
@@ -94,7 +94,7 @@ function CartList({ step, items, setItems }) {
     });
   
     setItems(updatedItems);
-    localStorage.setItem("cart", JSON.stringify(updatedItems)); // ✅ persist to localStorage
+    localStorage.setItem("cart", JSON.stringify(updatedItems)); // persist to localStorage
   };
   
   
@@ -147,6 +147,7 @@ function CartList({ step, items, setItems }) {
               onOptionChange={handleOptionChange}
             />
           ))}
+          <div></div>
 
           {step === 2 && (
             <div>

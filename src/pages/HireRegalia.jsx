@@ -7,6 +7,7 @@ import CeremonyCourseSelection from "../components/CeremonyCourseSelection";
 import CartList from "../components/CartList";
 import CustomerDetails from "../components/CustomerDetails";
 import Contact from "../components/Contact";
+import PaymentCompleted from "../components/PaymentCompleted";
 import {
   getCoursesByCeremonyId,
   getCeremonies,
@@ -17,7 +18,9 @@ function HireRegalia() {
   const action = 0; // Hire
 
   // ---- STATES ----
-  const [step, setStep] = useState(() => Number(localStorage.getItem("step")) || 1);
+  const [step, setStep] = useState(
+    () => Number(localStorage.getItem("step")) || 1
+  );
 
   const [ceremonies, setCeremonies] = useState([]);
   const [selectedCeremonyId, setSelectedCeremonyId] = useState(() => {
@@ -46,7 +49,12 @@ function HireRegalia() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const steps = ["Select Regalia", "Place Order", "Customer Details", "Payment Completed"];
+  const steps = [
+    "Select Regalia",
+    "Place Order",
+    "Customer Details",
+    "Payment Completed",
+  ];
 
   // ---- PERSIST TO LOCALSTORAGE ----
   useEffect(() => localStorage.setItem("step", step), [step]);
@@ -108,39 +116,38 @@ function HireRegalia() {
 
   // Fetch Items only if courseChanged is true
   // Fetch Items only if courseChanged is true
-useEffect(() => {
-  if (!selectedCourseId) return;
+  useEffect(() => {
+    if (!selectedCourseId) return;
 
-  const savedCart = localStorage.getItem("cart");
+    const savedCart = localStorage.getItem("cart");
 
-  if (!courseChanged && savedCart) {
-    // ✅ Load from localStorage only on initial load
-    setItems(JSON.parse(savedCart));
-    return;
-  }
-
-  if (!courseChanged) return; // don't fetch if nothing changed
-
-  // Clear old items before fetching new ones
-  setItems([]);
-  setItem({});
-
-  const fetchItems = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await getItemsByCourseId(selectedCourseId);
-      setItems(Array.isArray(data) ? data : []);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    if (!courseChanged && savedCart) {
+      // Load from localStorage only on initial load
+      setItems(JSON.parse(savedCart));
+      return;
     }
-  };
 
-  fetchItems();
-}, [selectedCourseId, courseChanged]);
+    if (!courseChanged) return; // don't fetch if nothing changed
 
+    // Clear old items before fetching new ones
+    setItems([]);
+    setItem({});
+
+    const fetchItems = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getItemsByCourseId(selectedCourseId);
+        setItems(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchItems();
+  }, [selectedCourseId, courseChanged]);
 
   // ---- RENDER ----
   return (
@@ -158,7 +165,11 @@ useEffect(() => {
 
       {step === 1 && (
         <>
-          {loading && <div style={{ padding: "20px", textAlign: "center" }}>Loading data...</div>}
+          {loading && (
+            <div style={{ padding: "20px", textAlign: "center" }}>
+              Loading data...
+            </div>
+          )}
 
           {error && (
             <div
@@ -185,13 +196,19 @@ useEffect(() => {
               onCeremonySelect={(id) => setSelectedCeremonyId(id)}
               onCourseSelect={(id) => {
                 setSelectedCourseId(id);
-                setCourseChanged(true); // mark as changed
+                setCourseChanged(true);
               }}
             />
           )}
 
           {!loading && (
-            <CartList step={step} item={item} items={items} setItem={setItem} setItems={setItems} />
+            <CartList
+              step={step}
+              item={item}
+              items={items}
+              setItem={setItem}
+              setItems={setItems}
+            />
           )}
         </>
       )}
@@ -199,13 +216,31 @@ useEffect(() => {
       {step === 2 && (
         <div>
           <h2 className="cart-label">Shopping Cart</h2>
-          <CartList step={step} item={item} items={items} setItem={setItem} setItems={setItems} />
+          <CartList
+            step={step}
+            item={item}
+            items={items}
+            setItem={setItem}
+            setItems={setItems}
+          />
         </div>
       )}
 
-      {step === 3 && <CustomerDetails item={item} quantity={item.quantity || 1} />}
+      {step === 3 && (
+        <CustomerDetails
+          item={item}
+          quantity={item.quantity || 1}
+          step={step}
+          setStep={setStep}
+          steps={steps}
+        />
+      )}
 
-      {step === 4 && <div>{/* Payment Completed content goes here */}</div>}
+      {step === 4 && (
+        <div>
+          <PaymentCompleted />
+        </div>
+      )}
 
       <ProgressButtons
         action={action}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./BuyRegalia.css";
 import Navbar from "../components/Navbar";
 import Contact from "../components/Contact";
@@ -7,9 +7,10 @@ import ProgressButtons from "../components/ProgressButtons";
 import BuySelectRegalia from "../components/BuySelectRegalia";
 import CartList from "../components/CartList";
 import CustomerDetails from "../components/CustomerDetails";
+import PaymentCompleted from "../components/PaymentCompleted";
 
 function BuyRegalia() {
-    const action = 1; // Buy
+  const action = 1; // Buy
 
   const [step, setStep] = useState(() => {
     return Number(localStorage.getItem("step")) || 1;
@@ -24,8 +25,6 @@ function BuyRegalia() {
     const saved = localStorage.getItem("items");
     return saved ? JSON.parse(saved) : [];
   });
-  //   const [loading, setLoading] = useState(true);
-  //   const [error, setError] = useState(null);
 
   const steps = [
     "Select Regalia",
@@ -42,7 +41,7 @@ function BuyRegalia() {
         {/* <h2>Buy Regalia</h2> */}
         <ProgressBar step={step} steps={steps} />
         <ProgressButtons
-        action={action}
+          action={action}
           step={step}
           setStep={setStep}
           steps={steps}
@@ -80,7 +79,7 @@ function BuyRegalia() {
             {/* Show items base on selected ceremony and course */}
             {/* {!loading && ( */}
             <CartList
-            action={action}
+              action={action}
               step={step}
               item={item}
               items={items}
@@ -91,35 +90,42 @@ function BuyRegalia() {
           </>
         )}
         {step === 2 && (
-        <div>
-          <h2 className="cart-label">Shopping Cart</h2>
-          <CartList
-            step={step}
-            item={item}
-            items={items}
-            setItem={setItem}
-            setItems={setItems}
-          />
-        </div>
-      )}
+          <div>
+            <h2 className="cart-label">Shopping Cart</h2>
+            <CartList
+              step={step}
+              item={item}
+              items={items}
+              setItem={setItem}
+              setItems={setItems}
+            />
+          </div>
+        )}
 
-      {step === 3 && (
-        <div>
-          <CustomerDetails
-            item={item}
-            quantity={item.quantity || 1}
-          ></CustomerDetails>
-        </div>
-      )}
+        {step === 3 && (
+          <div>
+            <CustomerDetails
+              item={item}
+              quantity={item.quantity || 1}
+              step={step}
+              setStep={setStep}
+              steps={steps}
+            ></CustomerDetails>
+          </div>
+        )}
 
-      {step === 4 && <div>{/* Payment Completed content goes here */}</div>}
-<ProgressButtons
-        action={action}
+        {step === 4 && (
+          <div>
+            <PaymentCompleted />
+          </div>
+        )}
+        <ProgressButtons
+          action={action}
           step={step}
           setStep={setStep}
           steps={steps}
         />
-        {/* <Contact /> */}
+        <Contact />
       </div>
     </>
   );
