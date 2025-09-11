@@ -114,7 +114,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
   const cart =
     items.length > 0 ? items : JSON.parse(localStorage.getItem("cart") || "[]");
 
-  // Calculate total
+    // Calculate total
   const total = cart.reduce(
     (sum, item) => sum + (item.hirePrice || 0) * (item.quantity || 1),
     0
@@ -378,10 +378,10 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
                 >
                   {/* Hire / Buy ribbon */}
                   {item.name !== "Donation" &&
-                    (item.isHire === true ? (
-                      <div className="hire-ribbon">Hire</div>
+                    (item.isHiring === true ? (
+                      <div className="hire-ribbon">H</div>
                     ) : (
-                      <div className="buy-ribbon">Buy</div>
+                      <div className="buy-ribbon">B</div>
                     ))}
 
                   <div className="summary-info">
