@@ -5,7 +5,7 @@ import ProgressBar from "../components/ProgressBar";
 import ProgressButtons from "../components/ProgressButtons";
 import CeremonyCourseSelection from "../components/CeremonyCourseSelection";
 import CartList from "../components/CartList";
-import CustomerDetails from "../components/CustomerDetails";
+import CustomerDetail from "../components/customerDetail";
 import Contact from "../components/Contact";
 import PaymentCompleted from "../components/PaymentCompleted";
 import {
@@ -208,7 +208,6 @@ function HireRegalia() {
               items={items}
               setItem={setItem}
               setItems={setItems}
-              action={action}
             />
           )}
         </>
@@ -223,13 +222,12 @@ function HireRegalia() {
             items={items}
             setItem={setItem}
             setItems={setItems}
-            action={action}
           />
         </div>
       )}
 
       {step === 3 && (
-        <CustomerDetails
+        <CustomerDetail
           item={item}
           quantity={item.quantity || 1}
           step={step}

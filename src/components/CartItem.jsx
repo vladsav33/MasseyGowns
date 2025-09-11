@@ -9,7 +9,6 @@ function CartItem({
   onDecrease,
   onRemove,
   onOptionChange,
-  action,
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -39,7 +38,7 @@ function CartItem({
         }}
       />
       {item.name !== "Donation" &&
-        (item.buyPrice === null ? (
+        (item.isHiring === true ? (
           <div className="hire-ribbon">Hire</div>
         ) : (
           <div className="buy-ribbon">Buy</div>

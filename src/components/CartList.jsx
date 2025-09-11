@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import CartItem from "./CartItem.jsx";
 import "./CartList.css";
 
-function CartList({ step, items, setItems, action }) {
+function CartList({ step, items, setItems }) {
   const [donationQuantity, setDonationQuantity] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -53,10 +53,9 @@ function CartList({ step, items, setItems, action }) {
   //     selectedOptions: {}, // initialize empty object
   //     quantity: 1,
   //   };
-  
+
   //   updateCart([...items, newItem]);
   // };
-  
 
   const handleIncrease = (id) => {
     updateCart(
@@ -92,13 +91,10 @@ function CartList({ step, items, setItems, action }) {
       }
       return item;
     });
-  
+
     setItems(updatedItems);
     localStorage.setItem("cart", JSON.stringify(updatedItems)); // persist to localStorage
   };
-  
-  
-  
 
   // --- Price utilities ---
   const getNumericPrice = (priceString) =>
@@ -140,7 +136,6 @@ function CartList({ step, items, setItems, action }) {
               key={item.id}
               item={item}
               step={step}
-              action={action}
               quantity={item.quantity || 1}
               onIncrease={() => handleIncrease(item.id)}
               onDecrease={() => handleDecrease(item.id)}
@@ -227,26 +222,28 @@ function CartList({ step, items, setItems, action }) {
                     Charities Commission (CC31226).
                   </p>
                   <div className="mission-section">
-                    <h3>Our Mission is</h3>
-                    <ul>
+                    <h3>Our Mission</h3>
+                    <ul
+                      style={{ listStyleType: "disc", paddingLeft: "1.5rem" }}
+                    >
                       <li>
-                        To provide a robe hire service of the highest quality
+                        <p>To provide a robe hire service of the highest quality</p>
                       </li>
                       <li>
-                        To disburse funds raised by robe hire for the
-                        advancement of education
+                        <p>To disburse funds raised by robe hire for the advancement of education</p>
                       </li>
                     </ul>
                   </div>
+
                   <div className="impact-section">
                     <p>
                       A $2 donation will go towards a grant to help someone
                       realise their potential.
                     </p>
                     <p className="highlight">
-                      ADH Palmerston North has given over{" "}
-                      <strong>$1 million in grants</strong> to help students
-                      since its formation.
+                      ADH Palmerston North has given over
+                      <strong> $1 million in grants </strong>
+                      to help students since its formation.
                     </p>
                   </div>
                 </div>
