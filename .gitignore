@@ -35,7 +35,6 @@ tmp/
 *.sw?
 
 # Env & coverage (可按需保留)
-.env
 .env.*
 coverage/
 
