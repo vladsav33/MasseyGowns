@@ -37,6 +37,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       localStorage.setItem("step", newStep);
       e.preventDefault();
       console.log("Form submitted:", formData);
+      localStorage.setItem("customerDetails", JSON.stringify(formData));
     }
   };
 
