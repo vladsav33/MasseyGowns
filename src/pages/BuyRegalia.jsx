@@ -6,7 +6,7 @@ import ProgressBar from "../components/ProgressBar";
 import ProgressButtons from "../components/ProgressButtons";
 import BuySelectRegalia from "../components/BuySelectRegalia";
 import CartList from "../components/CartList";
-import CustomerDetail from "../components/customerDetail";
+import CustomerDetail from "../components/CustomerDetail";
 import PaymentCompleted from "../components/PaymentCompleted";
 
 function BuyRegalia() {

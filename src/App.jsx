@@ -2,7 +2,7 @@ import React from "react";
 import HomePage from "./pages/HomePage";
 import { Routes, Route, Navigate } from "react-router-dom";
 import HireRegalia from "./pages/HireRegalia.jsx";
-import BuyRegalia from "./pages/buyRegalia.jsx";
+import BuyRegalia from "./pages/BuyRegalia.jsx";
 import FAQPage from "./components/FAQPage";
 import TermsAndConditions from "./pages/TermsAndConditions.jsx";
 

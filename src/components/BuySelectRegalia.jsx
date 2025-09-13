@@ -42,9 +42,7 @@ const BuySelectRegalia = ({ setItems }) => {
     fetchItems();
   }, []);
 
-  // ----------------------------
   // Fetch degree sets
-  // ----------------------------
   useEffect(() => {
     const fetchSets = async () => {
       try {
@@ -64,7 +62,7 @@ const BuySelectRegalia = ({ setItems }) => {
   const itemsByCategory = React.useMemo(() => {
     const map = new Map();
     for (const it of items || []) {
-      if (it?.buyPrice == null) continue; 
+      if (it?.buyPrice == null) continue;
       const cat = it?.category || "Other";
       if (!map.has(cat)) map.set(cat, []);
       map.get(cat).push({
@@ -73,15 +71,13 @@ const BuySelectRegalia = ({ setItems }) => {
       });
     }
     const obj = {};
-    [...map.keys()]
-      .sort()
-      .forEach((k) => {
-        obj[k] = map
-          .get(k)
-          .sort((a, b) =>
-            String(a.name || "").localeCompare(String(b.name || ""))
-          );
-      });
+    [...map.keys()].sort().forEach((k) => {
+      obj[k] = map
+        .get(k)
+        .sort((a, b) =>
+          String(a.name || "").localeCompare(String(b.name || ""))
+        );
+    });
     return obj;
   }, [items]);
 
@@ -90,9 +86,7 @@ const BuySelectRegalia = ({ setItems }) => {
     [itemsByCategory]
   );
 
-  // ----------------------------
   // Helpers
-  // ----------------------------
   const renderImage = (base64) =>
     base64 && typeof base64 === "string"
       ? `data:image/jpeg;base64,${base64}`
@@ -113,9 +107,8 @@ const BuySelectRegalia = ({ setItems }) => {
       category: product.category,
       description: product.description,
       pictureBase64: product.pictureBase64 ?? null,
-      // Cart expects hirePrice; map buy price into it so totals work
       hirePrice: Number(product.buyPrice) || 0,
-      buyPrice: product.buyPrice ?? null, // keep original if you need later
+      buyPrice: product.buyPrice ?? null,
       quantity: 1,
       options: product.options || [],
       selectedOptions: {},
@@ -132,7 +125,6 @@ const BuySelectRegalia = ({ setItems }) => {
       category: setItem.category || "Set",
       description: setItem.description,
       pictureBase64: setItem.pictureBase64 ?? null,
-      // Map buyPrice into hirePrice field for cart math
       hirePrice: Number(setItem.buyPrice) || 0,
       buyPrice: setItem.buyPrice ?? null,
       quantity: 1,
@@ -146,7 +138,6 @@ const BuySelectRegalia = ({ setItems }) => {
   return (
     <div className="regalia-shop">
       <div className="main-container">
-        {/* Tabs */}
         <div className="tabs-section">
           <div className="tabs-border">
             <nav className="tabs-nav">
@@ -172,6 +163,29 @@ const BuySelectRegalia = ({ setItems }) => {
 
         <div className="content-grid">
           <div className="main-content">
+            <div>
+              <ul>
+                <li>
+                  <p>
+                    Congratulations on your decision to purchase your own Massey
+                    University regalia.
+                  </p>
+                </li>
+                <li>
+                  <p>
+                    For more information and a detailed quote email us
+                    info@masseygowns.org.nz
+                  </p>
+                </li>
+                <li>
+                  <p>
+                    Please allow four weeks for manufacture - this may be longer
+                    during the graduation season due to the increase in demand
+                    around this time.
+                  </p>
+                </li>
+              </ul>
+            </div>
             {/* --------- Sets Tab --------- */}
             {activeTab === "sets" && (
               <div>
@@ -198,10 +212,14 @@ const BuySelectRegalia = ({ setItems }) => {
                           /> */}
                         </div>
                         <div className="product-info">
-                          <span className="item-category">{s.category || "Set"}</span>
+                          <span className="item-category">
+                            {s.category || "Set"}
+                          </span>
                           <h4 className="product-name">{s.name}</h4>
                           {s.description ? (
-                            <p className="product-description">{s.description}</p>
+                            <p className="product-description">
+                              {s.description}
+                            </p>
                           ) : (
                             <p className="product-description muted">&nbsp;</p>
                           )}
@@ -320,7 +338,6 @@ const BuySelectRegalia = ({ setItems }) => {
                 </div>
               </div>
             )}
-            {/* --------- /Individual Items Tab --------- */}
           </div>
         </div>
       </div>

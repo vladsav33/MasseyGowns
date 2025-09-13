@@ -269,11 +269,11 @@
   
   .hire-ribbon {
     position: absolute;
-    top: 15px;
-    right: -5px;
+    top: -5px;
+    right: -20px;
     background: #106a09;
     color: white;
-    padding: 6px 20px;
+    padding: 1px 10px;
     font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -283,11 +283,11 @@
   
   .buy-ribbon {
     position: absolute;
-    top: 15px;
-    right: -5px;
+    top: -5px;
+    right: -20px;
     background: #af2b13;
     color: white;
-    padding: 6px 20px;
+    padding: 1px 10px;
     font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
