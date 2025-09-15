@@ -21,34 +21,38 @@ function Navbar() {
               <h4>Casual Hire for Photos</h4>
               <ul>
                 <li>
-                  <a href="#">Certificate</a>
+                  <Link to="/hireregalia?degree=certificate">Certificate</Link>
                 </li>
                 <li>
-                  <a href="#">Diploma / Graduate Diploma / Post Grad Diploma</a>
+                  <Link to="/hireregalia?degree=diploma">
+                    Diploma / Graduate Diploma / Post Grad Diploma
+                  </Link>
                 </li>
                 <li>
-                  <a href="#">Bachelor Degree</a>
+                  <Link to="/hireregalia?degree=bachelor">Bachelor Degree</Link>
                 </li>
                 <li>
-                  <a href="#">Master Degree</a>
+                  <Link to="/hireregalia?degree=master">Master Degree</Link>
                 </li>
                 <li>
-                  <a href="#">PhD Degree</a>
+                  <Link to="/hireregalia?degree=phd">PhD Degree</Link>
                 </li>
                 <li>
-                  <a href="#">
+                  <Link to="/hireregalia?degree=doctoral">
                     Doctoral Degree (DEd, DBusAdmin, DClinPsych, DSW)
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#">Higher Doctoral Degree</a>
+                  <Link to="/hireregalia?degree=higher-doctoral">
+                    Higher Doctoral Degree
+                  </Link>
                 </li>
               </ul>
             </div>
           </section>
         </li>
         <li className="has-dropdown">
-          <a href="#">BUY REGALIA</a>
+          <Link to="/buyregalia">BUY REGALIA</Link>
           <section className="dropdown-panel">
             <div className="buyfull">
               <h4>Buy Full Regalia Sets</h4>

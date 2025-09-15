@@ -3,9 +3,10 @@ import Navbar from "../components/Navbar";
 import Ceremony from "../components/Ceremony";
 import FAQs from "../components/FAQs";
 import Contact from "../components/Contact";
-//import Footer from "../components/Footer";
 import Hireprocess from "../components/Hireprocess";
+import BuyDressSet from "../components/BuyDressSet";
 import "./HomePage.css";
+import { Link } from "react-router-dom";
 
 function HomePage() {
   return (
@@ -29,18 +30,20 @@ function HomePage() {
               <br /> and also for other institutions in the Central Districts.
             </p>
             <div className="options">
-              <a href="#" className="HireRegalia">
+              <Link to="/hireregalia" className="HireRegalia">
                 Hire Regalia
-              </a>
-              <a href="#" className="BuyRegalia">
+              </Link>
+
+              <Link to="/buyregalia" className="BuyRegalia">
                 Buy Regalia
-              </a>
+              </Link>
             </div>
           </div>
         </div>
       </div>
       <Ceremony />
       <Hireprocess />
+      <BuyDressSet />
       <FAQs />
       <Contact />
     </div>

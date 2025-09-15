@@ -1,0 +1,32 @@
+.BuyDressSetTitle {
+  margin-bottom: 20px;
+  margin-left: 130px;
+  font-weight: bolder;
+  font-size: 30px;
+  padding: 24px 0;
+}
+
+.BuyDressSetImg {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 70px;
+}
+
+.BuyDressSetImg div {
+  text-align: center;
+  width: 300px;
+}
+
+.BuyDressSetImg img {
+  width: 100%; /* 图片宽度跟随卡片 */
+  height: auto;
+  border-radius: 12px;
+  display: block;
+  margin: 0 auto; /* 防止图片有多余间隙 */
+}
+
+.BuyDressSetImg p {
+  font-size: larger;
+  font-weight: bolder;
+}

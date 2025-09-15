@@ -3,8 +3,9 @@ import HomePage from "./pages/HomePage";
 import { Routes, Route, Navigate } from "react-router-dom";
 import HireRegalia from "./pages/HireRegalia.jsx";
 import BuyRegalia from "./pages/BuyRegalia.jsx";
-import FAQPage from "./components/FAQPage";
+import FAQPage from "./pages/FAQPage";
 import TermsAndConditions from "./pages/TermsAndConditions.jsx";
+import HireprocessWrapper from "./components/HireprocessWrapper.jsx";
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
       <Route path="/hireregalia" element={<HireRegalia />} />
       <Route path="/buyregalia" element={<BuyRegalia />} />
       <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+      <Route path="/hireregalia/:degree" element={<HireprocessWrapper />} />
     </Routes>
   );
 }
