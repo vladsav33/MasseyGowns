@@ -32,15 +32,15 @@ function Navbar() {
                   return (
                 <li className={menuItem.children ? "has-dropdown" : ""}>
                   <h4>{menuItem.name}</h4>
-                  {menuItem.children && menuItem.children.length > 0 && (
-                    <ul className="drondown-list">
-                      {menuItem.children.map((child, j) => (
-                        <li key={j}>
-                          <a href="#">{child.name}</a>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                  {/*{menuItem.children && menuItem.children.length > 0 && (*/}
+                  {/*  <ul className="drondown-list">*/}
+                  {/*    {menuItem.children.map((child, j) => (*/}
+                  {/*      <li key={j}>*/}
+                  {/*        <a href="#">{child.name}</a>*/}
+                  {/*      </li>*/}
+                  {/*    ))}*/}
+                  {/*  </ul>*/}
+                  {/*)}*/}
                 </li>
               )})}
             </div>

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import "./CustomerDetails.css";
+import "./CustomerDetail.css";
 import { Link } from "react-router-dom";
 
-function CustomerDetails({ item, items = [], step, setStep, steps }) {
+function CustomerDetail({ item, items = [], step, setStep, steps }) {
   const [countries, setCountries] = useState([]);
   const [countriesError, setCountriesError] = useState(null);
   const [formData, setFormData] = useState({
@@ -37,6 +37,7 @@ function CustomerDetails({ item, items = [], step, setStep, steps }) {
       localStorage.setItem("step", newStep);
       e.preventDefault();
       console.log("Form submitted:", formData);
+      localStorage.setItem("customerDetails", JSON.stringify(formData));
     }
   };
 
@@ -114,7 +115,7 @@ function CustomerDetails({ item, items = [], step, setStep, steps }) {
   const cart =
     items.length > 0 ? items : JSON.parse(localStorage.getItem("cart") || "[]");
 
-  // Calculate total
+    // Calculate total
   const total = cart.reduce(
     (sum, item) => sum + (item.hirePrice || 0) * (item.quantity || 1),
     0
@@ -369,9 +370,6 @@ function CustomerDetails({ item, items = [], step, setStep, steps }) {
         {cart.length > 0 ? (
           <>
             {cart.map((item) => {
-              const isDonation = item.name === "Donation";
-              const isHire = !isDonation && item.buyPrice == null; // hire items have no buyPrice
-              const isBuy = !isDonation && item.buyPrice != null;
 
               return (
                 <div
@@ -380,12 +378,12 @@ function CustomerDetails({ item, items = [], step, setStep, steps }) {
                   style={{ position: "relative" }}
                 >
                   {/* Hire / Buy ribbon */}
-                  {/* {!isDonation &&
-                    (isHire ? (
-                      <div className="hire-ribbon">Hire</div>
+                  {item.name !== "Donation" &&
+                    (item.isHiring === true ? (
+                      <div className="hire-ribbon">H</div>
                     ) : (
-                      <div className="buy-ribbon">Buy</div>
-                    ))} */}
+                      <div className="buy-ribbon">B</div>
+                    ))}
 
                   <div className="summary-info">
                     <p className="summary-name">{item.name}</p>
@@ -428,4 +426,4 @@ function CustomerDetails({ item, items = [], step, setStep, steps }) {
   );
 }
 
-export default CustomerDetails;
+export default CustomerDetail;

@@ -16,43 +16,42 @@ function Navbar() {
           <Link to="/hireregalia" className="menu-link">
             HIRE REGALIA
           </Link>
+
           <section className="dropdown_panel">
             <div className="dropdown_casual">
               <h4>Casual Hire for Photos</h4>
               <ul>
                 <li>
-                  <Link to="/hireregalia?degree=certificate">Certificate</Link>
+                  <a href="#">Certificate</a>
                 </li>
                 <li>
-                  <Link to="/hireregalia?degree=diploma">
-                    Diploma / Graduate Diploma / Post Grad Diploma
-                  </Link>
+                  <a href="#">Diploma / Graduate Diploma / Post Grad Diploma</a>
                 </li>
                 <li>
-                  <Link to="/hireregalia?degree=bachelor">Bachelor Degree</Link>
+                  <a href="#">Bachelor Degree</a>
                 </li>
                 <li>
-                  <Link to="/hireregalia?degree=master">Master Degree</Link>
+                  <a href="#">Master Degree</a>
                 </li>
                 <li>
-                  <Link to="/hireregalia?degree=phd">PhD Degree</Link>
+                  <a href="#">PhD Degree</a>
                 </li>
                 <li>
-                  <Link to="/hireregalia?degree=doctoral">
+                  <a href="#">
                     Doctoral Degree (DEd, DBusAdmin, DClinPsych, DSW)
-                  </Link>
+                  </a>
                 </li>
                 <li>
-                  <Link to="/hireregalia?degree=higher-doctoral">
-                    Higher Doctoral Degree
-                  </Link>
+                  <a href="#">Higher Doctoral Degree</a>
                 </li>
               </ul>
             </div>
           </section>
         </li>
         <li className="has-dropdown">
-          <Link to="/buyregalia">BUY REGALIA</Link>
+          <Link to="/buyregalia" className="menu-link">
+            BUY REGALIA
+          </Link>
           <section className="dropdown-panel">
             <div className="buyfull">
               <h4>Buy Full Regalia Sets</h4>

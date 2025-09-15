@@ -6,7 +6,7 @@ import ProgressBar from "../components/ProgressBar";
 import ProgressButtons from "../components/ProgressButtons";
 import BuySelectRegalia from "../components/BuySelectRegalia";
 import CartList from "../components/CartList";
-import CustomerDetails from "../components/CustomerDetails";
+import CustomerDetail from "../components/CustomerDetail";
 import PaymentCompleted from "../components/PaymentCompleted";
 
 function BuyRegalia() {
@@ -79,7 +79,6 @@ function BuyRegalia() {
             {/* Show items base on selected ceremony and course */}
             {/* {!loading && ( */}
             <CartList
-              action={action}
               step={step}
               item={item}
               items={items}
@@ -93,7 +92,6 @@ function BuyRegalia() {
           <div>
             <h2 className="cart-label">Shopping Cart</h2>
             <CartList
-              action={action}
               step={step}
               item={item}
               items={items}
@@ -105,13 +103,13 @@ function BuyRegalia() {
 
         {step === 3 && (
           <div>
-            <CustomerDetails
+            <CustomerDetail
               item={item}
               quantity={item.quantity || 1}
               step={step}
               setStep={setStep}
               steps={steps}
-            ></CustomerDetails>
+            ></CustomerDetail>
           </div>
         )}
 
