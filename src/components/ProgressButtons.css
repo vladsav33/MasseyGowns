@@ -50,10 +50,14 @@
   box-shadow: none;
 }
 
-/* Specific button styling */
-.btn.prev {
-  font-weight: bold;
+.btn.next {
+  margin-left: auto; /* This pushes the next button to the right */
 }
+
+/* Specific button styling */
+/* .btn.prev {
+  font-weight: bold;
+} */
 
 /* Responsive design */
 @media (max-width: 768px) {

@@ -17,7 +17,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
     phoneNumber: "",
     mobile: "",
     purchaseOrder: "",
-    paymentMethod: "creditCard",
+    paymentMethod: "1",
     termsAccepted: false,
     message: "",
   });
@@ -36,7 +36,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       setStep(newStep);
       localStorage.setItem("step", newStep);
       e.preventDefault();
-      console.log("Form submitted:", formData);
+      // console.log("Form submitted:", formData);
       localStorage.setItem("customerDetails", JSON.stringify(formData));
     }
   };
@@ -302,8 +302,8 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
                 <input
                   type="radio"
                   name="paymentMethod"
-                  value="creditCard"
-                  checked={formData.paymentMethod === "creditCard"}
+                  value="1"
+                  checked={formData.paymentMethod === "1"}
                   onChange={handleInputChange}
                   className="radio-input"
                 />
@@ -313,8 +313,8 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
                 <input
                   type="radio"
                   name="paymentMethod"
-                  value="account2Account"
-                  checked={formData.paymentMethod === "account2Account"}
+                  value="2"
+                  checked={formData.paymentMethod === "2"}
                   onChange={handleInputChange}
                   className="radio-input"
                 />
@@ -324,14 +324,14 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
                 <input
                   type="radio"
                   name="paymentMethod"
-                  value="purchaseOrder"
-                  checked={formData.paymentMethod === "purchaseOrder"}
+                  value="3"
+                  checked={formData.paymentMethod === "3"}
                   onChange={handleInputChange}
                   className="radio-input"
                 />
                 <span>Purchase Order (University Staff only)</span>
               </label>
-              {formData.paymentMethod === "purchaseOrder" && (
+              {formData.paymentMethod === "3" && (
                 <input
                   type="text"
                   name="purchaseOrder"

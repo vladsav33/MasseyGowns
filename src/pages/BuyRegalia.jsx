@@ -8,13 +8,22 @@ import BuySelectRegalia from "../components/BuySelectRegalia";
 import CartList from "../components/CartList";
 import CustomerDetail from "../components/CustomerDetail";
 import PaymentCompleted from "../components/PaymentCompleted";
+import { useLocation } from 'react-router-dom';
 
 function BuyRegalia() {
   const action = 1; // Buy
 
+  // const [step, setStep] = useState(() => {
+  //   return Number(localStorage.getItem("step")) || 1;
+  // });
+   const location = useLocation();
+
   const [step, setStep] = useState(() => {
-    return Number(localStorage.getItem("step")) || 1;
-  });
+      if (location.state?.step) {
+        return Number(location.state.step);
+      }
+      return Number(localStorage.getItem("step")) || 1;
+    });
 
   const [item, setItem] = useState(() => {
     const saved = localStorage.getItem("item");
