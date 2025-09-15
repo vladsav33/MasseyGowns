@@ -1,5 +1,19 @@
-// src/components/Hireprocess.jsx
 import * as React from "react";
+import "./Hireprocess.css";
+
+export default function Hireprocess() {
+  return (
+    <section>
+      <h2 className="HireDressSetTitle">Quick Hiring Process</h2>
+      <div className="HireDressSetImg">
+        <img src="/process.png" alt="hire process" />
+      </div>
+    </section>
+  );
+}
+{
+  /*
+
 import PropTypes from "prop-types";
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
@@ -17,20 +31,13 @@ const ChevronStep = styled("div")(({ theme }) => ({
   justifyContent: "center",
   lineHeight: 1.2,
   fontSize: 14,
-  // 斜角/箭头
+
   clipPath:
     "polygon(0% 0%, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0% 100%, 12px 50%)",
   overflow: "hidden",
   userSelect: "none",
 }));
 
-/**
- * Quick Hiring Process
- * props:
- * - active: number  当前高亮步骤（从 0 开始；不传则不高亮）
- * - title: string   左侧标题
- * - steps: string[] 步骤文案；可用 \n 手动换行
- */
 export default function Hireprocess({
   active = -1,
   title = "Quick Hiring Process",
@@ -49,10 +56,9 @@ export default function Hireprocess({
           display: "flex",
           alignItems: "center",
           gap: 2,
-          flexWrap: { xs: "wrap", sm: "nowrap" }, // 小屏可换行
+          flexWrap: { xs: "wrap", sm: "nowrap" },
         }}
       >
-        {/* 左侧白边标题 */}
         <Box
           sx={{
             border: "2px solid #fff",
@@ -68,7 +74,6 @@ export default function Hireprocess({
           {title}
         </Box>
 
-        {/* 右侧步骤条 */}
         <Box
           role="list"
           aria-label="Hiring process steps"
@@ -99,9 +104,11 @@ export default function Hireprocess({
   );
 }
 
-// ✅ PropTypes 校验（解决 ESLint: react/prop-types）
 Hireprocess.propTypes = {
   active: PropTypes.number,
   title: PropTypes.string,
   steps: PropTypes.arrayOf(PropTypes.string),
 };
+
+*/
+}

@@ -19,11 +19,10 @@
 }
 
 .BuyDressSetImg img {
-  width: 100%; /* 图片宽度跟随卡片 */
-  height: auto;
+  width: 100%;
   border-radius: 12px;
   display: block;
-  margin: 0 auto; /* 防止图片有多余间隙 */
+  margin: 0 auto;
 }
 
 .BuyDressSetImg p {
