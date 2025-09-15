@@ -3,8 +3,8 @@ import Navbar from "../components/Navbar";
 import Ceremony from "../components/Ceremony";
 import FAQs from "../components/FAQs";
 import Contact from "../components/Contact";
-//import Footer from "../components/Footer";
 import Hireprocess from "../components/Hireprocess";
+import BuyDressSet from "../components/BuyDressSet";
 import "./HomePage.css";
 import { Link } from "react-router-dom";
 
@@ -33,6 +33,7 @@ function HomePage() {
               <Link to="/hireregalia" className="HireRegalia">
                 Hire Regalia
               </Link>
+
               <Link to="/buyregalia" className="BuyRegalia">
                 Buy Regalia
               </Link>
@@ -42,6 +43,7 @@ function HomePage() {
       </div>
       <Ceremony />
       <Hireprocess />
+      <BuyDressSet />
       <FAQs />
       <Contact />
     </div>

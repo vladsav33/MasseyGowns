@@ -54,10 +54,9 @@
   padding-right: 10px;
 }
 
-/* 让 H2 能承载一个在它下面的蓝色装饰 */
 .faqs .h2 {
   position: relative;
-  display: inline-block; /* 已有，但确保一下 */
+  display: inline-block;
   z-index: 0;
 }
 .faqs .h2 {
