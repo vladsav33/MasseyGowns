@@ -5,9 +5,10 @@ import ProgressBar from "../components/ProgressBar";
 import ProgressButtons from "../components/ProgressButtons";
 import CeremonyCourseSelection from "../components/CeremonyCourseSelection";
 import CartList from "../components/CartList";
-import CustomerDetail from "../components/customerDetail";
+import CustomerDetail from "../components/CustomerDetail";
 import Contact from "../components/Contact";
 import PaymentCompleted from "../components/PaymentCompleted";
+import { useLocation } from 'react-router-dom';
 import {
   getCoursesByCeremonyId,
   getCeremonies,
@@ -18,9 +19,18 @@ function HireRegalia() {
   const action = 0; // Hire
 
   // ---- STATES ----
-  const [step, setStep] = useState(
-    () => Number(localStorage.getItem("step")) || 1
-  );
+  const location = useLocation();
+  
+  // Initialize step from location.state if available, otherwise from localStorage or default to 1
+  const [step, setStep] = useState(() => {
+    if (location.state?.step) {
+      return Number(location.state.step);
+    }
+    return Number(localStorage.getItem("step")) || 1;
+  });
+  // const [step, setStep] = useState(() => {
+  //     return Number(localStorage.getItem("step")) || 1;
+  //   });
 
   const [ceremonies, setCeremonies] = useState([]);
   const [selectedCeremonyId, setSelectedCeremonyId] = useState(() => {
@@ -55,6 +65,13 @@ function HireRegalia() {
     "Customer Details",
     "Payment Completed",
   ];
+
+  // Handle location.state changes (if navigating from another page with step info)
+  // useEffect(() => {
+  //   if (location.state?.step && location.state.step !== step) {
+  //     setStep(Number(location.state.step));
+  //   }
+  // }, [location.state, step]);
 
   // ---- PERSIST TO LOCALSTORAGE ----
   useEffect(() => localStorage.setItem("step", step), [step]);
@@ -114,7 +131,6 @@ function HireRegalia() {
     fetchCourses();
   }, [selectedCeremonyId]);
 
-  // Fetch Items only if courseChanged is true
   // Fetch Items only if courseChanged is true
   useEffect(() => {
     if (!selectedCourseId) return;

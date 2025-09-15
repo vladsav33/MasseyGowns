@@ -92,8 +92,10 @@ function CartList({ step, items, setItems }) {
       return item;
     });
 
-    setItems(updatedItems);
-    localStorage.setItem("cart", JSON.stringify(updatedItems)); // persist to localStorage
+    setItems(updatedItems, grandTotal);
+    localStorage.setItem("cart", JSON.stringify(updatedItems, grandTotal)); // persist to localStorage
+    console.log(localStorage.getItem("cart"), grandTotal);
+    
   };
 
   // --- Price utilities ---

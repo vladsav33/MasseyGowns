@@ -6,14 +6,16 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-left">
-        <img src="/logo.jpg" alt="MasseyGowns" className="logo" />
+        <Link to="/">
+          <img src="/logo.jpg" alt="MasseyGowns" className="logo" />
+        </Link>
       </div>
       <ul className="navbar-menu">
-        <li>
+        {/* <li>
           <Link to="/">HOME</Link>
-        </li>
+        </li> */}
         <li className="has-dropdown">
-          <Link to="/hireregalia" className="menu-link">
+          <Link to="/hireregalia" state={{step:1}} className="menu-link" >
             HIRE REGALIA
           </Link>
 
@@ -49,7 +51,7 @@ function Navbar() {
           {/*</section>*/}
         </li>
         <li className="has-dropdown">
-          <Link to="/buyregalia" className="menu-link">
+          <Link to="/buyregalia" className="menu-link" state={{step:1}}>
             BUY REGALIA
           </Link>
           {/*<section className="dropdown-panel">*/}

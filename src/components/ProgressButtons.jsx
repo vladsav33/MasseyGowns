@@ -19,6 +19,12 @@ function ProgressButtons({
       const newStep = step - 1;
       setStep(newStep);
       localStorage.setItem("step", newStep);
+
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth'
+      });
     }
   };
 
@@ -27,6 +33,12 @@ function ProgressButtons({
       const newStep = step + 1;
       setStep(newStep);
       localStorage.setItem("step", newStep);
+
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth'
+      });
     }
   };
 
@@ -34,50 +46,65 @@ function ProgressButtons({
     <>
       {action === 0 ? (
         <div className="btns">
-          <button
-            className={`btn ${step === 1 ? "disabled" : ""} prev`}
-            onClick={handlePrev}
-            disabled={step === 1}
-          >
-            &lt;
-          </button>
+          {/* Prev Button (only if step > 1) */}
+          {step > 1 && (
+            <button
+              className="btn prev"
+              onClick={handlePrev}
+              disabled={step === 1}
+            >
+              &lt;
+            </button>
+          )}
 
-          <button
-            className={`btn ${
-              step === steps.length ||
-              (!selectedCeremonyId && !selectedCourseId) || step===3
-                ? "disabled"
-                : ""
-            }`}
-            onClick={
-              (!selectedCeremonyId && !selectedCourseId) || step===3 ? undefined : handleNext
-            }
-            disabled={
-              step === steps.length ||
-              (!selectedCeremonyId && !selectedCourseId)
-              || step===3
-            }
-          >
-            &gt;
-          </button>
+          {/* Next Button */}
+          {step < 3 && (
+            <button
+              className={`btn next ${
+                step === steps.length ||
+                !selectedCeremonyId ||
+                !selectedCourseId ||
+                step === 3
+                  ? "disabled"
+                  : ""
+              }`}
+              onClick={handleNext}
+              disabled={
+                step === steps.length ||
+                !selectedCeremonyId ||
+                !selectedCourseId ||
+                step === 3
+              }
+            >
+              &gt;
+            </button>
+          )}
         </div>
       ) : (
         <div className="btns">
-          <button
-            className={`btn ${step === 1 ? "disabled" : ""} prev`}
-            onClick={handlePrev}
-            disabled={step === 1}
-          >
-            &lt;
-          </button>
+          {/* Prev */}
+          {step > 1 && (
+            <button
+              className="btn prev"
+              onClick={handlePrev}
+              disabled={step === 1}
+            >
+              &lt;
+            </button>
+          )}
 
-          <button
-            className={`btn ${step === steps.length || step===3 ? "disabled" : ""}`}
-            onClick={step===3 ? undefined : handleNext}
-            disabled={step === steps.length && step===3}
-          >
-            &gt;
-          </button>
+          {/* Next */}
+          {step < 3 && (
+            <button
+              className={`btn next${ 
+                step === steps.length || step === 3 ? "disabled" : ""
+              }`}
+              onClick={handleNext}
+              disabled={step === steps.length || step === 3}
+            >
+              &gt;
+            </button>
+          )}
         </div>
       )}
     </>

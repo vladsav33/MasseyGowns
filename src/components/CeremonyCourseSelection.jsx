@@ -27,7 +27,6 @@ function CeremonyCourseSelection({
   const handleCeremonyChange = (e) => {
     const val = e.target.value;
     const id = val ? Number(val) : null;
-    // update parent state + call parent handler (this is a user action)
     setCeremony(id);
     onCeremonySelect(id);
     if (id !== null) localStorage.setItem("selectedCeremonyId", String(id));
@@ -77,9 +76,9 @@ function CeremonyCourseSelection({
           )}
 
           {selectedCeremonyObj.id === 1 && (
-            <p className="info-text" style={{ textAlign: "left" }}>
+            <span className="info-text" style={{ textAlign: "left" }}>
               <strong>{selectedCeremonyObj.name}</strong>
-              <div class="order-info">
+              <div className="order-info">
                 <h2>DUE DATE FOR ORDERS: {selectedCeremonyObj.dueDate}</h2>
                 <p>
                   <em>
@@ -99,7 +98,7 @@ function CeremonyCourseSelection({
                   <li>Have your credit card ready</li>
                   <li>
                     Have your full height and head measurement ready
-                    <span class="hint">
+                    <span className="hint">
                       (measure your head just above your eyebrows, approximately
                       57–59cm)
                     </span>
@@ -120,7 +119,7 @@ function CeremonyCourseSelection({
                   </a>
                 </p>
               </div>
-            </p>
+            </span>
           )}
         </>
       )}

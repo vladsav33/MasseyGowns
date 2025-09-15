@@ -117,9 +117,9 @@
   font-size: 17px;
   text-decoration: none;
 }
-.dropdown_casual a:hover {
+/* .dropdown_casual a:hover {
   text-decoration: underline;
-}
+} */
 
 .dropdown-panel {
   min-width: 520px;
@@ -149,6 +149,17 @@
   text-decoration: none;
   font-size: 17px;
 }
-.drondown-list a:hover {
+/* .drondown-list a:hover {
   text-decoration: underline;
+} */
+.navbar-menu a.active,
+.navbar-menu .menu-link.active {
+  color: Green;
+  font-weight: bold;
+  border-bottom: 2px solid white;
+  /* or background-color: #your-highlight-color; for background highlight */
+}
+
+.has-dropdown .menu-link.active {
+  background-color: rgba(your-color, 0.1);
 }

@@ -8,6 +8,8 @@ const BuySelectRegalia = ({ setItems }) => {
   const [activeTab, setActiveTab] = useState("sets"); // show sets by default
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   // individual items
   const [items, setItemsLocal] = useState([]);
@@ -164,7 +166,7 @@ const BuySelectRegalia = ({ setItems }) => {
         <div className="content-grid">
           <div className="main-content">
             <div>
-              <ul>
+              <ul style={{ listStyleType: "disc", paddingLeft: "1.5rem" }}>
                 <li>
                   <p>
                     Congratulations on your decision to purchase your own Massey
@@ -173,8 +175,10 @@ const BuySelectRegalia = ({ setItems }) => {
                 </li>
                 <li>
                   <p>
-                    For more information and a detailed quote email us
-                    info@masseygowns.org.nz
+                    For more information and a detailed quote email us{" "}
+                    <a href="mailto:info@masseygowns.org.nz?subject=Quote Request">
+                      info@masseygowns.org.nz
+                    </a>
                   </p>
                 </li>
                 <li>
@@ -186,6 +190,7 @@ const BuySelectRegalia = ({ setItems }) => {
                 </li>
               </ul>
             </div>
+            <br />
             {/* --------- Sets Tab --------- */}
             {activeTab === "sets" && (
               <div>
@@ -215,14 +220,21 @@ const BuySelectRegalia = ({ setItems }) => {
                           <span className="item-category">
                             {s.category || "Set"}
                           </span>
-                          <h4 className="product-name">{s.name}</h4>
-                          {s.description ? (
+                          <h4
+                            className="product-name item-title clickable"
+                            onClick={() => setIsDialogOpen(true)}
+                            onMouseEnter={() => setShowTooltip(true)}
+                            onMouseLeave={() => setShowTooltip(false)}
+                          >
+                            {s.name}
+                          </h4>
+                          {/* {s.description ? (
                             <p className="product-description">
                               {s.description}
                             </p>
                           ) : (
                             <p className="product-description muted">&nbsp;</p>
-                          )}
+                          )} */}
                           <div className="product-footer">
                             <span className="product-price">
                               ${Number(s.buyPrice ?? 0).toFixed(2)}
@@ -308,16 +320,14 @@ const BuySelectRegalia = ({ setItems }) => {
                               <span className="item-category">
                                 {product.category}
                               </span>
-                              <h4 className="product-name">{product.name}</h4>
-                              {product.description ? (
-                                <p className="product-description">
-                                  {product.description}
-                                </p>
-                              ) : (
-                                <p className="product-description muted">
-                                  &nbsp;
-                                </p>
-                              )}
+                              <h4
+                                className="product-name item-title clickable"
+                                onClick={() => setIsDialogOpen(true)}
+                                onMouseEnter={() => setShowTooltip(true)}
+                                onMouseLeave={() => setShowTooltip(false)}
+                              >
+                                {product.name}
+                              </h4>
                               <div className="product-footer">
                                 <span className="product-price">
                                   ${Number(product.buyPrice).toFixed(2)}
@@ -341,6 +351,26 @@ const BuySelectRegalia = ({ setItems }) => {
           </div>
         </div>
       </div>
+      {/* Dialog Box */}
+      {isDialogOpen && (
+        <div className="dialog-overlay" onClick={() => setIsDialogOpen(false)}>
+          <div className="dialog-box" onClick={(e) => e.stopPropagation()}>
+            <div className="dialog-header">
+              <button
+                className="close-btn"
+                onClick={() => setIsDialogOpen(false)}
+                aria-label="Close dialog"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="dialog-content">
+              <h3>Name</h3>
+              <p>Description</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
