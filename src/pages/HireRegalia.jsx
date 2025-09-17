@@ -28,9 +28,6 @@ function HireRegalia() {
     }
     return Number(localStorage.getItem("step")) || 1;
   });
-  // const [step, setStep] = useState(() => {
-  //     return Number(localStorage.getItem("step")) || 1;
-  //   });
 
   const [ceremonies, setCeremonies] = useState([]);
   const [selectedCeremonyId, setSelectedCeremonyId] = useState(() => {
@@ -66,12 +63,36 @@ function HireRegalia() {
     "Payment Completed",
   ];
 
-  // Handle location.state changes (if navigating from another page with step info)
-  // useEffect(() => {
-  //   if (location.state?.step && location.state.step !== step) {
-  //     setStep(Number(location.state.step));
-  //   }
-  // }, [location.state, step]);
+  // ---- VALIDATION FUNCTIONS ----
+  
+  // Check if all items have their required options selected
+  const areAllOptionsSelected = () => {
+    if (!items || items.length === 0) return false;
+    
+    return items.every(item => {
+      // Skip validation for donation items
+      if (item.isDonation) return true;
+      
+      // If item has no options, it's valid
+      if (!item.options || item.options.length === 0) return true;
+      
+      // Check if all options have selected values
+      return item.options.every(option => {
+        const selectedValue = item.selectedOptions?.[option.label];
+        return selectedValue && selectedValue.trim() !== "";
+      });
+    });
+  };
+
+  // Check if basic requirements are met (ceremony and course selected)
+  const areBasicRequirementsMet = () => {
+    return selectedCeremonyId && selectedCourseId;
+  };
+
+  // Combined validation for step 1
+  const canProceedFromStep1 = () => {
+    return areBasicRequirementsMet() && areAllOptionsSelected() && items.length > 0;
+  };
 
   // ---- PERSIST TO LOCALSTORAGE ----
   useEffect(() => localStorage.setItem("step", step), [step]);
@@ -165,7 +186,6 @@ function HireRegalia() {
     fetchItems();
   }, [selectedCourseId, courseChanged]);
 
-  // ---- RENDER ----
   return (
     <div className="content">
       <Navbar />
@@ -177,6 +197,8 @@ function HireRegalia() {
         steps={steps}
         selectedCeremonyId={selectedCeremonyId}
         selectedCourseId={selectedCourseId}
+        canProceedFromStep1={canProceedFromStep1}
+        items={items}
       />
 
       {step === 1 && (
@@ -226,6 +248,21 @@ function HireRegalia() {
               setItems={setItems}
             />
           )}
+
+          {/* Show validation message if requirements not met */}
+          {!canProceedFromStep1() && items.length > 0 && (
+            <div style={{
+              padding: "10px",
+              backgroundColor: "#fef3cd",
+              color: "#856404",
+              borderRadius: "4px",
+              margin: "10px 0",
+              fontSize: "14px"
+            }}>
+              {!areBasicRequirementsMet() && "Please select ceremony and course. "}
+              {!areAllOptionsSelected() && "Please select all required options for your items before proceeding."}
+            </div>
+          )}
         </>
       )}
 
@@ -265,6 +302,8 @@ function HireRegalia() {
         steps={steps}
         selectedCeremonyId={selectedCeremonyId}
         selectedCourseId={selectedCourseId}
+        canProceedFromStep1={canProceedFromStep1}
+        items={items}
       />
 
       <Contact />

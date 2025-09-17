@@ -8,6 +8,7 @@ function ProgressButtons({
   selectedCeremonyId,
   selectedCourseId,
   action,
+  canProceedFromStep1
 }) {
   // Save step into localStorage whenever it changes
   useEffect(() => {
@@ -44,6 +45,7 @@ function ProgressButtons({
 
   return (
     <>
+    {/* Hire Regalia */}
       {action === 0 ? (
         <div className="btns">
           {/* Prev Button (only if step > 1) */}
@@ -64,7 +66,8 @@ function ProgressButtons({
                 step === steps.length ||
                 !selectedCeremonyId ||
                 !selectedCourseId ||
-                step === 3
+                step === 3 ||
+                !canProceedFromStep1()
                   ? "disabled"
                   : ""
               }`}
@@ -73,7 +76,8 @@ function ProgressButtons({
                 step === steps.length ||
                 !selectedCeremonyId ||
                 !selectedCourseId ||
-                step === 3
+                step === 3 ||
+                !canProceedFromStep1()
               }
             >
               &gt;
@@ -82,6 +86,7 @@ function ProgressButtons({
         </div>
       ) : (
         <div className="btns">
+          {/* Buy Regalia */}
           {/* Prev */}
           {step > 1 && (
             <button
