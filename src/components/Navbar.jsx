@@ -75,8 +75,11 @@ function Navbar() {
   const getNumericPrice = (priceString) =>
     parseFloat(String(priceString || 0).replace("$", "")) || 0;
 
-  const totalItems = cartItems.reduce((acc, item) => acc + (item.quantity || 1), 0);
-  
+  const totalItems = cartItems.reduce(
+    (acc, item) => acc + (item.quantity || 1),
+    0
+  );
+
   const totalPrice = cartItems.reduce(
     (acc, item) => acc + getNumericPrice(item.hirePrice) * (item.quantity || 1),
     0
@@ -101,9 +104,9 @@ function Navbar() {
   };
 
   const removeFromCart = (itemId) => {
-    const updatedItems = cartItems.filter(item => item.id !== itemId);
+    const updatedItems = cartItems.filter((item) => item.id !== itemId);
     setCartItems(updatedItems);
-    
+
     if (updatedItems.length > 0) {
       localStorage.setItem("cart", JSON.stringify(updatedItems));
     } else {
@@ -123,20 +126,22 @@ function Navbar() {
       </div>
       <ul className="navbar-menu">
         <li className="has-dropdown">
-          <Link to="/hireregalia" state={{step:1}} className={`menu-link ${isActive("/hireregalia") ? "active" : ""}`} >
+          <Link to="/hireregalia" state={{ step: 1 }} className="menu-link">
             HIRE REGALIA
           </Link>
         </li>
         <li className="has-dropdown">
-          <Link to="/buyregalia" className={`menu-link ${isActive("/buyregalia") ? "active" : ""}`} state={{step:1}}>
+          <Link to="/buyregalia" className="menu-link" state={{ step: 1 }}>
             BUY REGALIA
           </Link>
         </li>
         <li>
-          <Link to="/faqs" className={isActive("/faqs") ? "active" : ""}>FAQs</Link>
+          <Link to="/faqs" className={isActive("/faqs") ? "active" : ""}>
+            FAQs
+          </Link>
         </li>
         <li>
-          <a href="#">Contact Us</a>
+          <Link to="/contactus">Contact Us</Link>
         </li>
       </ul>
       <div className="navbar-icons">
@@ -145,14 +150,14 @@ function Navbar() {
             <i className="fa fa-shopping-bag"></i>
             {totalItems > 0 && <span className="cart-badge">{totalItems}</span>}
           </div>
-          
+
           {/* Cart Dropdown */}
           {isCartOpen && (
             <div className="cart-dropdown">
               <div className="cart-dropdown-header">
                 <h3>Shopping Cart</h3>
               </div>
-              
+
               <div className="cart-dropdown-content">
                 {cartItems.length > 0 ? (
                   <>
@@ -162,24 +167,39 @@ function Navbar() {
                           <div className="cart-item-info">
                             <div className="cart-item-name">{item.name}</div>
                             <div className="cart-item-details">
-                              <span className="cart-item-category">{item.category}</span>
-                              <span className="cart-item-quantity">Qty: {item.quantity || 1}</span>
+                              <span className="cart-item-category">
+                                {item.category}
+                              </span>
+                              <span className="cart-item-quantity">
+                                Qty: {item.quantity || 1}
+                              </span>
                             </div>
                             {/* Show selected options if available */}
-                            {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && (
-                              <div className="cart-item-options">
-                                {Object.entries(item.selectedOptions).map(([label, value]) => (
-                                  <div key={label} className="cart-option">
-                                    <span className="option-label">{label}:</span>
-                                    <span className="option-value">{value}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                            {item.selectedOptions &&
+                              Object.keys(item.selectedOptions).length > 0 && (
+                                <div className="cart-item-options">
+                                  {Object.entries(item.selectedOptions).map(
+                                    ([label, value]) => (
+                                      <div key={label} className="cart-option">
+                                        <span className="option-label">
+                                          {label}:
+                                        </span>
+                                        <span className="option-value">
+                                          {value}
+                                        </span>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              )}
                           </div>
                           <div className="cart-item-actions">
                             <div className="cart-item-price">
-                              ${(getNumericPrice(item.hirePrice) * (item.quantity || 1)).toFixed(2)}
+                              $
+                              {(
+                                getNumericPrice(item.hirePrice) *
+                                (item.quantity || 1)
+                              ).toFixed(2)}
                             </div>
                             <button
                               className="remove-item-btn"
@@ -192,12 +212,15 @@ function Navbar() {
                         </div>
                       ))}
                     </div>
-                    
+
                     <div className="cart-dropdown-footer">
                       <div className="cart-total">
                         <strong>Total: ${totalPrice.toFixed(2)}</strong>
                       </div>
-                      <button className="view-cart-btn" onClick={handleViewCart}>
+                      <button
+                        className="view-cart-btn"
+                        onClick={handleViewCart}
+                      >
                         View Cart
                       </button>
                     </div>
