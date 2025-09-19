@@ -151,7 +151,7 @@ const BuySelectRegalia = ({ setItems }) => {
                   activeTab === "sets" ? "tab-active" : "tab-inactive"
                 }`}
               >
-                Complete Degree Sets
+                Complete Sets
               </button>
               <button
                 onClick={() => setActiveTab("individual")}
@@ -171,13 +171,13 @@ const BuySelectRegalia = ({ setItems }) => {
               <ul style={{ listStyleType: "disc", paddingLeft: "1.5rem" }}>
                 <li>
                   <p>
-                    Congratulations on your decision to purchase your own Massey
+                    Thank you for your order to purchase your own Massey
                     University regalia.
                   </p>
                 </li>
                 <li>
                   <p>
-                    For more information and a detailed quote email us{" "}
+                    For more information email us{" "}
                     <a href="mailto:info@masseygowns.org.nz?subject=Quote Request">
                       info@masseygowns.org.nz
                     </a>
@@ -186,7 +186,7 @@ const BuySelectRegalia = ({ setItems }) => {
                 <li>
                   <p>
                     Please allow four weeks for manufacture - this may be longer
-                    during the graduation season due to the increase in demand
+                    during the graduation season due to the increase in demand on our supplies
                     around this time.
                   </p>
                 </li>
@@ -196,9 +196,9 @@ const BuySelectRegalia = ({ setItems }) => {
             {/* --------- Sets Tab --------- */}
             {activeTab === "sets" && (
               <div>
-                <h2 className="section-title">Complete Degree Sets</h2>
+                <h2 className="section-title">Complete Sets</h2>
 
-                {loadingSets && <p className="muted">Loading degree sets…</p>}
+                {loadingSets && <p className="muted">Loading sets…</p>}
                 {errorSets && <p className="error-text">{errorSets}</p>}
 
                 {!loadingSets && !errorSets && sets.length === 0 && (
@@ -262,7 +262,7 @@ const BuySelectRegalia = ({ setItems }) => {
                 <h2 className="section-title">Shop by Category</h2>
 
                 <div className="category-select-row">
-                  <label className="category-label" htmlFor="categorySelect">
+                  <label className="item-category" htmlFor="categorySelect">
                     Category:
                   </label>
                   <select
