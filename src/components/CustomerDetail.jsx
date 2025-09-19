@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./CustomerDetail.css";
 import { Link } from "react-router-dom";
+import {submitOrderDetails, submitCustomerDetails} from "./../services/HireBuyRegaliaService.js"
 
 function CustomerDetail({ item, items = [], step, setStep, steps }) {
   const [countries, setCountries] = useState([]);
@@ -14,14 +15,14 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
     postcode: "",
     country: "",
     studentId: "",
-    phoneNumber: "",
+    phone: "",
     mobile: "",
     purchaseOrder: "",
     paymentMethod: "1",
     termsAccepted: false,
     message: "",
   });
-
+  
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -29,8 +30,8 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       [name]: type === "checkbox" ? checked : value,
     }));
   };
-
-  const handleSubmit = (e) => {
+  
+  const handleSubmit = async (e) => {
     if (step < steps.length) {
       const newStep = step + 1;
       setStep(newStep);
@@ -38,6 +39,19 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       e.preventDefault();
       // console.log("Form submitted:", formData);
       localStorage.setItem("customerDetails", JSON.stringify(formData));
+      try {
+        // Wait for both submissions to complete
+        const cart = localStorage.getItem("cart");
+        await Promise.all([
+          // submitOrderDetails(cart),
+          submitCustomerDetails(formData)
+        ]);
+        
+        console.log('Both submissions completed successfully');
+      } catch (error) {
+        console.error('Error during submission:', error);
+        // Handle error (show user message, etc.)
+      }
     }
   };
 
@@ -254,8 +268,8 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
           <div className="form-row">
             <input
               type="tel"
-              name="phoneNumber"
-              value={formData.phoneNumber}
+              name="phone"
+              value={formData.phone}
               onChange={handleInputChange}
               placeholder="Phone Number"
               className="form-input"

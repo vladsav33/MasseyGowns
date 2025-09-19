@@ -117,6 +117,7 @@ const BuySelectRegalia = ({ setItems }) => {
       type: "individual",
     };
     pushToCart(newItem);
+    window.dispatchEvent(new Event("cartUpdated"));
   };
 
   // add to cart for a set (buy flow)
@@ -135,6 +136,7 @@ const BuySelectRegalia = ({ setItems }) => {
       type: "set",
     };
     pushToCart(newItem);
+    window.dispatchEvent(new Event("cartUpdated"));
   };
 
   return (

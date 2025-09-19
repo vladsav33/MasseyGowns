@@ -30,25 +30,31 @@ function Navbar() {
       }
     };
 
-    // Load initially
     loadCartItems();
+
+    const safeLoad = () => {
+      if (typeof startTransition === "function") {
+        startTransition(() => loadCartItems());
+      } else {
+        setTimeout(loadCartItems, 0);
+      }
+    };
+
+    safeLoad();
 
     // Listen for localStorage changes (when cart is updated in other components)
     const handleStorageChange = (e) => {
-      if (e.key === "cart") {
-        loadCartItems();
-      }
+      if (e.key === "cart") safeLoad();
     };
 
     // Listen for custom cart update events
     const handleCartUpdate = () => {
-      loadCartItems();
+      safeLoad();
     };
 
     window.addEventListener("storage", handleStorageChange);
     window.addEventListener("cartUpdated", handleCartUpdate);
 
-    // Also check for cart changes on location change
     loadCartItems();
 
     return () => {
@@ -98,8 +104,8 @@ function Navbar() {
       // If already on buy page, go to step 2
       navigate("/buyregalia", { state: { step: 2 } });
     } else {
-      // Otherwise, go to hire page step 2 by default
-      navigate("/hireregalia", { state: { step: 2 } });
+      // Otherwise, go to buy page step 2 by default
+      navigate("/buyregalia", { state: { step: 2 } });
     }
   };
 
@@ -126,12 +132,12 @@ function Navbar() {
       </div>
       <ul className="navbar-menu">
         <li className="has-dropdown">
-          <Link to="/hireregalia" state={{ step: 1 }} className="menu-link">
+          <Link to="/hireregalia" state={{ step: 1 }} className={`menu-link ${isActive("/hireregalia") ? "active" : ""}`}>
             HIRE REGALIA
           </Link>
         </li>
         <li className="has-dropdown">
-          <Link to="/buyregalia" className="menu-link" state={{ step: 1 }}>
+          <Link to="/buyregalia" state={{ step: 1 }} className={`menu-link ${isActive("/buyregalia") ? "active" : ""}`}>
             BUY REGALIA
           </Link>
         </li>

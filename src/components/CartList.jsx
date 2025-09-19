@@ -6,7 +6,7 @@ function CartList({ step, items, setItems }) {
   const [donationQuantity, setDonationQuantity] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Centralized cart updater (single source of truth)
+  // Centralized cart updater
   const updateCart = (next) => {
     setItems((prev) => {
       const updated = typeof next === "function" ? next(prev) : next;
@@ -15,6 +15,7 @@ function CartList({ step, items, setItems }) {
       } else {
         localStorage.removeItem("cart");
       }
+      window.dispatchEvent(new Event("cartUpdated"));
       return updated;
     });
   };
@@ -94,7 +95,7 @@ function CartList({ step, items, setItems }) {
 
     setItems(updatedItems, grandTotal);
     localStorage.setItem("cart", JSON.stringify(updatedItems, grandTotal)); // persist to localStorage
-    console.log(localStorage.getItem("cart"), grandTotal);
+    // console.log(localStorage.getItem("cart"), grandTotal);
     
   };
 

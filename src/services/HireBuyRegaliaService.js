@@ -51,3 +51,36 @@ export const getItemSets = async () => {
     return [];
   }
 };
+
+export const submitOrderDetails = async (items) => {
+  try {
+    const orderPayload = {
+      items: items,
+      orderDate: new Date().toISOString(),
+    };
+
+    const response = await axios.post(`${API_URL}/items`, orderPayload);
+    console.log('Order submitted successfully:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error submitting order:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const submitCustomerDetails = async (formData) => {
+  try {
+    const customerPayload = {
+      ...formData,
+      orderDate: new Date().toISOString(),
+      Paid: false
+    };
+
+    const response = await axios.post(`${API_URL}/orders`, customerPayload);
+    console.log('Customer details submitted successfully:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error submitting customer details:', error.response?.data || error.message);
+    throw error;
+  }
+};

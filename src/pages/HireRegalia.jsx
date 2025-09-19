@@ -8,7 +8,7 @@ import CartList from "../components/CartList";
 import CustomerDetail from "../components/CustomerDetail";
 import Contact from "../components/Contact";
 import PaymentCompleted from "../components/PaymentCompleted";
-import { useLocation } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 import {
   getCoursesByCeremonyId,
   getCeremonies,
@@ -20,7 +20,7 @@ function HireRegalia() {
 
   // ---- STATES ----
   const location = useLocation();
-  
+
   // Initialize step from location.state if available, otherwise from localStorage or default to 1
   const [step, setStep] = useState(() => {
     if (location.state?.step) {
@@ -64,20 +64,20 @@ function HireRegalia() {
   ];
 
   // ---- VALIDATION FUNCTIONS ----
-  
+
   // Check if all items have their required options selected
   const areAllOptionsSelected = () => {
-    if (!items || items.length === 0) return false;
-    
-    return items.every(item => {
+    // if (!items || items.length === 0) return false;
+
+    return items.every((item) => {
       // Skip validation for donation items
       if (item.isDonation) return true;
-      
+
       // If item has no options, it's valid
       if (!item.options || item.options.length === 0) return true;
-      
+
       // Check if all options have selected values
-      return item.options.every(option => {
+      return item.options.every((option) => {
         const selectedValue = item.selectedOptions?.[option.label];
         return selectedValue && selectedValue.trim() !== "";
       });
@@ -91,7 +91,9 @@ function HireRegalia() {
 
   // Combined validation for step 1
   const canProceedFromStep1 = () => {
-    return areBasicRequirementsMet() && areAllOptionsSelected() && items.length > 0;
+    return (
+      areBasicRequirementsMet() && areAllOptionsSelected() && items.length > 0
+    );
   };
 
   // ---- PERSIST TO LOCALSTORAGE ----
@@ -108,6 +110,7 @@ function HireRegalia() {
   useEffect(() => {
     if (items?.length) localStorage.setItem("cart", JSON.stringify(items));
     else localStorage.removeItem("cart");
+    window.dispatchEvent(new Event("cartUpdated"));
   }, [items]);
 
   // ---- API CALLS ----
@@ -175,6 +178,12 @@ function HireRegalia() {
         setLoading(true);
         setError(null);
         const data = await getItemsByCourseId(selectedCourseId);
+
+        // const prev = JSON.parse(localStorage.getItem("cart") || "[]");
+        // const updated = [...prev, data];
+        // localStorage.setItem("cart", JSON.stringify(updated));
+        // if (typeof setItems === "function") setItems(updated);
+
         setItems(Array.isArray(data) ? data : []);
       } catch (err) {
         setError(err.message);
@@ -197,7 +206,7 @@ function HireRegalia() {
         steps={steps}
         selectedCeremonyId={selectedCeremonyId}
         selectedCourseId={selectedCourseId}
-        canProceedFromStep1={canProceedFromStep1}
+        areAllOptionsSelected={areAllOptionsSelected}
         items={items}
       />
 
@@ -250,19 +259,21 @@ function HireRegalia() {
           )}
 
           {/* Show validation message if requirements not met */}
-          {!canProceedFromStep1() && items.length > 0 && (
-            <div style={{
-              padding: "10px",
-              backgroundColor: "#fef3cd",
-              color: "#856404",
-              borderRadius: "4px",
-              margin: "10px 0",
-              fontSize: "14px"
-            }}>
-              {!areBasicRequirementsMet() && "Please select ceremony and course. "}
-              {!areAllOptionsSelected() && "Please select all required options for your items before proceeding."}
+          {/* {!canProceedFromStep1() && items.length > 0 && (
+            <div
+              style={{
+                padding: "10px",
+                backgroundColor: "#97c0a4",
+                color: "#ffffff",
+                borderRadius: "4px",
+                margin: "10px 0",
+                fontSize: "14px",
+              }}
+            >
+              {!areBasicRequirementsMet() &&
+                "Please select ceremony and course. "}              
             </div>
-          )}
+          )} */}
         </>
       )}
 
@@ -302,7 +313,7 @@ function HireRegalia() {
         steps={steps}
         selectedCeremonyId={selectedCeremonyId}
         selectedCourseId={selectedCourseId}
-        canProceedFromStep1={canProceedFromStep1}
+        areAllOptionsSelected={areAllOptionsSelected}
         items={items}
       />
 
