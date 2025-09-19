@@ -63,13 +63,13 @@ const BuySelectRegalia = ({ setItems }) => {
 
   const itemsByCategory = React.useMemo(() => {
     const map = new Map();
-    for (const it of items || []) {
+    for (const [index, it] of (items || []).entries()) {
       if (it?.buyPrice == null) continue;
       const cat = it?.category || "Other";
       if (!map.has(cat)) map.set(cat, []);
       map.get(cat).push({
         ...it,
-        uiId: `${it.degreeId}-${it.id}`,
+        uiId: `${it.degreeId}-${it.id}-${index}`,
       });
     }
     const obj = {};
@@ -308,8 +308,7 @@ const BuySelectRegalia = ({ setItems }) => {
                         {itemsByCategory[selectedCategory]?.map((product) => (
                           <div key={product.uiId} className="product-card">
                             <div className="product-image">
-                              {/* Uncomment when images are ready
-                              <img
+                              {/* <img
                                 src={renderImage(product.pictureBase64)}
                                 alt={product.name}
                                 className="item-image-topic"
