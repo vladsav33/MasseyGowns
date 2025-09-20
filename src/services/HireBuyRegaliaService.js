@@ -71,16 +71,28 @@ export const submitOrderDetails = async (items) => {
 export const submitCustomerDetails = async (formData) => {
   try {
     const customerPayload = {
-      ...formData,
-      orderDate: new Date().toISOString(),
-      Paid: false
+      firstName: formData.firstName || '',
+      lastName: formData.lastName || '',
+      email: formData.email || '',
+      address: formData.address || '',
+      city: formData.city || '',
+      postcode: formData.postcode || '',
+      country: formData.country || 'NZ',
+      phone: formData.phone || '',
+      mobile: formData.mobile || '',
+      studentId: formData.studentId || 0,
+      message: formData.message || '',
+      sizeId: 3,
+      paid: false,
+      // orderDate: "2025-09-17"
+      orderDate: new Date().toISOString().split('T')[0],
     };
 
+    // console.log('Posting to customers endpoint:', `${API_URL}/orders`);
     const response = await axios.post(`${API_URL}/orders`, customerPayload);
-    console.log('Customer details submitted successfully:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error submitting customer details:', error.response?.data || error.message);
+    console.error('Error details:', error.response?.data || error.message);
     throw error;
   }
 };

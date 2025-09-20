@@ -13,7 +13,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
     address: "",
     city: "",
     postcode: "",
-    country: "",
+    country: "NZ",
     studentId: "",
     phone: "",
     mobile: "",
@@ -46,7 +46,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
           // submitOrderDetails(cart),
           submitCustomerDetails(formData)
         ]);
-        
+        // localStorage.removeItem("cart");
         console.log('Both submissions completed successfully');
       } catch (error) {
         console.error('Error during submission:', error);

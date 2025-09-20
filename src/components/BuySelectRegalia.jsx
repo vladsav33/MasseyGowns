@@ -186,8 +186,8 @@ const BuySelectRegalia = ({ setItems }) => {
                 <li>
                   <p>
                     Please allow four weeks for manufacture - this may be longer
-                    during the graduation season due to the increase in demand on our supplies
-                    around this time.
+                    during the graduation season due to the increase in demand
+                    on our supplies around this time.
                   </p>
                 </li>
               </ul>
@@ -207,50 +207,46 @@ const BuySelectRegalia = ({ setItems }) => {
 
                 {!loadingSets && !errorSets && sets.length > 0 && (
                   <div className="items-grid">
-                    {sets.map((s) => (
-                      <div key={`set-${s.id}`} className="product-card">
-                        <div className="product-image">
-                          {/* Uncomment if you’ll have images
-                          <img
-                            src={renderImage(s.pictureBase64)}
-                            alt={s.name}
-                            className="item-image-topic"
-                            onError={(e) => (e.currentTarget.src = placeholderSvg)}
-                          /> */}
-                        </div>
-                        <div className="product-info">
-                          <span className="item-category">
-                            {s.category || "Set"}
-                          </span>
-                          <h4
-                            className="product-name item-title clickable"
-                            onClick={() => setIsDialogOpen(true)}
-                            onMouseEnter={() => setShowTooltip(true)}
-                            onMouseLeave={() => setShowTooltip(false)}
-                          >
-                            {s.name}
-                          </h4>
-                          {/* {s.description ? (
-                            <p className="product-description">
-                              {s.description}
-                            </p>
-                          ) : (
-                            <p className="product-description muted">&nbsp;</p>
-                          )} */}
-                          <div className="product-footer">
-                            <span className="product-price">
-                              ${Number(s.buyPrice ?? 0).toFixed(2)}
+                    {sets
+                      .sort((a, b) => a.id - b.id)
+                      .map((s) => (
+                        <div key={`set-${s.id}`} className="product-card">
+                          <div className="product-image">
+                            {/* <img
+                              src={renderImage(s.pictureBase64)}
+                              alt={s.name}
+                              className="item-image-topic"
+                              onError={(e) =>
+                                (e.currentTarget.src = placeholderSvg)
+                              }
+                            /> */}
+                          </div>
+                          <div className="product-info">
+                            <span className="item-category">
+                              {s.category || "Set"}
                             </span>
-                            <button
-                              onClick={() => addSetToCart(s)}
-                              className="add-to-cart-btn"
+                            <h4
+                              className="product-name item-title clickable"
+                              onClick={() => setIsDialogOpen(true)}
+                              onMouseEnter={() => setShowTooltip(true)}
+                              onMouseLeave={() => setShowTooltip(false)}
                             >
-                              Add to Cart
-                            </button>
+                              {s.name}
+                            </h4>
+                            <div className="product-footer">
+                              <span className="product-price">
+                                ${Number(s.buyPrice ?? 0).toFixed(2)}
+                              </span>
+                              <button
+                                onClick={() => addSetToCart(s)}
+                                className="add-to-cart-btn"
+                              >
+                                Add to Cart
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
                   </div>
                 )}
               </div>
