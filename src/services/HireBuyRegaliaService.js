@@ -81,6 +81,8 @@ export const submitCustomerDetails = async (formData) => {
       phone: formData.phone || '',
       mobile: formData.mobile || '',
       studentId: formData.studentId || 0,
+      paymentMethod: formData.paymentMethod || 1,
+      purchaseOrder: formData.purchaseOrder || '',
       message: formData.message || '',
       sizeId: 3,
       paid: false,

@@ -17,16 +17,19 @@ function ProgressButtons({
 
   cartData?.forEach((item) => {
     if (item.options?.length > 0) {
-      if (!item.selectedOptions) {
+      // Check if selectedOptions exists and is not empty
+      if (!item.selectedOptions || Object.keys(item.selectedOptions).length === 0) {
         isDropdownSelected = false;
-      } else {
-        // check if any option value is empty
-        Object.values(item.selectedOptions).forEach((val) => {
-          if (!val) {
-            isDropdownSelected = false;
-          }
-        });
+        return;
       }
+      
+      // Check if all required options have values
+      item.options.forEach((option) => {
+        const selectedValue = item.selectedOptions[option.label];
+        if (!selectedValue || selectedValue.trim() === "") {
+          isDropdownSelected = false;
+        }
+      });
     }
   });
 

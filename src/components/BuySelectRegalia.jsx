@@ -113,7 +113,7 @@ const BuySelectRegalia = ({ setItems }) => {
       buyPrice: product.buyPrice ?? null,
       quantity: 1,
       options: product.options || [],
-      selectedOptions: {},
+      selectedOptions: product.selectedOptions || {},
       type: "individual",
     };
     pushToCart(newItem);
@@ -131,8 +131,8 @@ const BuySelectRegalia = ({ setItems }) => {
       hirePrice: Number(setItem.buyPrice) || 0,
       buyPrice: setItem.buyPrice ?? null,
       quantity: 1,
-      options: [],
-      selectedOptions: {},
+      options: setItem.options || [],
+      selectedOptions: setItem.selectedOptions || {},
       type: "set",
     };
     pushToCart(newItem);

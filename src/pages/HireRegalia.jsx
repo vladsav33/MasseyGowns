@@ -178,12 +178,6 @@ function HireRegalia() {
         setLoading(true);
         setError(null);
         const data = await getItemsByCourseId(selectedCourseId);
-
-        // const prev = JSON.parse(localStorage.getItem("cart") || "[]");
-        // const updated = [...prev, data];
-        // localStorage.setItem("cart", JSON.stringify(updated));
-        // if (typeof setItems === "function") setItems(updated);
-
         setItems(Array.isArray(data) ? data : []);
       } catch (err) {
         setError(err.message);
