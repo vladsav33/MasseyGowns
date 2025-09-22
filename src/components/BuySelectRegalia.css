@@ -175,9 +175,21 @@
     overflow: hidden;
     border: 2px solid #e8f5e8;
     transition: all 0.3s ease;
+    width: 40%;
+    height: 100%;
+  }
+
+  .product-card-set {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    overflow: hidden;
+    border: 2px solid #e8f5e8;
+    transition: all 0.3s ease;
   }
   
-  .product-card:hover {
+  .product-card:hover,
+  .product-card-set:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 25px rgba(76, 175, 80, 0.15);
     border-color: #4caf50;
@@ -505,7 +517,8 @@
   }
   
   /* Loading and animation effects */
-  .product-card {
+  .product-card,
+  .product-card-set {
     animation: fadeInUp 0.6s ease-out;
   }
   
@@ -535,3 +548,182 @@
     transition-duration: 0.3s;
     transition-timing-function: ease;
   }
+
+  /* Cascading Dropdowns */
+.cascading-dropdowns {
+  /* margin-bottom: 2rem; */
+  padding: 1.5rem;
+  /* background: #ffffff; */
+  /* border-radius: 12px; */
+  /* border: 2px solid #e8f5e8; */
+}
+
+.dropdown-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: end;
+}
+
+@media (max-width: 768px) {
+  .dropdown-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+.dropdown-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-label {
+  font-weight: 600;
+  color: #1b5e20;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.dropdown-select {
+  padding: 12px 16px;
+  border: 2px solid #c8e6c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: white;
+  color: #333;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.dropdown-select:focus {
+  outline: none;
+  border-color: #4caf50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.dropdown-select:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+  border-color: #ddd;
+}
+
+.dropdown-select:hover:not(:disabled) {
+  border-color: #4caf50;
+}
+
+/* Items Section */
+.items-section {
+  margin-top: 2rem;
+}
+
+.filtered-items {
+  margin-top: 1.5rem;
+}
+
+.items-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e8f5e8;
+}
+
+.items-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1b5e20;
+  margin: 0;
+}
+
+.items-count {
+  background: #e8f5e8;
+  color: #2e7d32;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Product Options (from previous update) */
+.product-options {
+  margin: 12px 0;
+  padding: 8px 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.option-group {
+  margin-bottom: 8px;
+}
+
+.option-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+.option-select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  background-color: white;
+  color: #374151;
+  transition: border-color 0.2s ease;
+}
+
+.option-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.add-to-cart-btn.disabled {
+  background-color: #d1d5db;
+  color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.add-to-cart-btn.disabled:hover {
+  background-color: #d1d5db;
+  transform: none;
+}
+
+/* Muted text styles */
+.muted {
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  padding: 2rem;
+}
+
+.error-text {
+  color: #d32f2f;
+  background: #ffebee;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #d32f2f;
+  margin: 1rem 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .cascading-dropdowns {
+    padding: 1rem;
+  }
+  
+  .items-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .dropdown-select {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}

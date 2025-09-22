@@ -65,9 +65,7 @@ function HireRegalia() {
 
   // ---- VALIDATION FUNCTIONS ----
 
-  // Check if all items have their required options selected
   const areAllOptionsSelected = () => {
-    // if (!items || items.length === 0) return false;
 
     return items.every((item) => {
       // Skip validation for donation items
@@ -82,18 +80,6 @@ function HireRegalia() {
         return selectedValue && selectedValue.trim() !== "";
       });
     });
-  };
-
-  // Check if basic requirements are met (ceremony and course selected)
-  const areBasicRequirementsMet = () => {
-    return selectedCeremonyId && selectedCourseId;
-  };
-
-  // Combined validation for step 1
-  const canProceedFromStep1 = () => {
-    return (
-      areBasicRequirementsMet() && areAllOptionsSelected() && items.length > 0
-    );
   };
 
   // ---- PERSIST TO LOCALSTORAGE ----
@@ -162,15 +148,25 @@ function HireRegalia() {
     const savedCart = localStorage.getItem("cart");
 
     if (!courseChanged && savedCart) {
-      // Load from localStorage only on initial load
       setItems(JSON.parse(savedCart));
       return;
     }
 
     if (!courseChanged) return; // don't fetch if nothing changed
 
-    // Clear old items before fetching new ones
-    setItems([]);
+    // Preserve buy items and donations when course changes
+    const preserveNonHireItems = (currentItems) => {
+      return currentItems.filter(item => 
+        item.type === 'individual' && !item.isHiring || // buy items
+        item.type === 'set' && !item.isHiring ||        // buy sets
+        item.isDonation                                 // donations
+      );
+    };
+
+    // Get items to preserve before clearing
+    const itemsToPreserve = preserveNonHireItems(items);
+
+    // Clear only hire items, keep buy items and donations
     setItem({});
 
     const fetchItems = async () => {
@@ -178,9 +174,15 @@ function HireRegalia() {
         setLoading(true);
         setError(null);
         const data = await getItemsByCourseId(selectedCourseId);
-        setItems(Array.isArray(data) ? data : []);
+        const newHireItems = Array.isArray(data) ? data : [];
+        
+        // Combine preserved items with new hire items
+        const combinedItems = [...itemsToPreserve, ...newHireItems];
+        setItems(combinedItems);
       } catch (err) {
         setError(err.message);
+        // If fetch fails, at least keep the preserved items
+        setItems(itemsToPreserve);
       } finally {
         setLoading(false);
       }
@@ -251,23 +253,6 @@ function HireRegalia() {
               setItems={setItems}
             />
           )}
-
-          {/* Show validation message if requirements not met */}
-          {/* {!canProceedFromStep1() && items.length > 0 && (
-            <div
-              style={{
-                padding: "10px",
-                backgroundColor: "#97c0a4",
-                color: "#ffffff",
-                borderRadius: "4px",
-                margin: "10px 0",
-                fontSize: "14px",
-              }}
-            >
-              {!areBasicRequirementsMet() &&
-                "Please select ceremony and course. "}              
-            </div>
-          )} */}
         </>
       )}
 

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "./CustomerDetail.css";
 import { Link } from "react-router-dom";
-import {submitOrderDetails, submitCustomerDetails} from "./../services/HireBuyRegaliaService.js"
+import {
+  submitOrderDetails,
+  submitCustomerDetails,
+} from "./../services/HireBuyRegaliaService.js";
 
 function CustomerDetail({ item, items = [], step, setStep, steps }) {
   const [countries, setCountries] = useState([]);
@@ -17,12 +20,56 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
     studentId: "",
     phone: "",
     mobile: "",
-    purchaseOrder: "",
+    purchaseOrder: "PN",
     paymentMethod: "1",
     termsAccepted: false,
     message: "",
   });
+
+  const handlePurchaseOrderChange = (e) => {
+    let value = e.target.value;
+    
+    // Always ensure it starts with 'PN'
+    if (value.length < 2 || !value.startsWith('PN')) {
+      const additionalText = value.replace(/^P?N?/i, '');
+      value = 'PN' + additionalText;
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      purchaseOrder: value
+    }));
+  };
   
+  const ensureCursorAfterPN = (input) => {
+    setTimeout(() => {
+      const cursorPos = input.selectionStart;
+      const selectionEnd = input.selectionEnd;
+      
+      if (cursorPos < 2) {
+        // If cursor is before PN, move it to after PN
+        input.setSelectionRange(2, Math.max(2, selectionEnd));
+      }
+    }, 0);
+  };
+  
+  const handlePurchaseOrderInteraction = (e) => {
+    // Prevent backspace/delete from affecting PN
+    if (e.type === 'keydown' && (e.key === 'Backspace' || e.key === 'Delete')) {
+      const cursorPosition = e.target.selectionStart;
+      if (e.key === 'Backspace' && cursorPosition <= 2) {
+        e.preventDefault();
+        return;
+      }
+      if (e.key === 'Delete' && cursorPosition < 2) {
+        e.preventDefault();
+        return;
+      }
+    }
+    
+    ensureCursorAfterPN(e.target);
+  };
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -30,7 +77,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       [name]: type === "checkbox" ? checked : value,
     }));
   };
-  
+
   const handleSubmit = async (e) => {
     if (step < steps.length) {
       const newStep = step + 1;
@@ -44,12 +91,12 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
         const cart = localStorage.getItem("cart");
         await Promise.all([
           // submitOrderDetails(cart),
-          submitCustomerDetails(formData)
+          submitCustomerDetails(formData),
         ]);
         // localStorage.removeItem("cart");
-        console.log('Both submissions completed successfully');
+        console.log("Both submissions completed successfully");
       } catch (error) {
-        console.error('Error during submission:', error);
+        console.error("Error during submission:", error);
         // Handle error (show user message, etc.)
       }
     }
@@ -129,7 +176,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
   const cart =
     items.length > 0 ? items : JSON.parse(localStorage.getItem("cart") || "[]");
 
-    // Calculate total
+  // Calculate total
   const total = cart.reduce(
     (sum, item) => sum + (item.hirePrice || 0) * (item.quantity || 1),
     0
@@ -346,12 +393,27 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
                 <span>Purchase Order (University Staff only)</span>
               </label>
               {formData.paymentMethod === "3" && (
+                // <input
+                //   type="text"
+                //   name="purchaseOrder"
+                //   value={formData.purchaseOrder}
+                //   onChange={handleInputChange}
+                //   placeholder="Purchase Order #"
+                //   className="form-input purchase-order-input"
+                //   required
+                // />
+                // In your JSX:
                 <input
                   type="text"
                   name="purchaseOrder"
                   value={formData.purchaseOrder}
-                  onChange={handleInputChange}
-                  placeholder="Purchase Order #"
+                  onChange={handlePurchaseOrderChange}
+                  onKeyDown={handlePurchaseOrderInteraction}
+                  onClick={handlePurchaseOrderInteraction}
+                  onFocus={handlePurchaseOrderInteraction}
+                  onSelect={handlePurchaseOrderInteraction}
+                  onKeyUp={handlePurchaseOrderInteraction} // Catch arrow key releases
+                  placeholder="Enter ID after PN"
                   className="form-input purchase-order-input"
                   required
                 />
@@ -384,7 +446,6 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
         {cart.length > 0 ? (
           <>
             {cart.map((item) => {
-
               return (
                 <div
                   key={item.id}
