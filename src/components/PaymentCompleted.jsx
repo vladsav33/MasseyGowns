@@ -188,18 +188,18 @@ function PaymentCompleted() {
 
     const handleDownloadReceipt = () => {
       const receiptContent = `
-PAYMENT RECEIPT
-===============
+        PAYMENT RECEIPT
+        ===============
 
-Transaction ID: ${paymentDetails.transactionId}
-Date: ${paymentDetails.date}
-Amount: ${paymentDetails.amount}
-Payment Method: ${paymentDetails.paymentMethod}
+        Transaction ID: ${paymentDetails.transactionId}
+        Date: ${paymentDetails.date}
+        Amount: ${paymentDetails.amount}
+        Payment Method: ${paymentDetails.paymentMethod}
 
-Thank you for your purchase!
-Academic Dress Hire
-Email: info@masseygowns.org.nz
-Phone: +64 6 350 4166
+        Thank you for your purchase!
+        Academic Dress Hire
+        Email: info@masseygowns.org.nz
+        Phone: +64 6 350 4166
       `.trim();
 
       const blob = new Blob([receiptContent], { type: "text/plain" });
@@ -304,6 +304,36 @@ Phone: +64 6 350 4166
               </div>
 
               <div className="form-fields">
+                {/* Card Name */}
+                <div className="field-group">
+                  <label className="field-label">Cardholder Name</label>
+                  <div className="input-wrapper">
+                    <input
+                      type="text"
+                      placeholder="Cardholder Name"
+                      value={formData.cardHolder}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "cardHolder",
+                          formatCardName(e.target.value)
+                        )
+                      }
+                      className={`field-input ${
+                        errors.cardHolder ? "field-error" : ""
+                      }`}
+                      maxLength="19"
+                    />
+                    <div className="input-icon">
+                      <CreditCard className="icon" />
+                    </div>
+                  </div>
+                  {errors.cardHolder && (
+                    <p className="error-message">
+                      Cardholder Name is not valid
+                    </p>
+                  )}
+                </div>
+
                 {/* Card Number */}
                 <div className="field-group">
                   <label className="field-label">Card number</label>

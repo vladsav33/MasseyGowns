@@ -14,19 +14,32 @@ function ProgressButtons({
   const cart = cartData?.length || 0;
 
   let isDropdownSelected = true;
+  let isOnlyHire = true;
+  let isOnlyBuy = true;
 
   cartData?.forEach((item) => {
+    if (item.isHiring) {
+      isOnlyHire = true;
+      isOnlyBuy = false;
+    }
+    else {
+      isOnlyHire = false;
+      isOnlyBuy = true;
+    }
     if (item.options?.length > 0) {
-      if (!item.selectedOptions) {
+      // Check if selectedOptions exists and is not empty
+      if (!item.selectedOptions || Object.keys(item.selectedOptions).length === 0) {
         isDropdownSelected = false;
-      } else {
-        // check if any option value is empty
-        Object.values(item.selectedOptions).forEach((val) => {
-          if (!val) {
-            isDropdownSelected = false;
-          }
-        });
+        return;
       }
+      
+      // Check if all required options have values
+      item.options.forEach((option) => {
+        const selectedValue = item.selectedOptions[option.label];
+        if (!selectedValue || selectedValue.trim() === "") {
+          isDropdownSelected = false;
+        }
+      });
     }
   });
 
@@ -91,9 +104,9 @@ function ProgressButtons({
               <button
                 className={`btn next ${
                   step === steps.length ||
-                  !selectedCeremonyId ||
-                  !selectedCourseId ||
                   step === 3 ||
+                  cart === 0 ||
+                  !isOnlyHire ||
                   !areAllOptionsSelected()
                     ? "disabled"
                     : ""
@@ -101,9 +114,9 @@ function ProgressButtons({
                 onClick={handleNext}
                 disabled={
                   step === steps.length ||
-                  !selectedCeremonyId ||
-                  !selectedCourseId ||
                   step === 3 ||
+                  cart === 0 ||
+                  !isOnlyHire ||
                   !areAllOptionsSelected()
                 }
               >
@@ -139,6 +152,7 @@ function ProgressButtons({
                   step === steps.length ||
                   step === 3 ||
                   cart === 0 ||
+                  !isOnlyBuy ||
                   !isDropdownSelected
                     ? "disabled"
                     : ""
@@ -148,6 +162,7 @@ function ProgressButtons({
                   step === steps.length ||
                   step === 3 ||
                   (cart === 0) ||
+                  !isOnlyBuy ||
                   !isDropdownSelected
                 }
               >
