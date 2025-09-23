@@ -1,10 +1,9 @@
 import React from "react";
-import "./BuyDressSet.css"; // 注意这里用 BuyDressSet.css，而不是 Footer.css
-
+import "./BuyDressSet.css";
 export default function BuyDressSet() {
   return (
     <section>
-      <h2 className="BuyDressSetTitle">Buy Quality Academic Dress Set</h2>
+      <h2 className="BuyDressSetTitle">Purchasing a Set of Academic Regalia</h2>
       <div className="BuyDressSetImg">
         <div>
           <img src="/BuyBachelorRobes.png" alt="Buy Bachelor Robes" />

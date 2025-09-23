@@ -5,12 +5,12 @@ import { Link } from "react-router-dom";
 const items = [
   {
     title: "Collection and Return Times",
-    desc: "Learn about gown sizing, fitting, collection, and what to bring when picking up or returning your graduation regalia.",
+    desc: "Check your graduation's specific collection and return times, plus what to bring when picking up regalia.",
     href: "/faqs/collection-and-return-times",
   },
   {
     title: "Sizes and Fitting",
-    desc: "Check your graduation's specific collection and return times, plus what to bring when picking up regalia.",
+    desc: "Learn about gown sizing, fitting, collection, and what to bring when picking up or returning your graduation regalia.",
     href: "/faqs/sizes-and-fitting",
   },
   {
