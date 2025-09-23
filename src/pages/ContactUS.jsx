@@ -6,12 +6,13 @@ import { sendContactForm } from "../api/FormApi";
 
 export default function ContactUS() {
   const [formData, setFormData] = useState({
+    id: "",
     email: "",
-    firstname: "",
-    lastname: "",
+    firstName: "",
+    lastName: "",
     subject: "",
     query: "",
-    captcha: "",
+    captchaInput: "",
   });
 
   const [captchaCode, setCaptchaCode] = useState("");
@@ -32,6 +33,7 @@ export default function ContactUS() {
   const handleChange = (e) => {
     setFormData({
       ...formData,
+      id: `contacts_${Date.now()}`,
       [e.target.name]: e.target.value,
     });
   };
@@ -50,11 +52,11 @@ export default function ContactUS() {
       alert("Your enquiry has been sent successfully!");
       console.log("API Response:", result);
 
-      // 清空表单
       setFormData({
+        id: "",
         email: "",
-        firstname: "",
-        lastname: "",
+        firstName: "",
+        lastName: "",
         subject: "",
         query: "",
         captchaInput: "",
@@ -76,13 +78,10 @@ export default function ContactUS() {
               If you have any questions, feedback or issues with your order
               please contact ACADEMIC DRESS HIRE
             </p>
+
             <p>
-              <span className="label">Postal Address :</span> P O Box 1713,
-              Palmerston North 4440
-            </p>
-            <p>
-              <span className="label">Courier Address :</span> Refectory Road,
-              Massey University, Tennent Drive, Palmerston North 4472
+              <span className="label">Courier Address :</span> 3 Refectory Road,
+              Massey University, Palmerston North 4472
             </p>
             <p className="label">Customer service:</p>
             <ul className="pande">
@@ -92,10 +91,8 @@ export default function ContactUS() {
             <p>
               We will endeavour to respond to your enquiry as soon as possible.
             </p>
-            <p>
-              Please note we work reduced winter hours and do not work during
-              the holidays
-            </p>
+            <p>Our normal hours are 9:00am – 2.30pm, Mon – Thurs.</p>
+            <p>We operate extended hours during the graduation week.</p>
           </div>
           <div className="googlemap">
             <Googlemap />
@@ -106,10 +103,7 @@ export default function ContactUS() {
             To send us an enquiry please fill in the following form, and we will
             endeavour to reply to you as soon as possible.
           </p>
-          <p>
-            Please note, this office is manned on a part time based. This office
-            is closed right through January.
-          </p>
+
           <form onSubmit={handleSubmit}>
             <label>
               Your Email*
@@ -125,8 +119,8 @@ export default function ContactUS() {
               First Name*
               <input
                 type="text"
-                name="firstname"
-                value={formData.firstname}
+                name="firstName"
+                value={formData.firstName}
                 onChange={handleChange}
                 required
               />
@@ -135,8 +129,8 @@ export default function ContactUS() {
               Last Name*{" "}
               <input
                 type="text"
-                name="lastname"
-                value={formData.lastname}
+                name="lastName"
+                value={formData.lastName}
                 onChange={handleChange}
                 required
               />
@@ -152,7 +146,7 @@ export default function ContactUS() {
               />
             </label>
             <label>
-              Your Query*{" "}
+              Enquiry*
               <textarea
                 type="text"
                 name="query"

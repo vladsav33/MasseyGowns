@@ -1,21 +1,32 @@
 const API_BASE = import.meta.env.VITE_GOWN_API_BASE;
 
-// post the form to the database
 export async function sendContactForm(formData) {
   try {
-    const res = await fetch(`${API_BASE}/form`, {
-      method: "post",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
+    const response = await fetch(`${API_BASE}/contacts`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: formData.id,
+        email: formData.email,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        subject: formData.subject,
+        query: formData.query,
+        createdAt: new Date().toISOString(),
+      }),
     });
 
-    if (!res.ok) {
-      throw new Error("Failed to send form");
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Server error:", errorText);
+      throw new Error("Failed to send contact form");
     }
 
-    return await res.json();
-  } catch (err) {
-    console.error("Form API error:", err);
-    throw err;
+    return await response.json();
+  } catch (error) {
+    console.error("Error sending contact form:", error);
+    throw error;
   }
 }

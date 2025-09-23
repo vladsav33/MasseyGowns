@@ -4,7 +4,7 @@ import "./Hireprocess.css";
 export default function Hireprocess() {
   return (
     <section>
-      <h2 className="HireDressSetTitle">Quick Hiring Process</h2>
+      <h2 className="HireDressSetTitle">The Hiring Process</h2>
       <div className="HireDressSetImg">
         <img src="/process.png" alt="hire process" />
       </div>

@@ -26,8 +26,8 @@ function Ceremony() {
               Women: formal clothes and applicable academic dress.
             </p>
             <p>
-              At graduation all graduates shall appear in the academic dress
-              proper to their degree.
+              All graduands are required to wear academic regalia at the
+              graduation ceremony.
             </p>
             <a href="#" className="cere_link">
               Read More
