@@ -241,6 +241,9 @@ function Navbar() {
           )}
         </div>
         <i className="fa fa-search"></i>
+        <Link to="/admin">
+          <i className="fa fa-circle-user"></i>
+        </Link>
       </div>
     </nav>
   );
