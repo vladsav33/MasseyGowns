@@ -30,25 +30,31 @@ function Navbar() {
       }
     };
 
-    // Load initially
     loadCartItems();
+
+    const safeLoad = () => {
+      if (typeof startTransition === "function") {
+        startTransition(() => loadCartItems());
+      } else {
+        setTimeout(loadCartItems, 0);
+      }
+    };
+
+    safeLoad();
 
     // Listen for localStorage changes (when cart is updated in other components)
     const handleStorageChange = (e) => {
-      if (e.key === "cart") {
-        loadCartItems();
-      }
+      if (e.key === "cart") safeLoad();
     };
 
     // Listen for custom cart update events
     const handleCartUpdate = () => {
-      loadCartItems();
+      safeLoad();
     };
 
     window.addEventListener("storage", handleStorageChange);
     window.addEventListener("cartUpdated", handleCartUpdate);
 
-    // Also check for cart changes on location change
     loadCartItems();
 
     return () => {
@@ -89,18 +95,85 @@ function Navbar() {
     setIsCartOpen(!isCartOpen);
   };
 
+  // Analyze cart contents to determine item types
+  const analyzeCartContents = () => {
+    const analysis = {
+      hasBuyItems: false,
+      hasHireItems: false,
+      hasOnlyDonations: false
+    };
+
+    // Filter out donations first
+    const nonDonationItems = cartItems.filter(item => !item.isDonation);
+    
+    if (nonDonationItems.length === 0) {
+      analysis.hasOnlyDonations = true;
+      return analysis;
+    }
+
+    // Check for buy items (items where isHiring is false or type indicates buying)
+    analysis.hasBuyItems = nonDonationItems.some(item => 
+      item.isHiring === false || 
+      (item.type === 'individual' && item.isHiring !== true) ||
+      (item.type === 'set' && item.isHiring !== true)
+    );
+
+    // Check for hire items (items where isHiring is true or undefined/null - old hire items)
+    analysis.hasHireItems = nonDonationItems.some(item => 
+      item.isHiring === true || 
+      item.isHiring === undefined || 
+      item.isHiring === null
+    );
+
+    return analysis;
+  };
+
   const handleViewCart = () => {
     setIsCartOpen(false);
-    if (location.pathname === "/hireregalia") {
-      // If already on hire page, go to step 2
-      navigate("/hireregalia", { state: { step: 2 } });
-    } else if (location.pathname === "/buyregalia") {
-      // If already on buy page, go to step 2
-      navigate("/buyregalia", { state: { step: 2 } });
-    } else {
-      // Otherwise, go to hire page step 2 by default
-      navigate("/hireregalia", { state: { step: 2 } });
+
+    const { hasBuyItems, hasHireItems, hasOnlyDonations } = analyzeCartContents();
+
+    // If cart is empty or only has donations, default behavior
+    if (cartItems.length === 0 || hasOnlyDonations) {
+      if (location.pathname === "/hireregalia") {
+        navigate("/hireregalia", { state: { step: 2 } });
+      } else if (location.pathname === "/buyregalia") {
+        navigate("/buyregalia", { state: { step: 2 } });
+      } else {
+        navigate("/buyregalia", { state: { step: 2 } });
+      }
+      return;
     }
+
+    // Only buy items in cart → go to step 2 in buyRegalia
+    if (hasBuyItems && !hasHireItems) {
+      navigate("/buyregalia", { state: { step: 2 } });
+      return;
+    }
+
+    // Only hire items in cart → go to step 2 in hireRegalia  
+    if (hasHireItems && !hasBuyItems) {
+      navigate("/hireregalia", { state: { step: 2 } });
+      return;
+    }
+
+    // Both hire and buy items in cart
+    if (hasBuyItems && hasHireItems) {
+      if (location.pathname === "/hireregalia") {
+        // Already on hire page → go to step 2 in hireRegalia
+        navigate("/hireregalia", { state: { step: 2 } });
+      } else if (location.pathname === "/buyregalia") {
+        // Already on buy page → go to step 2 in buyRegalia
+        navigate("/buyregalia", { state: { step: 2 } });
+      } else {
+        // Not on hire or buy pages → go to step 2 in hireRegalia
+        navigate("/hireregalia", { state: { step: 2 } });
+      }
+      return;
+    }
+
+    // Fallback
+    navigate("/buyregalia", { state: { step: 2 } });
   };
 
   const removeFromCart = (itemId) => {
@@ -126,12 +199,12 @@ function Navbar() {
       </div>
       <ul className="navbar-menu">
         <li className="has-dropdown">
-          <Link to="/hireregalia" state={{ step: 1 }} className="menu-link">
+          <Link to="/hireregalia" state={{ step: 1 }} className={`menu-link ${isActive("/hireregalia") ? "active" : ""}`}>
             HIRE REGALIA
           </Link>
         </li>
         <li className="has-dropdown">
-          <Link to="/buyregalia" className="menu-link" state={{ step: 1 }}>
+          <Link to="/buyregalia" state={{ step: 1 }} className={`menu-link ${isActive("/buyregalia") ? "active" : ""}`}>
             BUY REGALIA
           </Link>
         </li>

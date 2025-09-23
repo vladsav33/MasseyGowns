@@ -11,7 +11,19 @@ function CeremonyCourseSelection({
   onCeremonySelect,
   onCourseSelect,
 }) {
-  
+  const formatDateToDDMMYY = (dateString) => {
+    if (!dateString) return "";
+
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = String(date.getFullYear()).slice(-4);
+
+    return `${day}/${month}/${year}`;
+  };
+
   useEffect(() => {
     const savedCeremonyId = localStorage.getItem("selectedCeremonyId");
     const savedCourseId = localStorage.getItem("selectedCourseId");
@@ -50,7 +62,7 @@ function CeremonyCourseSelection({
   return (
     <div className="ceremony-course-container">
       {/* Ceremony Section */}
-      <h3>Select the ceremony you are reserving robes for</h3>
+      <h3>Select the ceremony you are ordering regalia for</h3>
       <select
         className="dropdown-select"
         value={ceremony != null ? String(ceremony) : ""}
@@ -58,11 +70,13 @@ function CeremonyCourseSelection({
       >
         <option value="">Please select a ceremony...</option>
         {Array.isArray(ceremonies) &&
-          ceremonies.map((ceremonyOption) => (
-            <option key={ceremonyOption.id} value={String(ceremonyOption.id)}>
-              {ceremonyOption.name}
-            </option>
-          ))}
+          ceremonies
+            .sort((a, b) => a.id - b.id)
+            .map((ceremonyOption) => (
+              <option key={ceremonyOption.id} value={String(ceremonyOption.id)}>
+                {ceremonyOption.name}
+              </option>
+            ))}
       </select>
       {selectedCeremonyObj && (
         <>
@@ -79,12 +93,15 @@ function CeremonyCourseSelection({
             <span className="info-text" style={{ textAlign: "left" }}>
               <strong>{selectedCeremonyObj.name}</strong>
               <div className="order-info">
-                <h2>DUE DATE FOR ORDERS: {selectedCeremonyObj.dueDate}</h2>
+                <h2>
+                  DUE DATE FOR ORDERS:{" "}
+                  {formatDateToDDMMYY(selectedCeremonyObj.dueDate)}
+                </h2>
                 <p>
                   <em>
                     <u>
                       (Late orders will be accepted on a first come first served
-                      basis, so please order asap)
+                      basis, so please order early)
                     </u>
                   </em>
                 </p>
@@ -97,10 +114,9 @@ function CeremonyCourseSelection({
                 >
                   <li>Have your credit card ready</li>
                   <li>
-                    Have your full height and head measurement ready
+                    Have your full height and head measurement ready{" "}
                     <span className="hint">
-                      (measure your head just above your eyebrows, approximately
-                      57–59cm)
+                      (measure your head just above your eyebrows)
                     </span>
                   </li>
                   <li>Click your qualification below</li>
@@ -108,8 +124,7 @@ function CeremonyCourseSelection({
 
                 <p>
                   <br></br>
-                  Collections and Returns are from our rooms at Massey
-                  University. Further information:
+                  Information on Collections and Returns can be :
                   <a
                     href="https://www.massey.ac.nz/"
                     target="_blank"
@@ -125,13 +140,13 @@ function CeremonyCourseSelection({
       )}
 
       {/* Course Section */}
-      <h3>Select the course</h3>
+      <h3>Select the qualification</h3>
       <select
         className="dropdown-select"
         value={course != null ? String(course) : ""}
         onChange={handleCourseChange}
       >
-        <option value="">Please select a course...</option>
+        <option value="">Please select a qualification...</option>
         {Array.isArray(courses) &&
           courses.map((courseOption) => (
             <option key={courseOption.id} value={String(courseOption.id)}>

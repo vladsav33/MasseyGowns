@@ -53,13 +53,13 @@ function Navbar() {
               <h4>Buy Full Regalia Sets</h4>
               <ul className="drondown-list">
                 <li>
-                  <a href="#">Buy Bachelor Degree Set</a>
+                  <a href="#">Buy Bachelor Set</a>
                 </li>
                 <li>
-                  <a href="#">Buy Master Degree Set</a>
+                  <a href="#">Buy Masters Set</a>
                 </li>
                 <li>
-                  <a href="#">Buy PhD Degree Set</a>
+                  <a href="#">Buy PhD Set</a>
                 </li>
               </ul>
             </div>

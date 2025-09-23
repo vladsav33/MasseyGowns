@@ -78,3 +78,12 @@
   outline: 2px solid #117832;
   outline-offset: 2px;
 }
+
+.dropDownLabel {
+  padding: 10px;
+  background-color: #97c0a4;
+  color: #ffffff;
+  border-radius: 4px;
+  margin: 10px 0;
+  font-size: 14px;
+}
