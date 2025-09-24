@@ -25,7 +25,8 @@ jobs:
 
       - name: npm install, build, and test
         run: |
-          rm -rf node_modules package-lock.json
+          Remove-Item -Recurse -Force node_modules
+          Remove-Item -Force package-lock.json
           npm install
           npm run build --if-present
           npm run test --if-present
@@ -65,5 +66,6 @@ jobs:
           package: './dist'
 
           
+
 
 
