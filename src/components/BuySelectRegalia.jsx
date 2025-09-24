@@ -61,11 +61,11 @@ const BuySelectRegalia = ({ setItems }) => {
     fetchSets();
   }, []);
 
-  // Get unique item types (categories) from purchasable items
+  // Get unique item types (categories)
   const itemTypes = React.useMemo(() => {
     const types = new Set();
     items.forEach((item) => {
-      if (item?.buyPrice != null && item.category) {
+      if (item.category) {
         types.add(item.category);
       }
     });
@@ -79,15 +79,11 @@ const BuySelectRegalia = ({ setItems }) => {
     const degrees = new Set();
     items.forEach((item) => {
       if (
-        item?.buyPrice != null &&
         item.category === selectedItemType &&
-        item.name
+        item.degreeId &&
+        item.degreeName
       ) {
-        const nameParts = item.name.split(" ");
-        if (nameParts.length > 1) {
-          const degree = nameParts.slice(1).join(" "); // Everything after the first word
-          if (degree) degrees.add(degree);
-        }
+        degrees.add(item.degreeName);
       }
     });
     return Array.from(degrees).sort();
@@ -97,19 +93,31 @@ const BuySelectRegalia = ({ setItems }) => {
   const filteredItems = React.useMemo(() => {
     if (!selectedItemType || !selectedDegree) return [];
 
-    return items
+    const filtered = items
       .filter((item) => {
-        if (item?.buyPrice == null) return false;
         if (item.category !== selectedItemType) return false;
 
-        // Check if item name contains the selected degree
-        return item.name && item.name.includes(selectedDegree);
+        // Check if item degree name contains the selected degree
+        return item.degreeName && item.degreeName.includes(selectedDegree);
       })
       .map((item, index) => ({
         ...item,
         uiId: `${item.degreeId}-${item.id}-${index}`,
-      }))
-      .sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
+      }));
+
+    // Remove duplicates based on degree id and category
+    const uniqueItems = [];
+    const seen = new Set();
+    
+    filtered.forEach((item) => {
+      const key = `${item.degreeId}-${item.category}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueItems.push(item);
+      }
+    });
+
+    return uniqueItems.sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
   }, [items, selectedItemType, selectedDegree]);
 
   // Reset degree selection when item type changes

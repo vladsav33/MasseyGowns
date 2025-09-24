@@ -89,7 +89,7 @@ function ProgressButtons({
 
           <div className="btns">
             {/* Prev Button (only if step > 1) */}
-            {step > 1 && (
+            {step > 1 && step < 4 && (
               <button
                 className="btn prev"
                 onClick={handlePrev}
@@ -135,7 +135,7 @@ function ProgressButtons({
           <div className="btns">
             {/* Buy Regalia */}
             {/* Prev */}
-            {step > 1 && (
+            {step > 1 && step < 4 && (
               <button
                 className="btn prev"
                 onClick={handlePrev}

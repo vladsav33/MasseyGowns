@@ -19,6 +19,7 @@
     "@mui/material": "^7.3.1",
     "@tailwindcss/vite": "^4.1.13",
     "axios": "^1.11.0",
+    "jspdf": "^3.0.3",
     "lucide-react": "^0.540.0",
     "node": "^24.6.0",
     "prop-types": "^15.8.1",

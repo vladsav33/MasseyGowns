@@ -52,21 +52,46 @@ export const getItemSets = async () => {
   }
 };
 
-export const submitOrderDetails = async (items) => {
+// export const submitOrderDetails = async (items) => {
+//   try {
+//     const orderPayload = {
+//       items: items,
+//       orderDate: new Date().toISOString(),
+//     };
+
+//     const response = await axios.post(`${API_URL}/items`, orderPayload);
+//     console.log('Order submitted successfully:', response.data);
+//     return response.data;
+//   } catch (error) {
+//     console.error('Error submitting order:', error.response?.data || error.message);
+//     throw error;
+//   }
+// };
+
+export const submitOrderDetails = async (cart) => {
   try {
+    const orderItems = cart.map(item => ({
+      cost: item.hirePrice,
+      hire: item.isHiring ?? true,
+      quantity: item.quantity
+    }));
+
     const orderPayload = {
-      items: items,
+      items: orderItems,
       orderDate: new Date().toISOString(),
     };
-
     const response = await axios.post(`${API_URL}/items`, orderPayload);
-    console.log('Order submitted successfully:', response.data);
+    console.log("Order submitted successfully:", response.data);
     return response.data;
   } catch (error) {
-    console.error('Error submitting order:', error.response?.data || error.message);
+    console.error(
+      "Error submitting order:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };
+
 
 export const submitCustomerDetails = async (formData) => {
   try {
@@ -86,11 +111,9 @@ export const submitCustomerDetails = async (formData) => {
       message: formData.message || '',
       sizeId: 3,
       paid: false,
-      // orderDate: "2025-09-17"
       orderDate: new Date().toISOString().split('T')[0],
     };
 
-    // console.log('Posting to customers endpoint:', `${API_URL}/orders`);
     const response = await axios.post(`${API_URL}/orders`, customerPayload);
     return response.data;
   } catch (error) {
@@ -98,3 +121,7 @@ export const submitCustomerDetails = async (formData) => {
     throw error;
   }
 };
+
+// export const updatePaidStatus = async () = {
+
+// }
