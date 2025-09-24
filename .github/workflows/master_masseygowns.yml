@@ -25,6 +25,7 @@ jobs:
 
       - name: npm install, build, and test
         run: |
+          del package-lock.json
           npm ci
           npm run build --if-present
           npm run test --if-present
@@ -64,6 +65,7 @@ jobs:
           package: './dist'
 
           
+
 
 
 
