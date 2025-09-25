@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import Authentication from "../components/Authentication";
+
 const API_URL = import.meta.env.VITE_GOWN_API_BASE;
 
 export default function OrdersToCSV() {
@@ -26,7 +28,7 @@ export default function OrdersToCSV() {
             })
             .then((data) => {
                 setJsonData(data);         // store raw JSON
-                setCsvData(jsonToCSV(data));
+                // setCsvData(jsonToCSV(data));
                 setLoading(false);
             })
             .catch((err) => {
@@ -71,10 +73,8 @@ export default function OrdersToCSV() {
 
     // Trigger CSV download
     const downloadCSV = () => {
-        const csv = convertToCSV(jsonData);
-        setCsvData(csv);
-
-        const blob = new Blob([csv], { type: "text/csv" });
+        if (!csvData) return;
+        const blob = new Blob([csvData], { type: "text/csv" });
         const url = URL.createObjectURL(blob);
 
         const a = document.createElement("a");
@@ -84,17 +84,30 @@ export default function OrdersToCSV() {
         URL.revokeObjectURL(url);
     };
 
+    const extractOrders = () => {
+        const csv = convertToCSV(jsonData);
+        setCsvData(csv);
+    };
+
     return (
-        <div className="p-6">
-            <h1 className="text-xl font-bold mb-4 text-black">Orders Export</h1>
-            <button
-                onClick={downloadCSV}
-                className="!bg-green-700 text-white px-4 py-2 rounded hover:!bg-green-800">
-                Export to CSV
-            </button>
-            {csvData && (
-                <pre className="mt-4 bg-gray-100 p-2 rounded overflow-x-auto"> {csvData} </pre>
-            )}
-        </div>
+        <Authentication>
+            <div className="p-6">
+                <h1 className="!text-3xl font-bold mb-4 text-black">Orders Export:</h1>
+                <button
+                    onClick={extractOrders}
+                    className="!bg-green-700 text-white px-4 py-2 rounded hover:!bg-green-800 mr-8">
+                    Extract Orders
+                </button>
+                <button
+                    disabled={!csvData}
+                    onClick={downloadCSV}
+                    className="!bg-green-700 text-white px-4 py-2 rounded hover:!bg-green-800 disabled:!bg-gray-400 disabled:!cursor-not-allowed">
+                    Export to CSV
+                </button>
+                {csvData && (
+                    <pre className="mt-4 bg-gray-100 p-2 rounded overflow-x-auto"> {csvData} </pre>
+                )}
+            </div>
+        </Authentication>
     );
 }

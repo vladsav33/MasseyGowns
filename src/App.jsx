@@ -8,6 +8,7 @@ import ContactUS from "./pages/ContactUS.jsx";
 import TermsAndConditions from "./pages/TermsAndConditions.jsx";
 import HireprocessWrapper from "./components/HireprocessWrapper.jsx";
 import ExtractOrder from "./components/ExtractOrder.jsx";
+import Authentication from "./components/Authentication.jsx";
 
 export default function App() {
   return (
