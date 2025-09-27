@@ -14,7 +14,9 @@ export const getCeremonies = async () => {
 
 export const getCoursesByCeremonyId = async (selectedCeremonyId) => {
   try {
-    const response = await axios.get(`${API_URL}/degreesbyceremony/${selectedCeremonyId}`);
+    const response = await axios.get(
+      `${API_URL}/degreesbyceremony/${selectedCeremonyId}`
+    );
     return response.data;
   } catch (err) {
     console.error("Error fetching courses:", err);
@@ -24,7 +26,9 @@ export const getCoursesByCeremonyId = async (selectedCeremonyId) => {
 
 export const getItemsByCourseId = async (selectedCourseId) => {
   try {
-    const response = await axios.get(`${API_URL}/itemsbydegree/${selectedCourseId}`);
+    const response = await axios.get(
+      `${API_URL}/itemsbydegree/${selectedCourseId}`
+    );
     return response.data;
   } catch (err) {
     console.error("Error fetching courses:", err);
@@ -52,76 +56,70 @@ export const getItemSets = async () => {
   }
 };
 
-// export const submitOrderDetails = async (items) => {
-//   try {
-//     const orderPayload = {
-//       items: items,
-//       orderDate: new Date().toISOString(),
-//     };
-
-//     const response = await axios.post(`${API_URL}/items`, orderPayload);
-//     console.log('Order submitted successfully:', response.data);
-//     return response.data;
-//   } catch (error) {
-//     console.error('Error submitting order:', error.response?.data || error.message);
-//     throw error;
-//   }
-// };
-
-export const submitOrderDetails = async (cart) => {
-  try {
-    const orderItems = cart.map(item => ({
-      cost: item.hirePrice,
-      hire: item.isHiring ?? true,
-      quantity: item.quantity
-    }));
-
-    const orderPayload = {
-      items: orderItems,
-      orderDate: new Date().toISOString(),
-    };
-    const response = await axios.post(`${API_URL}/items`, orderPayload);
-    console.log("Order submitted successfully:", response.data);
-    return response.data;
-  } catch (error) {
-    console.error(
-      "Error submitting order:",
-      error.response?.data || error.message
-    );
-    throw error;
-  }
-};
-
-
 export const submitCustomerDetails = async (formData) => {
   try {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+
     const customerPayload = {
-      firstName: formData.firstName || '',
-      lastName: formData.lastName || '',
-      email: formData.email || '',
-      address: formData.address || '',
-      city: formData.city || '',
-      postcode: formData.postcode || '',
-      country: formData.country || 'NZ',
-      phone: formData.phone || '',
-      mobile: formData.mobile || '',
-      studentId: formData.studentId || 0,
-      paymentMethod: formData.paymentMethod || 1,
-      purchaseOrder: formData.purchaseOrder || '',
-      message: formData.message || '',
-      sizeId: 3,
+      firstName: formData.firstName || "",
+      lastName: formData.lastName || "",
+      email: formData.email || "",
+      address: formData.address || "",
+      city: formData.city || "",
+      postcode: formData.postcode || "",
+      country: formData.country || "NZ",
+      phone: formData.phone || "",
+      mobile: formData.mobile || "",
+      studentId: parseInt(formData.studentId) || 0,
+      message: formData.message || "",
+      items: cart.map((item) => ({
+        itemId: parseInt(item.id?.toString().split("-")[1]) || 0,
+        sizeId: parseInt(item.selectedOptions?.["Head Size"]) || 0,
+        fitId: parseInt(item.selectedOptions?.["My full height"]) || 0,
+        hoodId: parseInt(item.selectedOptions?.["Hood Type"]) || 0,
+        hire: item.isHiring ?? true,
+        quantity: item.quantity || 1,
+      })),
       paid: false,
-      orderDate: new Date().toISOString().split('T')[0],
+      paymentMethod: parseInt(formData.paymentMethod) || 1,
+      purchaseOrder: formData.purchaseOrder || "",
+      orderDate: new Date().toISOString().split("T")[0],
     };
 
     const response = await axios.post(`${API_URL}/orders`, customerPayload);
+    if (response.data) {
+      localStorage.setItem("orderResponse", JSON.stringify(response.data));
+    }
     return response.data;
   } catch (error) {
-    console.error('Error details:', error.response?.data || error.message);
+    console.error("Error details:", error.response?.data || error.message);
+    console.error("Payload sent:", customerPayload);
     throw error;
   }
 };
 
-// export const updatePaidStatus = async () = {
+export const updatePaidStatus = async () => {
+  try {
+    const orderResponse = JSON.parse(
+      localStorage.getItem("orderResponse") || "[]"
+    );
 
-// }
+    if (!orderResponse || !orderResponse.id) {
+      console.error("No valid order found in localStorage");
+      return;
+    }
+
+    const updatedOrder = {
+      ...orderResponse,
+      paid: true,
+    };
+
+    const response = await axios.put(
+      `${API_URL}/orders/${orderResponse.id}`,
+      updatedOrder
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating order:", error);
+  }
+};

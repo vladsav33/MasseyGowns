@@ -61,11 +61,11 @@ const BuySelectRegalia = ({ setItems }) => {
     fetchSets();
   }, []);
 
-  // Get unique item types (categories)
+  // Get unique item types (categories) from purchasable items
   const itemTypes = React.useMemo(() => {
     const types = new Set();
     items.forEach((item) => {
-      if (item.category) {
+      if (item?.buyPrice != null && item.category) {
         types.add(item.category);
       }
     });
@@ -79,11 +79,15 @@ const BuySelectRegalia = ({ setItems }) => {
     const degrees = new Set();
     items.forEach((item) => {
       if (
+        item?.buyPrice != null &&
         item.category === selectedItemType &&
-        item.degreeId &&
-        item.degreeName
+        item.name
       ) {
-        degrees.add(item.degreeName);
+        const nameParts = item.name.split(" ");
+        if (nameParts.length > 1) {
+          const degree = nameParts.slice(1).join(" ");
+          if (degree) degrees.add(degree);
+        }
       }
     });
     return Array.from(degrees).sort();
@@ -95,22 +99,23 @@ const BuySelectRegalia = ({ setItems }) => {
 
     const filtered = items
       .filter((item) => {
+        if (item?.buyPrice == null) return false;
         if (item.category !== selectedItemType) return false;
 
-        // Check if item degree name contains the selected degree
-        return item.degreeName && item.degreeName.includes(selectedDegree);
+        // Check if item name contains the selected degree
+        return item.name && item.name.includes(selectedDegree);
       })
       .map((item, index) => ({
         ...item,
         uiId: `${item.degreeId}-${item.id}-${index}`,
       }));
 
-    // Remove duplicates based on degree id and category
+    // Remove duplicates based on name and category
     const uniqueItems = [];
     const seen = new Set();
     
     filtered.forEach((item) => {
-      const key = `${item.degreeId}-${item.category}`;
+      const key = `${item.name}-${item.category}`;
       if (!seen.has(key)) {
         seen.add(key);
         uniqueItems.push(item);
@@ -350,8 +355,11 @@ const BuySelectRegalia = ({ setItems }) => {
                                         Please select...
                                       </option>
                                       {option.choices.map((choice, idx) => (
-                                        <option key={idx} value={choice}>
-                                          {choice}
+                                        <option 
+                                          key={idx} 
+                                          value={typeof choice === 'object' ? choice.id : choice}
+                                        >
+                                          {typeof choice === 'object' ? choice.size || choice.name || JSON.stringify(choice) : choice}
                                         </option>
                                       ))}
                                     </select>
@@ -536,8 +544,11 @@ const BuySelectRegalia = ({ setItems }) => {
                                             Please select...
                                           </option>
                                           {option.choices.map((choice, idx) => (
-                                            <option key={idx} value={choice}>
-                                              {choice}
+                                            <option 
+                                              key={idx} 
+                                              value={typeof choice === 'object' ? choice.id : choice}
+                                            >
+                                              {typeof choice === 'object' ? choice.size || choice.name || JSON.stringify(choice) : choice}
                                             </option>
                                           ))}
                                         </select>

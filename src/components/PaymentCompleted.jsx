@@ -3,7 +3,7 @@ import "./PaymentCompleted.css";
 import { CreditCard, Eye } from "lucide-react";
 import jsPDF from "jspdf";
 import { Link } from "react-router-dom";
-// import { updatePaidStatus } from "./../services/HireBuyRegaliaService";
+import { updatePaidStatus } from "./../services/HireBuyRegaliaService";
 
 function PaymentCompleted() {
   // Success dialog state
@@ -53,12 +53,13 @@ function PaymentCompleted() {
   const handlePayment = () => {
     if (validateForm()) {
       setShowSuccessDialog(true);
-      // updatePaidStatus();
+      updatePaidStatus();
     }
   };
 
   const handleCloseSuccessDialog = () => {
     setShowSuccessDialog(false);
+    localStorage.removeItem("orderResponse");
   };
 
   const formatCardHolder = (value) => {
@@ -164,7 +165,6 @@ function PaymentCompleted() {
     alert(`Thanks ${data.firstName}! We'll record your details.`);
   };
 
-  // PaymentSuccessDialog component (inline)
   const PaymentSuccessDialog = ({ isOpen, onClose, paymentDetails }) => {
     // Close dialog with Escape key
     useEffect(() => {
@@ -202,24 +202,86 @@ function PaymentCompleted() {
       }
     };
 
-    const handleDownloadReceipt = () => {
+    const backBtn = async () => {
+      localStorage.removeItem("step");
+    }
+
+    const handleDownloadReceipt = (paymentDetails) => {
       const doc = new jsPDF();
 
-      doc.setFontSize(18);
-      doc.setTextColor(76, 175, 80);
+      // === Header ===
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(20);
+      doc.setTextColor(40, 40, 40);
       doc.text("PAYMENT RECEIPT", 105, 20, { align: "center" });
 
+      // === Subheading / Company Info ===
       doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100, 100, 100);
+      doc.text("Thank you for your payment!", 105, 28, { align: "center" });
+      doc.text("Massey University Regalia Hire Service", 105, 35, {
+        align: "center",
+      });
+
+      // === Divider Line ===
+      doc.setDrawColor(200, 200, 200);
+      doc.line(20, 40, 190, 40);
+
+      // === Payment Info Section ===
+      let y = 50;
+      const lineHeight = 10;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
       doc.setTextColor(0, 0, 0);
-      doc.text(`Transaction ID: ${paymentDetails.transactionId}`, 20, 40);
-      doc.text(`Date: ${paymentDetails.date}`, 20, 50);
-      doc.text(`Email: ${paymentDetails.email}`, 20, 60);
-      doc.text(`Payment Method: ${paymentDetails.paymentMethod}`, 20, 70);
-      doc.text(`Amount Paid: ${paymentDetails.amount}`, 20, 80);
+      doc.text("Payment Details", 20, y);
 
-      doc.text("✅ Thank you for your payment!", 20, 100);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+      y += lineHeight;
+      doc.text(`Transaction ID:`, 20, y);
+      doc.text(`${paymentDetails.transactionId}`, 80, y);
 
-      doc.save(`Payment_Receipt_${paymentDetails.transactionId}.pdf`);
+      y += lineHeight;
+      doc.text(`Date:`, 20, y);
+      doc.text(`${paymentDetails.date}`, 80, y);
+
+      y += lineHeight;
+      doc.text(`Email:`, 20, y);
+      doc.text(`${paymentDetails.email}`, 80, y);
+
+      y += lineHeight;
+      doc.text(`Payment Method:`, 20, y);
+      doc.text(`${paymentDetails.paymentMethod}`, 80, y);
+
+      y += lineHeight;
+      doc.text(`Amount Paid:`, 20, y);
+      doc.setTextColor(0, 128, 0);
+      doc.setFont("helvetica", "bold");
+      doc.text(`$${paymentDetails.amount}`, 80, y);
+
+      // === Divider ===
+      doc.setDrawColor(200, 200, 200);
+      y += 10;
+      doc.line(20, y, 190, y);
+
+      // === Footer / Thank You ===
+      y += 15;
+      doc.setFontSize(13);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(60, 60, 60);
+      doc.text("Thank you for your payment!", 105, y, { align: "center" });
+
+      y += 8;
+      doc.setFontSize(11);
+      doc.setTextColor(120, 120, 120);
+      doc.text("A copy of this receipt has been sent to your email.", 105, y, {
+        align: "center",
+      });
+
+      // === Save File ===
+      const filename = `Payment_Receipt_${paymentDetails.transactionId}.pdf`;
+      doc.save(filename);
     };
 
     const handleContinue = () => {
@@ -273,7 +335,7 @@ function PaymentCompleted() {
           <div className="dialog-actions">
             <button
               className="btnsPay btn-secondary"
-              onClick={handleDownloadReceipt}
+              onClick={() => handleDownloadReceipt(paymentDetails)}
             >
               Download PDF Receipt
             </button>
@@ -447,12 +509,12 @@ function PaymentCompleted() {
 
           {paymentComplete && (
             <div className="thank-you-message">
-              <h2>🎉 Thank you for your purchasing!</h2>
+              <h2> Thank you for your purchasing!</h2>
               <p>
                 Your payment was successful. A receipt has been sent to{" "}
                 <strong>{customerDetails.email}</strong>.
-                <br/>
-                <Link to="/" className="home-btn">
+                <br />
+                <Link to="/" className="home-btn" onClick={() => backBtn()}>
                   Back to Home
                 </Link>
               </p>

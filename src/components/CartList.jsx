@@ -123,11 +123,10 @@ function CartList({ step, items, setItems }) {
     .filter((item) => item.isDonation)
     .reduce((acc, item) => acc + (item.quantity || 1), 0);
 
-  const taxOnItems = totalPrice * 0.1;
-  const taxOnDonations = totalDonationPrice * 0.1;
+  // const taxOnItems = totalPrice * 0.1;
+  // const taxOnDonations = totalDonationPrice * 0.1;
 
-  const grandTotal =
-    totalPrice + totalDonationPrice + taxOnItems + taxOnDonations;
+  const grandTotal = totalPrice + totalDonationPrice;
 
   return (
     <div className="cart">
@@ -179,23 +178,23 @@ function CartList({ step, items, setItems }) {
                   <span>${totalPrice.toFixed(2)}</span>
                 </div>
 
-                <div className="summary-row">
+                {/* <div className="summary-row">
                   <span>Tax on Items (10%):</span>
                   <span>${taxOnItems.toFixed(2)}</span>
-                </div>
+                </div> */}
 
                 <div className="summary-row">
                   <span>Total Donation ({totalDonationCount} × $2):</span>
                   <span>${totalDonationPrice.toFixed(2)}</span>
                 </div>
 
-                <div className="summary-row">
+                {/* <div className="summary-row">
                   <span>Tax on Donations (10%):</span>
                   <span>${taxOnDonations.toFixed(2)}</span>
-                </div>
+                </div> */}
 
                 <div className="summary-row total">
-                  <span>Total Amount:</span>
+                  <span>Total Amount (Including GST):</span>
                   <span>${grandTotal.toFixed(2)}</span>
                 </div>
               </div>

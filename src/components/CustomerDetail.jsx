@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import "./CustomerDetail.css";
 import { Link } from "react-router-dom";
 import {
-  submitOrderDetails,
   submitCustomerDetails,
 } from "./../services/HireBuyRegaliaService.js";
 
@@ -92,7 +91,6 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       // Submit order details
       await Promise.all([
         submitCustomerDetails(formData),
-        // submitOrderDetails(cart),
       ]);
       
       console.log("Order submission completed successfully");
@@ -211,7 +209,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       {/* Left: Customer Form */}
       <div className="cusomer-details">
         <form onSubmit={handleSubmit} className="customer-form">
-          <h1 className="form-title">Place Order</h1>
+          <h1 className="order-form-title">Place Order</h1>
 
           {/* Email */}
           <div className="form-group">
@@ -503,7 +501,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
 
             {/* Total */}
             <div className="summary-total">
-              <span>Total</span>
+              <span>Total (Including GST)</span>
               <span>${total.toFixed(2)}</span>
             </div>
           </>
