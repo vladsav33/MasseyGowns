@@ -4,9 +4,9 @@ import { Link } from "react-router-dom";
 
 const items = [
   {
-    title: "Collection and Return Times",
-    desc: "Check your graduation's specific collection and return times, plus what to bring when picking up regalia.",
-    //href: "/faqs/collection-and-return-times",
+    title: "Ordering and Payment",
+    desc: "Find information on how to order, hire and purchase regalia, pricing, payment options, and other important graduation gown details.",
+    //href: "/faqs/ordering-and-payment",
     href: "/faqs",
   },
   {
@@ -22,9 +22,9 @@ const items = [
     href: "/faqs",
   },
   {
-    title: "Ordering and Payment",
-    desc: "Find information on how to order, hire and purchase regalia, pricing, payment options, and other important graduation gown details.",
-    //href: "/faqs/ordering-and-payment",
+    title: "Collection and Return Times",
+    desc: "Check your graduation's specific collection and return times, plus what to bring when picking up regalia.",
+    //href: "/faqs/collection-and-return-times",
     href: "/faqs",
   },
 ];
