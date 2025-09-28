@@ -100,29 +100,31 @@ function Navbar() {
     const analysis = {
       hasBuyItems: false,
       hasHireItems: false,
-      hasOnlyDonations: false
+      hasOnlyDonations: false,
     };
 
     // Filter out donations first
-    const nonDonationItems = cartItems.filter(item => !item.isDonation);
-    
+    const nonDonationItems = cartItems.filter((item) => !item.isDonation);
+
     if (nonDonationItems.length === 0) {
       analysis.hasOnlyDonations = true;
       return analysis;
     }
 
     // Check for buy items (items where isHiring is false or type indicates buying)
-    analysis.hasBuyItems = nonDonationItems.some(item => 
-      item.isHiring === false || 
-      (item.type === 'individual' && item.isHiring !== true) ||
-      (item.type === 'set' && item.isHiring !== true)
+    analysis.hasBuyItems = nonDonationItems.some(
+      (item) =>
+        item.isHiring === false ||
+        (item.type === "individual" && item.isHiring !== true) ||
+        (item.type === "set" && item.isHiring !== true)
     );
 
     // Check for hire items (items where isHiring is true or undefined/null - old hire items)
-    analysis.hasHireItems = nonDonationItems.some(item => 
-      item.isHiring === true || 
-      item.isHiring === undefined || 
-      item.isHiring === null
+    analysis.hasHireItems = nonDonationItems.some(
+      (item) =>
+        item.isHiring === true ||
+        item.isHiring === undefined ||
+        item.isHiring === null
     );
 
     return analysis;
@@ -131,7 +133,8 @@ function Navbar() {
   const handleViewCart = () => {
     setIsCartOpen(false);
 
-    const { hasBuyItems, hasHireItems, hasOnlyDonations } = analyzeCartContents();
+    const { hasBuyItems, hasHireItems, hasOnlyDonations } =
+      analyzeCartContents();
 
     // If cart is empty or only has donations, default behavior
     if (cartItems.length === 0 || hasOnlyDonations) {
@@ -151,7 +154,7 @@ function Navbar() {
       return;
     }
 
-    // Only hire items in cart → go to step 2 in hireRegalia  
+    // Only hire items in cart → go to step 2 in hireRegalia
     if (hasHireItems && !hasBuyItems) {
       navigate("/hireregalia", { state: { step: 2 } });
       return;
@@ -199,15 +202,34 @@ function Navbar() {
       </div>
       <ul className="navbar-menu">
         <li className="has-dropdown">
-          <Link to="/hireregalia" state={{ step: 1 }} className={`menu-link ${isActive("/hireregalia") ? "active" : ""}`}>
+          <Link
+            to="/hireregalia"
+            state={{ step: 1 }}
+            className={`menu-link ${isActive("/hireregalia") ? "active" : ""}`}
+          >
             HIRE REGALIA
           </Link>
         </li>
         <li className="has-dropdown">
-          <Link to="/buyregalia" state={{ step: 1 }} className={`menu-link ${isActive("/buyregalia") ? "active" : ""}`}>
+          <Link
+            to="/buyregalia"
+            state={{ step: 1 }}
+            className={`menu-link ${isActive("/buyregalia") ? "active" : ""}`}
+          >
             BUY REGALIA
           </Link>
         </li>
+
+        <li className="has-dropdown">
+          <Link
+            to="/hireregalia"
+            state={{ step: 1 }}
+            className={`menu-link ${isActive("/hireregalia") ? "active" : ""}`}
+          >
+            Casual Hire for Photos
+          </Link>
+        </li>
+
         <li>
           <Link to="/faqs" className={isActive("/faqs") ? "active" : ""}>
             FAQs

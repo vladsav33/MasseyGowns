@@ -26,16 +26,18 @@ function HomePage() {
               <h3>Charitable Trust Inc.</h3>
             </div>
             <p>
-              Home of academic dress for the Massey University graduations{" "}
+              Home of academic dress for the Massey University graduations
               <br /> and also for other institutions in the Central Districts.
             </p>
             <div className="options">
               <Link to="/hireregalia" className="HireRegalia">
                 Hire Regalia
               </Link>
-
               <Link to="/buyregalia" className="BuyRegalia">
                 Buy Regalia
+              </Link>
+              <Link to="/hireregalia" className="HireRegalia">
+                Casual Hire for Photos
               </Link>
             </div>
           </div>

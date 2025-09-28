@@ -12,7 +12,7 @@
 .bigbox {
   border-radius: 30px;
   display: flex;
-  background-color: #f4f6f5;
+  background-color: #ffffff;
   width: 85%;
   margin: 30px;
 }
@@ -43,7 +43,6 @@
   font-size: 5rem;
   color: black;
   margin: 0;
-  padding-left: 150px;
 }
 
 .hero h1 {
@@ -86,7 +85,6 @@
   font-weight: 100px;
   gap: 30px;
   padding-top: 30px;
-  padding-right: 50px;
 }
 
 .HireRegalia,
@@ -94,7 +92,7 @@
   color: white;
   padding: 20px;
   font-weight: bold;
-  font-size: x-large;
+  font-size: larger;
   background-color: black;
   border-radius: 10%;
 }

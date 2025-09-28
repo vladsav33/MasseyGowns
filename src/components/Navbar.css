@@ -29,7 +29,7 @@
   align-items: center;
   margin: 0;
   border-right: 4px solid rgb(255, 255, 255);
-  flex: 1 1 55%;
+  flex: 1 1 65%;
   flex-wrap: wrap;
   padding-right: 70px;
 }
@@ -46,7 +46,7 @@
   align-items: center;
   justify-content: center;
   font-size: 23px;
-  flex: 1 1 10%;
+  flex: 1 1 5%;
   padding: 0 20px;
   gap: 40px;
 }
@@ -382,15 +382,15 @@
     width: 280px;
     right: -50px;
   }
-  
+
   .cart-dropdown-item {
     padding: 10px 12px;
   }
-  
+
   .cart-item-name {
     font-size: 13px;
   }
-  
+
   .cart-item-details {
     flex-direction: column;
     gap: 2px;

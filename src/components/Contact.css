@@ -125,3 +125,8 @@
 .visaimg {
   padding-top: 50px;
 }
+
+.contactlink {
+  text-decoration: underline;
+  font-weight: bolder;
+}

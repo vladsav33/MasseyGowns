@@ -58,42 +58,13 @@ export default function Contact() {
       <div className="contact_inner">
         <div className="contact_left">
           <h2 className="contact_email">Email Contact</h2>
-
-          <form onSubmit={handleSubmit} className="contact_form" noValidate>
-            <input
-              className="honeypot"
-              autoComplete="off"
-              tabIndex="-1"
-              value={honeypot}
-              onChange={(e) => setHoneypot(e.target.value)}
-              placeholder="Leave this field empty"
-            />
-
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="contact_input"
-              aria-label="Email address"
-            />
-            <button type="submit" className="contact_button" disabled={loading}>
-              {loading ? "Sending..." : "Send"}
-            </button>
-          </form>
-
-          {msg.text ? (
-            <div
-              className={`contact_msg ${
-                msg.type === "success" ? "success" : "error"
-              }`}
-              role="status"
-              aria-live="polite"
-            >
-              {msg.text}
-            </div>
-          ) : null}
+          <p className="clickhere">
+            You can click here{" "}
+            <Link to="/contactus" className="contactlink">
+              Contact Us
+            </Link>
+            , and then send us your queries.
+          </p>
           <div className="footer_pay">
             <img src="/visa.png" alt="visa&master" className="visaimg" />
           </div>
