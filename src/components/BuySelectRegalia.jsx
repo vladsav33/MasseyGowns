@@ -85,7 +85,7 @@ const BuySelectRegalia = ({ setItems }) => {
       ) {
         const nameParts = item.name.split(" ");
         if (nameParts.length > 1) {
-          const degree = nameParts.slice(1).join(" "); // Everything after the first word
+          const degree = nameParts.slice(1).join(" ");
           if (degree) degrees.add(degree);
         }
       }
@@ -97,7 +97,7 @@ const BuySelectRegalia = ({ setItems }) => {
   const filteredItems = React.useMemo(() => {
     if (!selectedItemType || !selectedDegree) return [];
 
-    return items
+    const filtered = items
       .filter((item) => {
         if (item?.buyPrice == null) return false;
         if (item.category !== selectedItemType) return false;
@@ -108,8 +108,21 @@ const BuySelectRegalia = ({ setItems }) => {
       .map((item, index) => ({
         ...item,
         uiId: `${item.degreeId}-${item.id}-${index}`,
-      }))
-      .sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
+      }));
+
+    // Remove duplicates based on name and category
+    const uniqueItems = [];
+    const seen = new Set();
+    
+    filtered.forEach((item) => {
+      const key = `${item.name}-${item.category}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueItems.push(item);
+      }
+    });
+
+    return uniqueItems.sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
   }, [items, selectedItemType, selectedDegree]);
 
   // Reset degree selection when item type changes
@@ -342,8 +355,11 @@ const BuySelectRegalia = ({ setItems }) => {
                                         Please select...
                                       </option>
                                       {option.choices.map((choice, idx) => (
-                                        <option key={idx} value={choice}>
-                                          {choice}
+                                        <option 
+                                          key={idx} 
+                                          value={typeof choice === 'object' ? choice.id : choice}
+                                        >
+                                          {typeof choice === 'object' ? choice.value || choice.name || JSON.stringify(choice) : choice}
                                         </option>
                                       ))}
                                     </select>
@@ -528,8 +544,11 @@ const BuySelectRegalia = ({ setItems }) => {
                                             Please select...
                                           </option>
                                           {option.choices.map((choice, idx) => (
-                                            <option key={idx} value={choice}>
-                                              {choice}
+                                            <option 
+                                              key={idx} 
+                                              value={typeof choice === 'object' ? choice.id : choice}
+                                            >
+                                              {typeof choice === 'object' ? choice.value || choice.name || JSON.stringify(choice) : choice}
                                             </option>
                                           ))}
                                         </select>

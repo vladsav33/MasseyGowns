@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import "./CustomerDetail.css";
 import { Link } from "react-router-dom";
 import {
-  submitOrderDetails,
   submitCustomerDetails,
 } from "./../services/HireBuyRegaliaService.js";
 
@@ -79,26 +78,49 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
   };
 
   const handleSubmit = async (e) => {
-    if (step < steps.length) {
-      const newStep = step + 1;
-      setStep(newStep);
-      localStorage.setItem("step", newStep);
-      e.preventDefault();
-      // console.log("Form submitted:", formData);
-      localStorage.setItem("customerDetails", JSON.stringify(formData));
-      try {
-        // Wait for both submissions to complete
-        const cart = localStorage.getItem("cart");
-        await Promise.all([
-          // submitOrderDetails(cart),
-          submitCustomerDetails(formData),
-        ]);
-        // localStorage.removeItem("cart");
-        console.log("Both submissions completed successfully");
-      } catch (error) {
-        console.error("Error during submission:", error);
-        // Handle error (show user message, etc.)
+    e.preventDefault();
+    
+    // Store customer details
+    localStorage.setItem("customerDetails", JSON.stringify(formData));
+    
+    try {
+      // Get the current cart
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      console.log("Cart before submission:", cart);
+      
+      // Submit order details
+      await Promise.all([
+        submitCustomerDetails(formData),
+      ]);
+      
+      console.log("Order submission completed successfully");
+      
+      // Clear the cart after successful submission
+      localStorage.removeItem("cart");
+      localStorage.removeItem("item");
+      localStorage.removeItem("selectedCeremonyId");
+      localStorage.removeItem("selectedCourseId");
+      
+      // Dispatch cart update event to notify other components (like Navbar)
+      window.dispatchEvent(new Event("cartUpdated"));
+      
+      // Proceed to next step
+      if (step < steps.length) {
+        const newStep = step + 1;
+        setStep(newStep);
+        localStorage.setItem("step", newStep);
+        
+        // Scroll to top for better UX
+        window.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: "smooth",
+        });
       }
+      
+    } catch (error) {
+      console.error("Error during order submission:", error);
+      alert("There was an error submitting your order. Please try again.");
     }
   };
 
@@ -139,8 +161,8 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
         const list = Object.entries(obj)
           .map(([code, v]) => ({
             label: v?.country ?? "",
-            value: code, // ISO-2
-            flag: "", // FIRST doesn't include flags
+            value: code,
+            flag: "",
           }))
           .filter((c) => c.label && c.value)
           .sort((a, b) => a.label.localeCompare(b.label));
@@ -187,7 +209,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       {/* Left: Customer Form */}
       <div className="cusomer-details">
         <form onSubmit={handleSubmit} className="customer-form">
-          <h1 className="form-title">Place Order</h1>
+          <h1 className="order-form-title">Place Order</h1>
 
           {/* Email */}
           <div className="form-group">
@@ -393,16 +415,6 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
                 <span>Purchase Order (University Staff only)</span>
               </label>
               {formData.paymentMethod === "3" && (
-                // <input
-                //   type="text"
-                //   name="purchaseOrder"
-                //   value={formData.purchaseOrder}
-                //   onChange={handleInputChange}
-                //   placeholder="Purchase Order #"
-                //   className="form-input purchase-order-input"
-                //   required
-                // />
-                // In your JSX:
                 <input
                   type="text"
                   name="purchaseOrder"
@@ -412,7 +424,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
                   onClick={handlePurchaseOrderInteraction}
                   onFocus={handlePurchaseOrderInteraction}
                   onSelect={handlePurchaseOrderInteraction}
-                  onKeyUp={handlePurchaseOrderInteraction} // Catch arrow key releases
+                  onKeyUp={handlePurchaseOrderInteraction}
                   placeholder="Enter ID after PN"
                   className="form-input purchase-order-input"
                   required
@@ -489,7 +501,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
 
             {/* Total */}
             <div className="summary-total">
-              <span>Total</span>
+              <span>Total (Including GST)</span>
               <span>${total.toFixed(2)}</span>
             </div>
           </>

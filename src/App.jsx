@@ -7,6 +7,12 @@ import FAQPage from "./pages/FAQPage";
 import ContactUS from "./pages/ContactUS.jsx";
 import TermsAndConditions from "./pages/TermsAndConditions.jsx";
 import HireprocessWrapper from "./components/HireprocessWrapper.jsx";
+import ExtractOrder from "./components/ExtractOrder.jsx";
+import Authentication from "./components/Authentication.jsx";
+import AdminConsole from "./components/AdminConsole.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import AdminEditCeremonies from "./components/AdminEditCeremonies.jsx";
+import AdminExtractOrders from "./components/AdminExtractOrders.jsx";
 
 export default function App() {
   return (
@@ -19,6 +25,18 @@ export default function App() {
       <Route path="/contactus" element={<ContactUS />} />
       <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
       <Route path="/hireregalia/:degree" element={<HireprocessWrapper />} />
+      <Route path="/admin" element={<AdminConsole />} />
+      <Route path="/login" element={<Authentication />}/>
+      <Route path="/admineditceremonies" element={
+        <ProtectedRoute>
+          <AdminEditCeremonies/>
+        </ProtectedRoute>
+      }/>
+      <Route path="/adminextractorders" element={
+        <ProtectedRoute>
+          <AdminExtractOrders/>
+        </ProtectedRoute>
+      }/>
     </Routes>
   );
 }

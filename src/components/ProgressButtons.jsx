@@ -18,21 +18,28 @@ function ProgressButtons({
   let isOnlyBuy = true;
 
   cartData?.forEach((item) => {
-    if (item.isHiring) {
+    if (item.isDonation) {
       isOnlyHire = true;
-      isOnlyBuy = false;
-    }
-    else {
-      isOnlyHire = false;
       isOnlyBuy = true;
+    } else {
+      if (item.isHiring) {
+        isOnlyHire = true;
+        isOnlyBuy = false;
+      } else {
+        isOnlyHire = false;
+        isOnlyBuy = true;
+      }
     }
     if (item.options?.length > 0) {
       // Check if selectedOptions exists and is not empty
-      if (!item.selectedOptions || Object.keys(item.selectedOptions).length === 0) {
+      if (
+        !item.selectedOptions ||
+        Object.keys(item.selectedOptions).length === 0
+      ) {
         isDropdownSelected = false;
         return;
       }
-      
+
       // Check if all required options have values
       item.options.forEach((option) => {
         const selectedValue = item.selectedOptions[option.label];
@@ -83,13 +90,14 @@ function ProgressButtons({
         <div>
           {!areAllOptionsSelected() && (
             <div className="dropDownLabel">
-              Please select all required options for your items before proceeding...
+              Please select all required options for your items before
+              proceeding...
             </div>
           )}
 
           <div className="btns">
             {/* Prev Button (only if step > 1) */}
-            {step > 1 && (
+            {step > 1 && step < 4 && (
               <button
                 className="btn prev"
                 onClick={handlePrev}
@@ -129,13 +137,14 @@ function ProgressButtons({
         <div>
           {!isDropdownSelected && (
             <div className="dropDownLabel">
-              Please select all required options for your items before proceeding.
+              Please select all required options for your items before
+              proceeding.
             </div>
           )}
           <div className="btns">
             {/* Buy Regalia */}
             {/* Prev */}
-            {step > 1 && (
+            {step > 1 && step < 4 && (
               <button
                 className="btn prev"
                 onClick={handlePrev}
@@ -161,7 +170,7 @@ function ProgressButtons({
                 disabled={
                   step === steps.length ||
                   step === 3 ||
-                  (cart === 0) ||
+                  cart === 0 ||
                   !isOnlyBuy ||
                   !isDropdownSelected
                 }

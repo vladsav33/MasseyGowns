@@ -1,9 +1,9 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import tailwind from "@tailwindcss/postcss";
+import tailwindcss from "@tailwindcss/vite";
 import autoprefixer from "autoprefixer";
 
 export default defineConfig({
-  plugins: [react()],
-  css: { postcss: { plugins: [tailwind(), autoprefixer()] } },
+  plugins: [react(), tailwindcss(),],
+  css: { postcss: { plugins: [autoprefixer()] } },
 });

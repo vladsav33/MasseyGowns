@@ -1,19 +1,26 @@
 import React, { useState, useEffect } from "react";
 import "./PaymentCompleted.css";
 import { CreditCard, Eye } from "lucide-react";
+import jsPDF from "jspdf";
+import { Link } from "react-router-dom";
+import { updatePaidStatus } from "./../services/HireBuyRegaliaService";
 
 function PaymentCompleted() {
   // Success dialog state
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [showPaymentCard, setShowPaymentCard] = useState(true);
+  const [paymentComplete, setPaymentComplete] = useState(false);
 
   // Card Payment
   const [formData, setFormData] = useState({
+    cardHolder: "",
     cardNumber: "",
     expiryDate: "",
     cvv: "",
   });
 
   const [errors, setErrors] = useState({
+    cardHolder: false,
     cardNumber: false,
     expiryDate: false,
     cvv: false,
@@ -30,7 +37,10 @@ function PaymentCompleted() {
 
   const validateForm = () => {
     const newErrors = {
-      cardNumber: !formData.cardNumber || formData.cardNumber.length < 16,
+      cardHolder: !formData.cardHolder || formData.cardHolder.trim().length < 2,
+      cardNumber:
+        !formData.cardNumber ||
+        formData.cardNumber.replace(/\s/g, "").length < 16,
       expiryDate:
         !formData.expiryDate || !/^\d{2}\/\d{2}$/.test(formData.expiryDate),
       cvv: !formData.cvv || formData.cvv.length < 3,
@@ -43,11 +53,18 @@ function PaymentCompleted() {
   const handlePayment = () => {
     if (validateForm()) {
       setShowSuccessDialog(true);
+      updatePaidStatus();
     }
   };
 
   const handleCloseSuccessDialog = () => {
     setShowSuccessDialog(false);
+    localStorage.removeItem("orderResponse");
+  };
+
+  const formatCardHolder = (value) => {
+    // Allow only letters, spaces, hyphens, and apostrophes
+    return value.replace(/[^a-zA-Z\s\-']/g, "").substring(0, 50);
   };
 
   const formatCardNumber = (value) => {
@@ -148,7 +165,6 @@ function PaymentCompleted() {
     alert(`Thanks ${data.firstName}! We'll record your details.`);
   };
 
-  // PaymentSuccessDialog component (inline)
   const PaymentSuccessDialog = ({ isOpen, onClose, paymentDetails }) => {
     // Close dialog with Escape key
     useEffect(() => {
@@ -186,35 +202,92 @@ function PaymentCompleted() {
       }
     };
 
-    const handleDownloadReceipt = () => {
-      const receiptContent = `
-        PAYMENT RECEIPT
-        ===============
+    const backBtn = async () => {
+      localStorage.removeItem("step");
+    }
 
-        Transaction ID: ${paymentDetails.transactionId}
-        Date: ${paymentDetails.date}
-        Amount: ${paymentDetails.amount}
-        Payment Method: ${paymentDetails.paymentMethod}
+    const handleDownloadReceipt = (paymentDetails) => {
+      const doc = new jsPDF();
 
-        Thank you for your purchase!
-        Academic Dress Hire
-        Email: info@masseygowns.org.nz
-        Phone: +64 6 350 4166
-      `.trim();
+      // === Header ===
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(20);
+      doc.setTextColor(40, 40, 40);
+      doc.text("PAYMENT RECEIPT", 105, 20, { align: "center" });
 
-      const blob = new Blob([receiptContent], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `receipt-${paymentDetails.transactionId}.txt`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      // === Subheading / Company Info ===
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100, 100, 100);
+      doc.text("Thank you for your payment!", 105, 28, { align: "center" });
+      doc.text("Massey University Regalia Hire Service", 105, 35, {
+        align: "center",
+      });
+
+      // === Divider Line ===
+      doc.setDrawColor(200, 200, 200);
+      doc.line(20, 40, 190, 40);
+
+      // === Payment Info Section ===
+      let y = 50;
+      const lineHeight = 10;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.setTextColor(0, 0, 0);
+      doc.text("Payment Details", 20, y);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+      y += lineHeight;
+      doc.text(`Transaction ID:`, 20, y);
+      doc.text(`${paymentDetails.transactionId}`, 80, y);
+
+      y += lineHeight;
+      doc.text(`Date:`, 20, y);
+      doc.text(`${paymentDetails.date}`, 80, y);
+
+      y += lineHeight;
+      doc.text(`Email:`, 20, y);
+      doc.text(`${paymentDetails.email}`, 80, y);
+
+      y += lineHeight;
+      doc.text(`Payment Method:`, 20, y);
+      doc.text(`${paymentDetails.paymentMethod}`, 80, y);
+
+      y += lineHeight;
+      doc.text(`Amount Paid:`, 20, y);
+      doc.setTextColor(0, 128, 0);
+      doc.setFont("helvetica", "bold");
+      doc.text(`$${paymentDetails.amount}`, 80, y);
+
+      // === Divider ===
+      doc.setDrawColor(200, 200, 200);
+      y += 10;
+      doc.line(20, y, 190, y);
+
+      // === Footer / Thank You ===
+      y += 15;
+      doc.setFontSize(13);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(60, 60, 60);
+      doc.text("Thank you for your payment!", 105, y, { align: "center" });
+
+      y += 8;
+      doc.setFontSize(11);
+      doc.setTextColor(120, 120, 120);
+      doc.text("A copy of this receipt has been sent to your email.", 105, y, {
+        align: "center",
+      });
+
+      // === Save File ===
+      const filename = `Payment_Receipt_${paymentDetails.transactionId}.pdf`;
+      doc.save(filename);
     };
 
     const handleContinue = () => {
       onClose();
+      setShowPaymentCard(false); // hide payment form
+      setPaymentComplete(true); // show thank-you message
     };
 
     if (!isOpen) return null;
@@ -262,9 +335,9 @@ function PaymentCompleted() {
           <div className="dialog-actions">
             <button
               className="btnsPay btn-secondary"
-              onClick={handleDownloadReceipt}
+              onClick={() => handleDownloadReceipt(paymentDetails)}
             >
-              Download Receipt
+              Download PDF Receipt
             </button>
             <button
               className="btnsPay btn-primary"
@@ -294,157 +367,138 @@ function PaymentCompleted() {
               <option>English</option>
             </select>
           </div>
-
-          <div className="payment-content">
-            {/* Payment Form Card */}
-            <div className="payment-form-card">
-              <div className="form-header">
-                <CreditCard className="form-icon" />
-                <h2 className="form-title">Pay with card</h2>
-              </div>
-
-              <div className="form-fields">
-                {/* Card Name */}
-                <div className="field-group">
-                  <label className="field-label">Cardholder Name</label>
-                  <div className="input-wrapper">
-                    <input
-                      type="text"
-                      placeholder="Cardholder Name"
-                      value={formData.cardHolder}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "cardHolder",
-                          formatCardName(e.target.value)
-                        )
-                      }
-                      className={`field-input ${
-                        errors.cardHolder ? "field-error" : ""
-                      }`}
-                      maxLength="19"
-                    />
-                    <div className="input-icon">
-                      <CreditCard className="icon" />
-                    </div>
-                  </div>
-                  {errors.cardHolder && (
-                    <p className="error-message">
-                      Cardholder Name is not valid
-                    </p>
-                  )}
+          {showPaymentCard && (
+            <div className="payment-content">
+              {/* Payment Form Card */}
+              <div className="payment-form-card">
+                <div className="form-header">
+                  <CreditCard className="form-icon" />
+                  <h2 className="form-title">Pay with card</h2>
                 </div>
 
-                {/* Card Number */}
-                <div className="field-group">
-                  <label className="field-label">Card number</label>
-                  <div className="input-wrapper">
-                    <input
-                      type="text"
-                      placeholder="Your card number"
-                      value={formData.cardNumber}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "cardNumber",
-                          formatCardNumber(e.target.value)
-                        )
-                      }
-                      className={`field-input ${
-                        errors.cardNumber ? "field-error" : ""
-                      }`}
-                      maxLength="19"
-                    />
-                    <div className="input-icon">
-                      <CreditCard className="icon" />
-                    </div>
-                  </div>
-                  {errors.cardNumber && (
-                    <p className="error-message">Card number is not valid</p>
-                  )}
-                </div>
-
-                {/* Expiration Date and CVV */}
-                <div className="field-row">
+                <div className="form-fields">
+                  {/* Card Holder Name */}
                   <div className="field-group">
-                    <label className="field-label">Expiration date</label>
-                    <input
-                      type="text"
-                      placeholder="MM/YY"
-                      value={formData.expiryDate}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "expiryDate",
-                          formatExpiryDate(e.target.value)
-                        )
-                      }
-                      className={`field-input ${
-                        errors.expiryDate ? "field-error" : ""
-                      }`}
-                      maxLength="5"
-                    />
-                    {errors.expiryDate && (
+                    <label className="field-label">Cardholder Name</label>
+                    <div className="input-wrapper">
+                      <input
+                        type="text"
+                        placeholder="Enter cardholder name"
+                        value={formData.cardHolder}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "cardHolder",
+                            formatCardHolder(e.target.value)
+                          )
+                        }
+                        className={`field-input ${
+                          errors.cardHolder ? "field-error" : ""
+                        }`}
+                        maxLength="50"
+                      />
+                      <div className="input-icon">
+                        <CreditCard className="icon" />
+                      </div>
+                    </div>
+                    {errors.cardHolder && (
                       <p className="error-message">
-                        Expiration month must be a value between 01 and 12
+                        Cardholder name is required
                       </p>
                     )}
                   </div>
 
-                  {/* <div className="field-group">
-                    <label className="field-label">CVV</label>
+                  {/* Card Number */}
+                  <div className="field-group">
+                    <label className="field-label">Card number</label>
                     <div className="input-wrapper">
                       <input
                         type="text"
-                        placeholder="CVV"
-                        value={formData.cvv}
-                        onChange={(e) => handleInputChange('cvv', e.target.value.replace(/\D/g, ''))}
-                        className={`field-input ${errors.cvv ? 'field-error' : ''}`}
-                        maxLength="3"
-                      />
-                      <div className="input-icon">
-                        <Eye className="icon" />
-                      </div>
-                    </div>
-                    {errors.cvv && (
-                      <p className="error-message">CVV is required</p>
-                    )}
-                  </div> */}
-
-                  <div className="field-group">
-                    <label className="field-label">CVV</label>
-                    <div className="input-wrapper">
-                      <input
-                        type="password" // mask input automatically
-                        placeholder="CVV"
-                        value={formData.cvv}
+                        placeholder="Your card number"
+                        value={formData.cardNumber}
                         onChange={(e) =>
                           handleInputChange(
-                            "cvv",
-                            e.target.value.replace(/\D/g, "")
+                            "cardNumber",
+                            formatCardNumber(e.target.value)
                           )
                         }
                         className={`field-input ${
-                          errors.cvv ? "field-error" : ""
+                          errors.cardNumber ? "field-error" : ""
                         }`}
-                        maxLength="3"
+                        maxLength="19"
                       />
+                      <div className="input-icon">
+                        <CreditCard className="icon" />
+                      </div>
                     </div>
-                    {errors.cvv && (
-                      <p className="error-message">CVV is required</p>
+                    {errors.cardNumber && (
+                      <p className="error-message">Card number is not valid</p>
                     )}
                   </div>
+
+                  {/* Expiration Date and CVV */}
+                  <div className="field-row">
+                    <div className="field-group">
+                      <label className="field-label">Expiration date</label>
+                      <input
+                        type="text"
+                        placeholder="MM/YY"
+                        value={formData.expiryDate}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "expiryDate",
+                            formatExpiryDate(e.target.value)
+                          )
+                        }
+                        className={`field-input ${
+                          errors.expiryDate ? "field-error" : ""
+                        }`}
+                        maxLength="5"
+                      />
+                      {errors.expiryDate && (
+                        <p className="error-message">
+                          Expiration date must be valid (MM/YY)
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="field-group">
+                      <label className="field-label">CVV</label>
+                      <div className="input-wrapper">
+                        <input
+                          type="password" // mask input automatically
+                          placeholder="CVV"
+                          value={formData.cvv}
+                          onChange={(e) =>
+                            handleInputChange(
+                              "cvv",
+                              e.target.value.replace(/\D/g, "")
+                            )
+                          }
+                          className={`field-input ${
+                            errors.cvv ? "field-error" : ""
+                          }`}
+                          maxLength="4"
+                        />
+                      </div>
+                      {errors.cvv && (
+                        <p className="error-message">CVV is required</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Pay Button */}
+                  <button onClick={handlePayment} className="pay-button">
+                    Pay ${totals.grandTotal || 0}
+                  </button>
                 </div>
 
-                {/* Pay Button */}
-                <button onClick={handlePayment} className="pay-button">
-                  Pay ${totals.grandTotal || 0}
-                </button>
-              </div>
-
-              {/* Footer */}
-              <div className="form-footer">
-                <div className="footer-text">Secure payments provided by</div>
+                {/* Footer */}
+                <div className="form-footer">
+                  <div className="footer-text">Secure payments provided by</div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Success Dialog */}
           <PaymentSuccessDialog
@@ -452,6 +506,20 @@ function PaymentCompleted() {
             onClose={handleCloseSuccessDialog}
             paymentDetails={paymentDetails}
           />
+
+          {paymentComplete && (
+            <div className="thank-you-message">
+              <h2> Thank you for your purchasing!</h2>
+              <p>
+                Your payment was successful. A receipt has been sent to{" "}
+                <strong>{customerDetails.email}</strong>.
+                <br />
+                <Link to="/" className="home-btn" onClick={() => backBtn()}>
+                  Back to Home
+                </Link>
+              </p>
+            </div>
+          )}
         </div>
       ) : (
         <div className="oc-wrap">

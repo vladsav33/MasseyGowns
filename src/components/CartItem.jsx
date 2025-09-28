@@ -14,9 +14,9 @@ function CartItem({
   const [showTooltip, setShowTooltip] = useState(false);
 
   const unitPrice = parseFloat(item.hirePrice || 0);
-  const subtotal = unitPrice * quantity;
-  const tax = subtotal * 0.1;
-  const total = subtotal + tax;
+  const total = unitPrice * quantity;
+  // const tax = subtotal * 0.1;
+  // const total = subtotal + tax;
 
   return (
     <div className="cart-item item-image-container">
@@ -66,8 +66,14 @@ function CartItem({
                 >
                   <option value="">Please select...</option>
                   {option.choices.map((choice, idx) => (
-                    <option key={idx} value={choice}>
-                      {choice}
+                    <option 
+                      key={idx} 
+                      value={typeof choice === 'object' ? choice.id || choice.value : choice}
+                    >
+                      {typeof choice === 'object' 
+                        ? choice.value || choice.size || choice.name || JSON.stringify(choice) 
+                        : choice
+                      }
                     </option>
                   ))}
                 </select>
@@ -89,7 +95,13 @@ function CartItem({
                 <div key={index} className="option-row">
                   <span className="option-label">{option.label}:</span>
                   <span className="option-value">
-                    {item.selectedOptions?.[option.label] || "—"}
+                    {typeof item.selectedOptions?.[option.label] === 'object'
+                      ? item.selectedOptions[option.label]?.value || 
+                        item.selectedOptions[option.label]?.size ||
+                        item.selectedOptions[option.label]?.name ||
+                        JSON.stringify(item.selectedOptions[option.label])
+                      : item.selectedOptions?.[option.label] || "—"
+                    }
                   </span>
                 </div>
               ))}
@@ -106,16 +118,16 @@ function CartItem({
               <span>Quantity:</span>
               <span>{quantity}</span>
             </div>
-            <div className="price-row">
+            {/* <div className="price-row">
               <span>Subtotal:</span>
               <span>${subtotal.toFixed(2)}</span>
-            </div>
-            <div className="price-row">
+            </div> */}
+            {/* <div className="price-row">
               <span>Tax (10%):</span>
               <span>${tax.toFixed(2)}</span>
-            </div>
+            </div> */}
             <div className="price-row total-row">
-              <span>Total:</span>
+              <span>Total (Including GST):</span>
               <span>${total.toFixed(2)}</span>
             </div>
           </div>

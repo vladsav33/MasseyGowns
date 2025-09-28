@@ -778,3 +778,23 @@
     width: 100%;
   }
 }
+
+.thank-you-container {
+  text-align: center;
+  padding: 40px;
+}
+
+.home-btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 12px 24px;
+  background: #4caf50;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.home-btn:hover {
+  background: #43a047;
+}
