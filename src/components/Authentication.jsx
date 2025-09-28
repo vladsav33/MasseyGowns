@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_GOWN_API_BASE;
+
 function ProtectedRoute({ children }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [username, setUsername] = useState("");
@@ -19,7 +21,7 @@ function ProtectedRoute({ children }) {
         e.preventDefault();
         console.log(username, password);
         try {
-            const res = await axios.post("http://localhost:5144/api/auth/login", {
+            const res = await axios.post(`${API_URL}/api/auth/login`, {
                 username,
                 password,
             });

@@ -359,7 +359,7 @@ const BuySelectRegalia = ({ setItems }) => {
                                           key={idx} 
                                           value={typeof choice === 'object' ? choice.id : choice}
                                         >
-                                          {typeof choice === 'object' ? choice.size || choice.name || JSON.stringify(choice) : choice}
+                                          {typeof choice === 'object' ? choice.value || choice.name || JSON.stringify(choice) : choice}
                                         </option>
                                       ))}
                                     </select>
@@ -548,7 +548,7 @@ const BuySelectRegalia = ({ setItems }) => {
                                               key={idx} 
                                               value={typeof choice === 'object' ? choice.id : choice}
                                             >
-                                              {typeof choice === 'object' ? choice.size || choice.name || JSON.stringify(choice) : choice}
+                                              {typeof choice === 'object' ? choice.value || choice.name || JSON.stringify(choice) : choice}
                                             </option>
                                           ))}
                                         </select>

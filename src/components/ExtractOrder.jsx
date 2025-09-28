@@ -46,6 +46,13 @@ export default function OrdersToCSV() {
 
         data.forEach((item) => {
             // console.log(item);
+            const flatItems = item.items.map(obj =>
+                Object.entries(obj)
+                    .map(([k, v]) => `${k}:${v === null ? "null" : v}`)
+                    .join(", ")
+            );
+            const csvSafe = flatItems.map(flat => `${flat}`).join(",");
+
             rows.push({
                 OrderId: item.id,
                 FirstName: item.firstName,
@@ -63,6 +70,7 @@ export default function OrdersToCSV() {
                 PaymentMethod: item.paymentMethod,
                 PurchaseOrder: item.purchaseOrder,
                 OrderDate: item.orderDate,
+                Items: csvSafe
             });
         });
 
