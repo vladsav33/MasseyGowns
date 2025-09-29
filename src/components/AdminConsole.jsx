@@ -5,8 +5,9 @@ import Navbar from "./Navbar.jsx";
 import AdminEditCeremonies from "./AdminEditCeremonies.jsx";
 import AdminNavbar from "./AdminNavbar.jsx";
 
-export default function OrdersToCSV() {
+export default function AdminConsole() {
     localStorage.removeItem("token"); // Remove it later
+    // console.log("Admin Console");
     return (
         <div>
         <Authentication>
