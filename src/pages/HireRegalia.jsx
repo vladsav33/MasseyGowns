@@ -194,7 +194,10 @@ function HireRegalia() {
   return (
     <div className="content">
       <Navbar />
-      <ProgressBar step={step} steps={steps} />
+      <br/>
+      <br/>
+      <br/>
+      <ProgressBar step={step} steps={steps} className="progressbar"/>
       <ProgressButtons
         action={action}
         step={step}

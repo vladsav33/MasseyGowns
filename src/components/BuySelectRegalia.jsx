@@ -178,7 +178,7 @@ const BuySelectRegalia = ({ setItems }) => {
 
     const selectedOptions = itemOptions[product.uiId] || {};
     const newItem = {
-      id: `${product.degreeId ?? "NA"}-${product.id}-${Date.now()}`,
+      id: product.id,
       name: product.name,
       category: product.category,
       description: product.description,
@@ -211,7 +211,7 @@ const BuySelectRegalia = ({ setItems }) => {
 
     const selectedOptions = itemOptions[`set-${setItem.id}`] || {};
     const newItem = {
-      id: `set-${setItem.id}-${Date.now()}`,
+      id: setItem.id,
       name: setItem.name,
       category: setItem.category || "Set",
       description: setItem.description,
