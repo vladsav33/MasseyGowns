@@ -47,7 +47,9 @@ function BuyRegalia() {
       <div className="content">
         <Navbar />
         <div></div>
-        {/* <h2>Buy Regalia</h2> */}
+        <br/>
+      <br/>
+      <br/>
         <ProgressBar step={step} steps={steps} />
         <ProgressButtons
           action={action}
