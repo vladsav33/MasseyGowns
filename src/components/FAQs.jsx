@@ -4,24 +4,28 @@ import { Link } from "react-router-dom";
 
 const items = [
   {
-    title: "Collection and Return Times",
-    desc: "Check your graduation's specific collection and return times, plus what to bring when picking up regalia.",
-    href: "/faqs/collection-and-return-times",
+    title: "Ordering and Payment",
+    desc: "Find information on how to order, hire and purchase regalia, pricing, payment options, and other important graduation gown details.",
+    //href: "/faqs/ordering-and-payment",
+    href: "/faqs",
   },
   {
     title: "Sizes and Fitting",
     desc: "Learn about gown sizing, fitting, collection, and what to bring when picking up or returning your graduation regalia.",
-    href: "/faqs/sizes-and-fitting",
+    //href: "/faqs/sizes-and-fitting",
+    href: "/faqs",
   },
   {
     title: "What to Wear",
     desc: "Find out what regalia to wear for your graduation, including gowns, hoods, hats, and institution-specific requirements.",
-    href: "/faqs/what-to-wear",
+    //href: "/faqs/what-to-wear",
+    href: "/faqs",
   },
   {
-    title: "Ordering and Payment",
-    desc: "Find information on how to order, hire and purchase regalia, pricing, payment options, and other important graduation gown details.",
-    href: "/faqs/ordering-and-payment",
+    title: "Collection and Return Times",
+    desc: "Check your graduation's specific collection and return times, plus what to bring when picking up regalia.",
+    //href: "/faqs/collection-and-return-times",
+    href: "/faqs",
   },
 ];
 

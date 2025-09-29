@@ -29,9 +29,6 @@ function Ceremony() {
               All graduands are required to wear academic regalia at the
               graduation ceremony.
             </p>
-            <a href="#" className="cere_link">
-              Read More
-            </a>
           </div>
         </div>
       </div>
