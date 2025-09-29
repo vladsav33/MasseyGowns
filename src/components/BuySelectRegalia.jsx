@@ -76,18 +76,28 @@ const BuySelectRegalia = ({ setItems }) => {
   const availableDegrees = React.useMemo(() => {
     if (!selectedItemType) return [];
 
+    // const degrees = new Set();
+    // items.forEach((item) => {
+    //   if (
+    //     item?.buyPrice != null &&
+    //     item.category === selectedItemType &&
+    //     item.name
+    //   ) {
+    //     const nameParts = item.name.split(" ");
+    //     if (nameParts.length > 1) {
+    //       const degree = nameParts.slice(1).join(" ");
+    //       if (degree) degrees.add(degree);
+    //     }
+    //   }
+    // });
     const degrees = new Set();
     items.forEach((item) => {
       if (
-        item?.buyPrice != null &&
-        item.category === selectedItemType &&
-        item.name
+          item.category === selectedItemType &&
+          item.degreeId &&
+          item.degreeName
       ) {
-        const nameParts = item.name.split(" ");
-        if (nameParts.length > 1) {
-          const degree = nameParts.slice(1).join(" ");
-          if (degree) degrees.add(degree);
-        }
+        degrees.add(item.degreeName);
       }
     });
     return Array.from(degrees).sort();
@@ -99,11 +109,12 @@ const BuySelectRegalia = ({ setItems }) => {
 
     const filtered = items
       .filter((item) => {
-        if (item?.buyPrice == null) return false;
+        // if (item?.buyPrice == null) return false;
         if (item.category !== selectedItemType) return false;
 
         // Check if item name contains the selected degree
-        return item.name && item.name.includes(selectedDegree);
+        // return item.name && item.name.includes(selectedDegree);
+        return item.degreeName && item.degreeName.includes(selectedDegree);
       })
       .map((item, index) => ({
         ...item,
