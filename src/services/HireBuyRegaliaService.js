@@ -56,6 +56,16 @@ export const getItemSets = async () => {
   }
 };
 
+export const getDelivery = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/delivery`);
+    return response.data;
+  } catch (err) {
+    console.error("Error fetching delivery data:", err);
+    return [];
+  }
+}
+
 export const submitCustomerDetails = async (formData) => {
   try {
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");

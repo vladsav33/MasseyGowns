@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "./CustomerDetail.css";
 import { Link } from "react-router-dom";
-import {
-  submitCustomerDetails,
-} from "./../services/HireBuyRegaliaService.js";
+import { submitCustomerDetails } from "./../services/HireBuyRegaliaService.js";
+import DatePicker from "react-datepicker";
+import { format } from "date-fns";
+import "react-datepicker/dist/react-datepicker.css";
 
 function CustomerDetail({ item, items = [], step, setStep, steps }) {
   const [countries, setCountries] = useState([]);
@@ -19,53 +20,80 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
     studentId: "",
     phone: "",
     mobile: "",
+    eventDate: "",
     purchaseOrder: "PN",
     paymentMethod: "1",
     termsAccepted: false,
     message: "",
   });
 
+  const handleDateChange = (date) => {
+    setFormData({ ...formData, eventDate: date });
+  };
+
+  const today = new Date().toISOString().split("T")[0];
+
+  const selectedCeremonyId = JSON.parse(
+    localStorage.getItem("selectedCeremonyId") || 0
+  );
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
+  };
+
   const handlePurchaseOrderChange = (e) => {
     let value = e.target.value;
-    
+
     // Always ensure it starts with 'PN'
-    if (value.length < 2 || !value.startsWith('PN')) {
-      const additionalText = value.replace(/^P?N?/i, '');
-      value = 'PN' + additionalText;
+    if (value.length < 2 || !value.startsWith("PN")) {
+      const additionalText = value.replace(/^P?N?/i, "");
+      value = "PN" + additionalText;
     }
-    
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
-      purchaseOrder: value
+      purchaseOrder: value,
     }));
   };
-  
+
   const ensureCursorAfterPN = (input) => {
     setTimeout(() => {
       const cursorPos = input.selectionStart;
       const selectionEnd = input.selectionEnd;
-      
+
       if (cursorPos < 2) {
         // If cursor is before PN, move it to after PN
         input.setSelectionRange(2, Math.max(2, selectionEnd));
       }
     }, 0);
   };
-  
+
   const handlePurchaseOrderInteraction = (e) => {
     // Prevent backspace/delete from affecting PN
-    if (e.type === 'keydown' && (e.key === 'Backspace' || e.key === 'Delete')) {
+    if (e.type === "keydown" && (e.key === "Backspace" || e.key === "Delete")) {
       const cursorPosition = e.target.selectionStart;
-      if (e.key === 'Backspace' && cursorPosition <= 2) {
+      if (e.key === "Backspace" && cursorPosition <= 2) {
         e.preventDefault();
         return;
       }
-      if (e.key === 'Delete' && cursorPosition < 2) {
+      if (e.key === "Delete" && cursorPosition < 2) {
         e.preventDefault();
         return;
       }
     }
-    
+
     ensureCursorAfterPN(e.target);
   };
 
@@ -79,37 +107,35 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Store customer details
     localStorage.setItem("customerDetails", JSON.stringify(formData));
-    
+
     try {
       // Get the current cart
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
       console.log("Cart before submission:", cart);
-      
+
       // Submit order details
-      await Promise.all([
-        submitCustomerDetails(formData),
-      ]);
-      
+      await Promise.all([submitCustomerDetails(formData)]);
+
       console.log("Order submission completed successfully");
-      
+
       // Clear the cart after successful submission
       localStorage.removeItem("cart");
       localStorage.removeItem("item");
       localStorage.removeItem("selectedCeremonyId");
       localStorage.removeItem("selectedCourseId");
-      
+
       // Dispatch cart update event to notify other components (like Navbar)
       window.dispatchEvent(new Event("cartUpdated"));
-      
+
       // Proceed to next step
       if (step < steps.length) {
         const newStep = step + 1;
         setStep(newStep);
         localStorage.setItem("step", newStep);
-        
+
         // Scroll to top for better UX
         window.scrollTo({
           top: 0,
@@ -117,7 +143,6 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
           behavior: "smooth",
         });
       }
-      
     } catch (error) {
       console.error("Error during order submission:", error);
       alert("There was an error submitting your order. Please try again.");
@@ -178,7 +203,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
         { label: "New Zealand", value: "NZ", flag: "" },
         { label: "Australia", value: "AU", flag: "" },
         { label: "United States", value: "US", flag: "" },
-        { label: "United Kingdom", value: "GB", flag: "" },
+        { label: "United Kingdom", value: "UK", flag: "" },
       ];
       if (!cancelled) {
         setCountries(staticList);
@@ -354,6 +379,30 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
             />
           </div>
 
+          {selectedCeremonyId === 2 && (
+            <div>
+              <label className="form-label">
+                What date do you plan to take the photos?
+                <i>Please allow two weeks to prepare and courier the order.</i>
+              </label>
+              <input
+                type="date"
+                name="eventDate"
+                value={formData.eventDate}
+                onChange={handleChange}
+                min={today}
+                className="form-input"
+                required
+              />
+              {/* <DatePicker
+                selected={formData.eventDate}
+                onChange={handleDateChange}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="DD/MM/YYYY"
+                className="form-input"
+              /> */}
+            </div>
+          )}
           {/* Terms */}
           <div className="checkbox-group">
             <input
