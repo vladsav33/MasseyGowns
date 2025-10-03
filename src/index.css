@@ -33,6 +33,7 @@ body {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   background-color: #ffffff;
   overflow-x: hidden;
+  color: #000000;
 }
 
 h1 {

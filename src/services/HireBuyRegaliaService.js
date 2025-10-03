@@ -56,6 +56,16 @@ export const getItemSets = async () => {
   }
 };
 
+export const getDelivery = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/delivery`);
+    return response.data;
+  } catch (err) {
+    console.error("Error fetching delivery data:", err);
+    return [];
+  }
+}
+
 export const submitCustomerDetails = async (formData) => {
   try {
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
@@ -73,11 +83,11 @@ export const submitCustomerDetails = async (formData) => {
       studentId: parseInt(formData.studentId) || 0,
       message: formData.message || "",
       items: cart.map((item) => ({
-        itemId: parseInt(item.id?.toString().split("-")[1]) || 0,
-        sizeId: parseInt(item.selectedOptions?.["Head Size"]) || 0,
+        itemId: parseInt(item.id?.toString()) || 0,
+        sizeId: parseInt(item.selectedOptions?.["Head Size"]) || parseInt(item.selectedOptions?.["Gown Size"]) || 0,
         fitId: parseInt(item.selectedOptions?.["My full height"]) || 0,
         hoodId: parseInt(item.selectedOptions?.["Hood Type"]) || 0,
-        hire: item.isHiring ?? true,
+        hire: item.isHiring ?? false,
         quantity: item.quantity || 1,
       })),
       paid: false,

@@ -35,7 +35,7 @@ function CartList({ step, items, setItems }) {
   // --- Cart actions ---
   const handleAddDonationToCart = () => {
     const donationItem = {
-      id: Date.now(),
+      id: 300,
       name: "Donation",
       category: "Graduate Women Manawatu Charitable Trust Inc.",
       hirePrice: 2,

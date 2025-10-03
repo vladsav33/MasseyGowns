@@ -1,6 +1,10 @@
 import "./BuySelectRegalia.css";
 import React, { useState, useEffect } from "react";
-import { getItems, getItemSets } from "../services/HireBuyRegaliaService";
+import {
+  getItems,
+  getItemSets,
+  getDelivery,
+} from "../services/HireBuyRegaliaService";
 
 const placeholderSvg = "data:image/svg+xml;base64,...";
 
@@ -76,18 +80,28 @@ const BuySelectRegalia = ({ setItems }) => {
   const availableDegrees = React.useMemo(() => {
     if (!selectedItemType) return [];
 
+    // const degrees = new Set();
+    // items.forEach((item) => {
+    //   if (
+    //     item?.buyPrice != null &&
+    //     item.category === selectedItemType &&
+    //     item.name
+    //   ) {
+    //     const nameParts = item.name.split(" ");
+    //     if (nameParts.length > 1) {
+    //       const degree = nameParts.slice(1).join(" ");
+    //       if (degree) degrees.add(degree);
+    //     }
+    //   }
+    // });
     const degrees = new Set();
     items.forEach((item) => {
       if (
-        item?.buyPrice != null &&
-        item.category === selectedItemType &&
-        item.name
+          item.category === selectedItemType &&
+          item.degreeId &&
+          item.degreeName
       ) {
-        const nameParts = item.name.split(" ");
-        if (nameParts.length > 1) {
-          const degree = nameParts.slice(1).join(" ");
-          if (degree) degrees.add(degree);
-        }
+        degrees.add(item.degreeName);
       }
     });
     return Array.from(degrees).sort();
@@ -99,11 +113,12 @@ const BuySelectRegalia = ({ setItems }) => {
 
     const filtered = items
       .filter((item) => {
-        if (item?.buyPrice == null) return false;
+        // if (item?.buyPrice == null) return false;
         if (item.category !== selectedItemType) return false;
 
         // Check if item name contains the selected degree
-        return item.name && item.name.includes(selectedDegree);
+        // return item.name && item.name.includes(selectedDegree);
+        return item.degreeName && item.degreeName.includes(selectedDegree);
       })
       .map((item, index) => ({
         ...item,
@@ -113,7 +128,7 @@ const BuySelectRegalia = ({ setItems }) => {
     // Remove duplicates based on name and category
     const uniqueItems = [];
     const seen = new Set();
-    
+
     filtered.forEach((item) => {
       const key = `${item.name}-${item.category}`;
       if (!seen.has(key)) {
@@ -122,7 +137,9 @@ const BuySelectRegalia = ({ setItems }) => {
       }
     });
 
-    return uniqueItems.sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
+    return uniqueItems.sort((a, b) =>
+      String(a.name || "").localeCompare(String(b.name || ""))
+    );
   }, [items, selectedItemType, selectedDegree]);
 
   // Reset degree selection when item type changes
@@ -136,10 +153,43 @@ const BuySelectRegalia = ({ setItems }) => {
       ? `data:image/jpeg;base64,${base64}`
       : placeholderSvg;
 
-  const pushToCart = (newItem) => {
+  const pushToCart = async (newItem) => {
+    // Get delivery info (could be a single object or array)
+    const data = await getDelivery();
+    const delivery = Array.isArray(data) ? data : [];
+
+    // Get previous cart
     const prev = JSON.parse(localStorage.getItem("cart") || "[]");
+
+    // Check if delivery is already added
+    const hasDelivery = prev.some((item) => item.type === "delivery");
+
+    // Build updated cart
     const updated = [...prev, newItem];
+
+    // If delivery not already added, add it
+    const selectedOptions = itemOptions[delivery[0].id] || {};
+    if (!hasDelivery && delivery) {
+      const deliveryItem = {
+        id: delivery[0].id || "",
+        name: delivery[0].name || "Courier Delivery",
+        category: delivery[0].category || "Service",
+        description: delivery[0].description || "Regalia delivery service",
+        buyPrice: Number(delivery[0].buyPrice) || 0,
+        hirePrice: Number(delivery[0].buyPrice) || 0,
+        quantity: 1,
+        options: delivery[0].options,
+        selectedOptions: selectedOptions,
+        type: "delivery",
+        isHiring: false,
+      };
+      updated.push(deliveryItem);
+    }
+
+    // Save to localStorage
     localStorage.setItem("cart", JSON.stringify(updated));
+
+    // Update parent state if provided
     if (typeof setItems === "function") setItems(updated);
   };
 
@@ -159,9 +209,9 @@ const BuySelectRegalia = ({ setItems }) => {
     if (!product.options || product.options.length === 0) return true;
 
     // Use the correct ID for sets vs individual items
-    const itemId = product.uiId || `set-${product.id}`;
+    const itemId = product.uiId || product.id;
     const selectedOptions = itemOptions[itemId] || {};
-    
+
     return product.options.every(
       (option) =>
         selectedOptions[option.label] && selectedOptions[option.label] !== ""
@@ -178,7 +228,7 @@ const BuySelectRegalia = ({ setItems }) => {
 
     const selectedOptions = itemOptions[product.uiId] || {};
     const newItem = {
-      id: `${product.degreeId ?? "NA"}-${product.id}-${Date.now()}`,
+      id: product.id,
       name: product.name,
       category: product.category,
       description: product.description,
@@ -191,6 +241,7 @@ const BuySelectRegalia = ({ setItems }) => {
       type: "individual",
       isHiring: false,
     };
+
     pushToCart(newItem);
     window.dispatchEvent(new Event("cartUpdated"));
 
@@ -204,14 +255,14 @@ const BuySelectRegalia = ({ setItems }) => {
   // add to cart for a set (buy flow)
   const addSetToCart = (setItem) => {
     // Check if all required options are selected for sets too
-    if (!areAllOptionsSelected({ ...setItem, uiId: `set-${setItem.id}` })) {
+    if (!areAllOptionsSelected({ ...setItem, uiId: setItem.id })) {
       alert("Please select all required options before adding to cart.");
       return;
     }
 
-    const selectedOptions = itemOptions[`set-${setItem.id}`] || {};
+    const selectedOptions = itemOptions[setItem.id] || {};
     const newItem = {
-      id: `set-${setItem.id}-${Date.now()}`,
+      id: setItem.id,
       name: setItem.name,
       category: setItem.category || "Set",
       description: setItem.description,
@@ -226,11 +277,11 @@ const BuySelectRegalia = ({ setItems }) => {
     };
     pushToCart(newItem);
     window.dispatchEvent(new Event("cartUpdated"));
-    
+
     // Clear the selected options for this set after adding to cart
     setItemOptions((prev) => ({
       ...prev,
-      [`set-${setItem.id}`]: {},
+      [setItem.id]: {},
     }));
   };
 
@@ -311,7 +362,7 @@ const BuySelectRegalia = ({ setItems }) => {
                     {sets
                       .sort((a, b) => a.id - b.id)
                       .map((s) => (
-                        <div key={`set-${s.id}`} className="product-card-set">
+                        <div key={s.id} className="product-card-set">
                           <div className="product-image">
                             {/* Image placeholder */}
                           </div>
@@ -339,27 +390,31 @@ const BuySelectRegalia = ({ setItems }) => {
                                     <select
                                       className="option-select"
                                       value={
-                                        itemOptions[`set-${s.id}`]?.[
-                                          option.label
-                                        ] || ""
+                                        itemOptions[s.id]?.[option.label] || ""
                                       }
                                       onChange={(e) =>
                                         handleOptionChange(
-                                          `set-${s.id}`,
+                                          s.id,
                                           option.label,
                                           e.target.value
                                         )
                                       }
                                     >
-                                      <option value="">
-                                        Please select...
-                                      </option>
+                                      <option value="">Please select...</option>
                                       {option.choices.map((choice, idx) => (
-                                        <option 
-                                          key={idx} 
-                                          value={typeof choice === 'object' ? choice.id : choice}
+                                        <option
+                                          key={idx}
+                                          value={
+                                            typeof choice === "object"
+                                              ? choice.id
+                                              : choice
+                                          }
                                         >
-                                          {typeof choice === 'object' ? choice.value || choice.name || JSON.stringify(choice) : choice}
+                                          {typeof choice === "object"
+                                            ? choice.value ||
+                                              choice.name ||
+                                              JSON.stringify(choice)
+                                            : choice}
                                         </option>
                                       ))}
                                     </select>
@@ -377,13 +432,17 @@ const BuySelectRegalia = ({ setItems }) => {
                                 className={`add-to-cart-btn ${
                                   !areAllOptionsSelected({
                                     ...s,
-                                    uiId: `set-${s.id}`
-                                  }) ? "disabled" : ""
+                                    uiId: s.id,
+                                  })
+                                    ? "disabled"
+                                    : ""
                                 }`}
-                                disabled={!areAllOptionsSelected({
-                                  ...s,
-                                  uiId: `set-${s.id}`
-                                })}
+                                disabled={
+                                  !areAllOptionsSelected({
+                                    ...s,
+                                    uiId: s.id,
+                                  })
+                                }
                               >
                                 Add to Cart
                               </button>
@@ -544,11 +603,19 @@ const BuySelectRegalia = ({ setItems }) => {
                                             Please select...
                                           </option>
                                           {option.choices.map((choice, idx) => (
-                                            <option 
-                                              key={idx} 
-                                              value={typeof choice === 'object' ? choice.id : choice}
+                                            <option
+                                              key={idx}
+                                              value={
+                                                typeof choice === "object"
+                                                  ? choice.id
+                                                  : choice
+                                              }
                                             >
-                                              {typeof choice === 'object' ? choice.value || choice.name || JSON.stringify(choice) : choice}
+                                              {typeof choice === "object"
+                                                ? choice.value ||
+                                                  choice.name ||
+                                                  JSON.stringify(choice)
+                                                : choice}
                                             </option>
                                           ))}
                                         </select>

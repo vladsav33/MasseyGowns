@@ -9,8 +9,30 @@ function Navbar() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const cartRef = useRef(null);
 
-  const isActive = (path) => {
-    return location.pathname === path;
+  // Get the selected ceremony ID from localStorage
+  const [selectedCeremonyId, setSelectedCeremonyId] = useState(null);
+
+  useEffect(() => {
+    const ceremonyId = localStorage.getItem("selectedCeremonyId");
+    setSelectedCeremonyId(ceremonyId ? parseInt(ceremonyId) : null);
+  }, [location]);
+
+  const isActive = (path, ceremonyId = null) => {
+    if (location.pathname !== path) return false;
+    
+    // If a ceremony ID is specified, check if it matches
+    if (ceremonyId !== null) {
+      const storedCeremonyId = localStorage.getItem("selectedCeremonyId");
+      return storedCeremonyId && parseInt(storedCeremonyId) === ceremonyId;
+    }
+    
+    return true;
+  };
+
+  const handleHireClick = (ceremonyId) => {
+    // Store the ceremony ID in localStorage
+    localStorage.setItem("selectedCeremonyId", ceremonyId);
+    setSelectedCeremonyId(ceremonyId);
   };
 
   // Load cart items from localStorage
@@ -45,6 +67,10 @@ function Navbar() {
     // Listen for localStorage changes (when cart is updated in other components)
     const handleStorageChange = (e) => {
       if (e.key === "cart") safeLoad();
+      if (e.key === "selectedCeremonyId") {
+        const ceremonyId = localStorage.getItem("selectedCeremonyId");
+        setSelectedCeremonyId(ceremonyId ? parseInt(ceremonyId) : null);
+      }
     };
 
     // Listen for custom cart update events
@@ -205,7 +231,8 @@ function Navbar() {
           <Link
             to="/hireregalia"
             state={{ step: 1 }}
-            className={`menu-link ${isActive("/hireregalia") ? "active" : ""}`}
+            onClick={() => handleHireClick(0)}
+            className={`menu-link ${isActive("/hireregalia", 0) ? "active" : ""}`}
           >
             HIRE REGALIA
           </Link>
@@ -224,7 +251,8 @@ function Navbar() {
           <Link
             to="/hireregalia"
             state={{ step: 1 }}
-            className={`menu-link ${isActive("/hireregalia") ? "active" : ""}`}
+            onClick={() => handleHireClick(2)}
+            className={`menu-link ${isActive("/hireregalia", 2) ? "active" : ""}`}
           >
             Casual Hire for Photos
           </Link>
