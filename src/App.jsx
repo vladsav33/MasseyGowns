@@ -5,6 +5,8 @@ import HireRegalia from "./pages/HireRegalia.jsx";
 import BuyRegalia from "./pages/BuyRegalia.jsx";
 import FAQPage from "./pages/FAQPage";
 import ContactUS from "./pages/ContactUS.jsx";
+import Payment from "./components/Payment.jsx";
+import Checkout from "./components/Checkout.jsx";
 import TermsAndConditions from "./pages/TermsAndConditions.jsx";
 import HireprocessWrapper from "./components/HireprocessWrapper.jsx";
 // import ExtractOrder from "./components/ExtractOrder.jsx";
@@ -19,12 +21,15 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
       <Route path="/faqs" element={<FAQPage />} />
       <Route path="/hireregalia" element={<HireRegalia />} />
       <Route path="/buyregalia" element={<BuyRegalia />} />
       <Route path="/contactus" element={<ContactUS />} />
       <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
       <Route path="/hireregalia/:degree" element={<HireprocessWrapper />} />
+      <Route path="/payment" element={<Payment />} />
+      <Route path="/checkout" element={<Checkout />} />
       <Route path="/admin" element={<AdminConsole />} />
       <Route path="/login" element={<Authentication />}/>
       <Route path="/admineditceremonies" element={
@@ -37,7 +42,6 @@ export default function App() {
           <AdminExtractOrders/>
         </ProtectedRoute>
       }/>
-      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

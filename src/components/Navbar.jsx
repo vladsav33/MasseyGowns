@@ -330,6 +330,9 @@ function Navbar() {
           )}
         </div>
         <i className="fa fa-search"></i>
+        <Link to={"/payment"}>
+          <i className="fa fa-user"></i>
+        </Link>
       </div>
     </nav>
   );
