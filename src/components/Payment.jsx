@@ -6,6 +6,8 @@ export default function Payment() {
     const [redirectUrl, setRedirectUrl] = useState(null);
     const [searchParams] = useSearchParams();
 
+
+
     // Handle Paystation return
     useEffect(() => {
         const result = searchParams.get("ec"); // Error code
@@ -37,7 +39,9 @@ export default function Payment() {
             if (data.redirectUrl) {
                 console.log(data.redirectUrl);
                 setRedirectUrl(data.redirectUrl);
-                window.location.href = data.redirectUrl; // Redirect to Paystation
+                setTimeout(() => {
+                    window.location.href = data.redirectUrl;
+                }, 1000); // 0.8 seconds delay for UX
             }
         } catch (err) {
             console.error(err);
@@ -46,20 +50,23 @@ export default function Payment() {
         setLoading(false);
     };
 
+    useEffect(() => {
+        startPayment();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // run only once on mount
+
     return (
         <div className="p-6">
-            <h2 className="text-xl mb-4">Checkout</h2>
-            <button
-                onClick={startPayment}
-                disabled={loading}
-                className="!bg-blue-600 text-white px-4 py-2 rounded"
-            >
-                {loading ? "Processing..." : "Pay with Paystation"}
-            </button>
-
-            {redirectUrl && (
-                <p className="mt-4">Redirecting to Paystation…</p>
-            )}
+            {/*<h2 className="text-xl mb-4">Checkout</h2>*/}
+            {/*<button*/}
+            {/*    onClick={startPayment}*/}
+            {/*    disabled={loading}*/}
+            {/*    className="!bg-blue-600 text-white px-4 py-2 rounded"*/}
+            {/*>*/}
+            {/*    {loading ? "Processing..." : "Pay with Paystation"}*/}
+            {/*</button>*/}
+            {loading && <p>Processing payment…</p>}
+            {redirectUrl && <p className="!text-2xl !text-black-500 !font-bold">Redirecting to Paystation…</p>}
         </div>
     );
 }
