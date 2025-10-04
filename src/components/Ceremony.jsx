@@ -20,14 +20,14 @@ function Ceremony() {
               <br />
             </p>
             <p>
+              All graduands are required to wear academic regalia at the
+              graduation ceremony.
+            </p>
+            <p>
               Appropriate dress is considered to be <br />
               Men: suit and tie and applicable academic dress.
               <br />
               Women: formal clothes and applicable academic dress.
-            </p>
-            <p>
-              All graduands are required to wear academic regalia at the
-              graduation ceremony.
             </p>
           </div>
         </div>
