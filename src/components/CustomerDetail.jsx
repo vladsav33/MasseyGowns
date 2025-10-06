@@ -126,6 +126,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       localStorage.removeItem("item");
       localStorage.removeItem("selectedCeremonyId");
       localStorage.removeItem("selectedCourseId");
+      // localStorage.removeItem("grandTotal");
 
       // Dispatch cart update event to notify other components (like Navbar)
       window.dispatchEvent(new Event("cartUpdated"));

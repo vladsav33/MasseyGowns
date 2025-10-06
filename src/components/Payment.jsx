@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 export default function Payment() {
     const [loading, setLoading] = useState(false);
     const [redirectUrl, setRedirectUrl] = useState(null);
     const [searchParams] = useSearchParams();
-
-
+    const hasRun = useRef(false);
 
     // Handle Paystation return
     useEffect(() => {
@@ -27,11 +26,12 @@ export default function Payment() {
     const startPayment = async () => {
         setLoading(true);
         try {
+            const grandTotal = localStorage.getItem("grandTotal");
             const res = await fetch("https://localhost:7185/api/payment/create-payment", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    Amount: 1000 // e.g. $10.00
+                    Amount: parseFloat(grandTotal) * 100
                 })
             });
             const data = await res.json();
@@ -51,8 +51,11 @@ export default function Payment() {
     };
 
     useEffect(() => {
-        startPayment();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        console.log(hasRun.current);
+        if (!hasRun.current) {
+            startPayment();
+            hasRun.current = true;
+        }
     }, []); // run only once on mount
 
     return (

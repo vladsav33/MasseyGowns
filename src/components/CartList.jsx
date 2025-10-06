@@ -35,7 +35,7 @@ function CartList({ step, items, setItems }) {
   // --- Cart actions ---
   const handleAddDonationToCart = () => {
     const donationItem = {
-      id: 300,
+      id: 20,
       name: "Donation",
       category: "Graduate Women Manawatu Charitable Trust Inc.",
       hirePrice: 2,
@@ -127,6 +127,7 @@ function CartList({ step, items, setItems }) {
   // const taxOnDonations = totalDonationPrice * 0.1;
 
   const grandTotal = totalPrice + totalDonationPrice;
+  localStorage.setItem("grandTotal", grandTotal);
 
   return (
     <div className="cart">

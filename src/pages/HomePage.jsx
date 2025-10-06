@@ -15,7 +15,7 @@ function HomePage() {
       <div className="hero">
         <div className="bigbox">
           <div className="image">
-            <img src="./img.png" alt="picture" className="picture" />
+            <img src="./img_small.png" alt="picture" className="picture" />
           </div>
           <div className="text">
             <h1>Academic</h1>
