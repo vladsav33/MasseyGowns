@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_GOWN_API_BASE;
+
 export default function Payment() {
     const [loading, setLoading] = useState(false);
     const [redirectUrl, setRedirectUrl] = useState(null);
@@ -27,7 +29,7 @@ export default function Payment() {
         setLoading(true);
         try {
             const grandTotal = localStorage.getItem("grandTotal");
-            const res = await fetch("https://localhost:7185/api/payment/create-payment", {
+            const res = await fetch(`${API_URL}/api/payment/create-payment`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
