@@ -357,7 +357,7 @@ function Navbar() {
             </div>
           )}
         </div>
-        <i className="fa fa-search"></i>
+        {/*<i className="fa fa-search"></i>*/}
         {/*<Link to={"/payment"}>*/}
         {/*  <i className="fa fa-user"></i>*/}
         {/*</Link>*/}
