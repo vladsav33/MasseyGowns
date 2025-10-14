@@ -8,6 +8,7 @@ import CartList from "../components/CartList";
 import CustomerDetail from "../components/CustomerDetail";
 import Contact from "../components/Contact";
 import PaymentCompleted from "../components/PaymentCompleted";
+import Payment from "../components/Payment";
 import { useLocation } from "react-router-dom";
 import {
   getCoursesByCeremonyId,
@@ -284,7 +285,8 @@ function HireRegalia() {
 
       {step === 4 && (
         <div>
-          <PaymentCompleted />
+          {/*<PaymentCompleted />*/}
+          <Payment />
         </div>
       )}
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  React, { useState, useEffect } from "react";
 import "./CustomerDetail.css";
 import { Link } from "react-router-dom";
 import { submitCustomerDetails } from "./../services/HireBuyRegaliaService.js";
@@ -126,6 +126,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       localStorage.removeItem("item");
       localStorage.removeItem("selectedCeremonyId");
       localStorage.removeItem("selectedCourseId");
+      // localStorage.removeItem("grandTotal");
 
       // Dispatch cart update event to notify other components (like Navbar)
       window.dispatchEvent(new Event("cartUpdated"));

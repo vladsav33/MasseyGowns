@@ -126,7 +126,8 @@ function BuyRegalia() {
 
         {step === 4 && (
           <div>
-            <PaymentCompleted />
+            {/*<PaymentCompleted />*/}
+            <Payment />
           </div>
         )}
         <ProgressButtons
