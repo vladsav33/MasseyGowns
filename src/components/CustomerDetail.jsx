@@ -440,7 +440,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
                   onChange={handleInputChange}
                   className="radio-input"
                 />
-                <span>Credit Card (Verifone)</span>
+                <span>Credit/Debit Card (Paystation)</span>
               </label>
               <label className="radio-label">
                 <input
