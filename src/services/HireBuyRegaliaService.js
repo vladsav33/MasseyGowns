@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// const API_URL = import.meta.env.VITE_GOWN_API_BASE;
-const API_URL = 'https://localhost:7185';
+const API_URL = import.meta.env.VITE_GOWN_API_BASE;
+// const API_URL = 'https://localhost:7185';
 
 export const getCeremonies = async () => {
   try {
