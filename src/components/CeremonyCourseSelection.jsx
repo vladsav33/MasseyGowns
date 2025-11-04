@@ -71,7 +71,7 @@ function CeremonyCourseSelection({
         <option value="">Please select a ceremony...</option>
         {Array.isArray(ceremonies) &&
           ceremonies
-            .sort((a, b) => a.id - b.id)
+            // .sort((a, b) => a.id - b.id)
             .map((ceremonyOption) => (
               <option key={ceremonyOption.id} value={String(ceremonyOption.id)}>
                 {ceremonyOption.name}

@@ -120,6 +120,8 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       await Promise.all([submitCustomerDetails(formData)]);
 
       console.log("Order submission completed successfully");
+      setTimeout(() => { debugger; }, 0);
+      debugger;
 
       // Clear the cart after successful submission
       localStorage.removeItem("cart");
