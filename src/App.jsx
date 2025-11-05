@@ -21,7 +21,6 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
       <Route path="/faqs" element={<FAQPage />} />
       <Route path="/hireregalia" element={<HireRegalia />} />
       <Route path="/buyregalia" element={<BuyRegalia />} />
@@ -32,6 +31,7 @@ export default function App() {
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/admin" element={<AdminConsole />} />
       <Route path="/login" element={<Authentication />}/>
+      <Route path="*" element={<Navigate to="/" replace />} />
       <Route path="/admineditceremonies" element={
         <ProtectedRoute>
           <AdminEditCeremonies/>
