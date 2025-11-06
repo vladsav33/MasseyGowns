@@ -16,6 +16,7 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import AdminEditCeremonies from "./components/AdminEditCeremonies.jsx";
 import AdminExtractOrders from "./components/AdminExtractOrders.jsx";
 import AdminNavbar from "./components/Navbar.jsx";
+import ScrollToTop from "./components/ScrollToTop.jsx";
 
 export default function App() {
   return (
