@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import "./CeremonyCourseSelection.css";
 
 function CeremonyCourseSelection({
+  showCeremony,
   course,
   courses,
   setCourse,
@@ -25,7 +26,9 @@ function CeremonyCourseSelection({
   };
 
   useEffect(() => {
-    const savedCeremonyId = localStorage.getItem("selectedCeremonyId");
+    const savedCeremonyId = showCeremony?localStorage.getItem("selectedCeremonyId"):
+        localStorage.getItem("selectedPhotoCeremonyId")?localStorage.getItem("selectedPhotoCeremonyId"):2;
+    // console.log("SavedCeremonyId = ", savedCeremonyId);
     const savedCourseId = localStorage.getItem("selectedCourseId");
 
     if (savedCeremonyId) {
@@ -34,7 +37,16 @@ function CeremonyCourseSelection({
     if (savedCourseId) {
       setCourse(Number(savedCourseId));
     }
-  }, [setCeremony, setCourse]);
+  }, [showCeremony]);
+
+  useEffect(() => {
+    console.log("Show Ceremony: ", showCeremony);
+    if (!showCeremony) {
+      setCeremony(2);
+    }
+    // if (showCeremony)
+    //   setCourse(null);
+  }, []);
 
   const handleCeremonyChange = (e) => {
     const val = e.target.value;
@@ -55,32 +67,41 @@ function CeremonyCourseSelection({
   };
 
   const selectedCeremonyObj =
-    ceremonies && ceremony != null
+      ceremony !== 2?(ceremonies && ceremony != null
       ? ceremonies.find((c) => c.id === Number(ceremony))
-      : null;
+      : null):ceremony;
+
+  // console.log("SelectedCeremonyObj=", selectedCeremonyObj);
+  // console.log("Ceremonies=", ceremonies);
+  // console.log("Ceremony=", ceremony);
 
   return (
     <div className="ceremony-course-container">
-      {/* Ceremony Section */}
-      <h3>Select the ceremony you are ordering regalia for</h3>
-      <select
-        className="dropdown-select"
-        value={ceremony != null ? String(ceremony) : ""}
-        onChange={handleCeremonyChange}
-      >
-        <option value="">Please select a ceremony...</option>
-        {Array.isArray(ceremonies) &&
-          ceremonies
-            // .sort((a, b) => a.id - b.id)
-            .map((ceremonyOption) => (
-              <option key={ceremonyOption.id} value={String(ceremonyOption.id)}>
-                {ceremonyOption.name}
-              </option>
-            ))}
-      </select>
+      {showCeremony && (
+        <>
+          {/* Ceremony Section */}
+          <h3>Select the ceremony you are ordering regalia for</h3>
+          <select
+            className="dropdown-select"
+            value={ceremony != null ? String(ceremony) : ""}
+            onChange={handleCeremonyChange}
+          >
+            <option value="">Please select a ceremony...</option>
+            {Array.isArray(ceremonies) &&
+              ceremonies
+                // .sort((a, b) => a.id - b.id)
+                .map((ceremonyOption) => (
+                  <option key={ceremonyOption.id} value={String(ceremonyOption.id)}>
+                    {ceremonyOption.name}
+                  </option>
+                ))}
+          </select>
+        </>
+      )}
+
       {selectedCeremonyObj && (
         <>
-          {selectedCeremonyObj.id === 2 && (
+          {!showCeremony && (
             <p className="info-text">
               Hire your robes outside graduation time for photos and family
               functions. Please put the date of your event in the 'Add a Message

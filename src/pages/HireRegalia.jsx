@@ -7,7 +7,6 @@ import CeremonyCourseSelection from "../components/CeremonyCourseSelection";
 import CartList from "../components/CartList";
 import CustomerDetail from "../components/CustomerDetail";
 import Contact from "../components/Contact";
-import PaymentCompleted from "../components/PaymentCompleted";
 import Payment from "../components/Payment";
 import { useLocation } from "react-router-dom";
 import {
@@ -21,6 +20,13 @@ function HireRegalia() {
 
   // ---- STATES ----
   const location = useLocation();
+  const mode = new URLSearchParams(location.search).get("mode");
+  // console.log(mode);
+  const showCeremony = mode !== "photo"; // hide only for casual hire
+  // console.log(showCeremony);
+  if (!showCeremony) {
+    localStorage.setItem("selectedCeremonyId", String(2));
+  }
 
   // Initialize step from location.state if available, otherwise from localStorage or default to 1
   const [step, setStep] = useState(() => {
@@ -32,7 +38,11 @@ function HireRegalia() {
 
   const [ceremonies, setCeremonies] = useState([]);
   const [selectedCeremonyId, setSelectedCeremonyId] = useState(() => {
-    const saved = localStorage.getItem("selectedCeremonyId");
+    const saved = showCeremony?localStorage.getItem("selectedCeremonyId"):localStorage.getItem("selectedPhotoCeremonyId");
+    console.log("Saved=", saved);
+    if (!showCeremony) {
+      return 2;
+      }
     return saved ? Number(saved) : null;
   });
 
@@ -121,6 +131,7 @@ function HireRegalia() {
   // Fetch Courses when Ceremony changes
   useEffect(() => {
     const fetchCourses = async () => {
+      console.log("selectedCeremonyId = ", selectedCeremonyId)
       if (!selectedCeremonyId) {
         setCourses([]);
         setSelectedCourseId(null);
@@ -234,6 +245,7 @@ function HireRegalia() {
 
           {!loading && (
             <CeremonyCourseSelection
+              showCeremony={showCeremony}
               ceremonies={ceremonies}
               ceremony={selectedCeremonyId}
               setCeremony={setSelectedCeremonyId}

@@ -9,14 +9,6 @@ import Payment from "./components/Payment.jsx";
 import Checkout from "./components/Checkout.jsx";
 import TermsAndConditions from "./pages/TermsAndConditions.jsx";
 import HireprocessWrapper from "./components/HireprocessWrapper.jsx";
-// import ExtractOrder from "./components/ExtractOrder.jsx";
-import Authentication from "./components/Authentication.jsx";
-import AdminConsole from "./components/AdminConsole.jsx";
-import ProtectedRoute from "./components/ProtectedRoute.jsx";
-import AdminEditCeremonies from "./components/AdminEditCeremonies.jsx";
-import AdminExtractOrders from "./components/AdminExtractOrders.jsx";
-import AdminNavbar from "./components/Navbar.jsx";
-import ScrollToTop from "./components/ScrollToTop.jsx";
 
 export default function App() {
   return (
@@ -30,19 +22,7 @@ export default function App() {
       <Route path="/hireregalia/:degree" element={<HireprocessWrapper />} />
       <Route path="/payment" element={<Payment />} />
       <Route path="/checkout" element={<Checkout />} />
-      <Route path="/admin" element={<AdminConsole />} />
-      <Route path="/login" element={<Authentication />}/>
       <Route path="*" element={<Navigate to="/" replace />} />
-      <Route path="/admineditceremonies" element={
-        <ProtectedRoute>
-          <AdminEditCeremonies/>
-        </ProtectedRoute>
-      }/>
-      <Route path="/adminextractorders" element={
-        <ProtectedRoute>
-          <AdminExtractOrders/>
-        </ProtectedRoute>
-      }/>
     </Routes>
   );
 }

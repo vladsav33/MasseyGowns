@@ -36,7 +36,8 @@ function HomePage() {
               <Link to="/buyregalia" className="BuyRegalia">
                 Buy Regalia
               </Link>
-              <Link to="/hireregalia" className="HireRegalia">
+                {/*<Link to="/hireregalia?mode=photo" className="HireRegalia">*/}
+              <Link to={{ pathname: "/hireregalia", search: "?mode=photo" }} className="HireRegalia">
                 Casual Hire for Photos
               </Link>
             </div>
