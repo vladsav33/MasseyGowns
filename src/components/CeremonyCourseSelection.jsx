@@ -28,8 +28,8 @@ function CeremonyCourseSelection({
   useEffect(() => {
     const savedCeremonyId = showCeremony?localStorage.getItem("selectedCeremonyId"):
         localStorage.getItem("selectedPhotoCeremonyId")?localStorage.getItem("selectedPhotoCeremonyId"):2;
-    // console.log("SavedCeremonyId = ", savedCeremonyId);
-    const savedCourseId = localStorage.getItem("selectedCourseId");
+    const savedCourseId = showCeremony?localStorage.getItem("selectedCourseId"):
+        localStorage.getItem("selectedPhotoCourseId");
 
     if (savedCeremonyId) {
       setCeremony(Number(savedCeremonyId));
@@ -39,22 +39,16 @@ function CeremonyCourseSelection({
     }
   }, [showCeremony]);
 
-  useEffect(() => {
-    console.log("Show Ceremony: ", showCeremony);
-    if (!showCeremony) {
-      setCeremony(2);
-    }
-    // if (showCeremony)
-    //   setCourse(null);
-  }, []);
-
   const handleCeremonyChange = (e) => {
     const val = e.target.value;
     const id = val ? Number(val) : null;
+
     setCeremony(id);
     onCeremonySelect(id);
-    if (id !== null) localStorage.setItem("selectedCeremonyId", String(id));
+    if (id !== null && showCeremony) localStorage.setItem("selectedCeremonyId", String(id));
     else localStorage.removeItem("selectedCeremonyId");
+    if (id !== null && !showCeremony) localStorage.setItem("selectedPhotoCeremonyId", String(id));
+    else localStorage.removeItem("selectedPhotoCeremonyId");
   };
 
   const handleCourseChange = (e) => {
@@ -62,18 +56,18 @@ function CeremonyCourseSelection({
     const id = val ? Number(val) : null;
     setCourse(id);
     onCourseSelect(id);
-    if (id !== null) localStorage.setItem("selectedCourseId", String(id));
-    else localStorage.removeItem("selectedCourseId");
+    if (showCeremony)
+      if (id !== null) localStorage.setItem("selectedCourseId", String(id));
+      else localStorage.removeItem("selectedCourseId");
+    else
+      if (id !== null) localStorage.setItem("selectedPhotoCourseId", String(id));
+      else localStorage.removeItem("selectedPhotoCourseId");
   };
 
   const selectedCeremonyObj =
       ceremony !== 2?(ceremonies && ceremony != null
       ? ceremonies.find((c) => c.id === Number(ceremony))
       : null):ceremony;
-
-  // console.log("SelectedCeremonyObj=", selectedCeremonyObj);
-  // console.log("Ceremonies=", ceremonies);
-  // console.log("Ceremony=", ceremony);
 
   return (
     <div className="ceremony-course-container">

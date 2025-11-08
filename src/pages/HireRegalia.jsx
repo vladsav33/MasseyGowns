@@ -21,12 +21,8 @@ function HireRegalia() {
   // ---- STATES ----
   const location = useLocation();
   const mode = new URLSearchParams(location.search).get("mode");
-  // console.log(mode);
   const showCeremony = mode !== "photo"; // hide only for casual hire
-  // console.log(showCeremony);
-  if (!showCeremony) {
-    localStorage.setItem("selectedCeremonyId", String(2));
-  }
+
 
   // Initialize step from location.state if available, otherwise from localStorage or default to 1
   const [step, setStep] = useState(() => {
@@ -39,18 +35,17 @@ function HireRegalia() {
   const [ceremonies, setCeremonies] = useState([]);
   const [selectedCeremonyId, setSelectedCeremonyId] = useState(() => {
     const saved = showCeremony?localStorage.getItem("selectedCeremonyId"):localStorage.getItem("selectedPhotoCeremonyId");
-    console.log("Saved=", saved);
-    if (!showCeremony) {
-      return 2;
-      }
     return saved ? Number(saved) : null;
   });
 
   const [courses, setCourses] = useState([]);
-  const [selectedCourseId, setSelectedCourseId] = useState(() => {
-    const saved = localStorage.getItem("selectedCourseId");
-    return saved ? Number(saved) : null;
-  });
+  const [selectedCourseId, setSelectedCourseId] = useState(null);// => {
+    // const saved = showCeremony?localStorage.getItem("selectedCourseId"):localStorage.getItem("selectedPhotoCourseId");
+    //
+    // console.log("Course Saved = ", saved);
+    //
+    // return saved ? Number(saved) : null;
+  // });
 
   const [courseChanged, setCourseChanged] = useState(false);
 
@@ -96,12 +91,16 @@ function HireRegalia() {
   // ---- PERSIST TO LOCALSTORAGE ----
   useEffect(() => localStorage.setItem("step", step), [step]);
   useEffect(() => {
-    if (selectedCeremonyId !== null)
+    if (selectedCeremonyId !== null && showCeremony)
       localStorage.setItem("selectedCeremonyId", selectedCeremonyId);
+    if (selectedCeremonyId !== null && !showCeremony)
+      localStorage.setItem("selectedPhotoCeremonyId", selectedCeremonyId);
   }, [selectedCeremonyId]);
   useEffect(() => {
-    if (selectedCourseId !== null)
+    if (selectedCourseId !== null && showCeremony)
       localStorage.setItem("selectedCourseId", selectedCourseId);
+    if (selectedCourseId !== null && !showCeremony)
+      localStorage.setItem("selectedPhotoCourseId", selectedCourseId);
   }, [selectedCourseId]);
   useEffect(() => localStorage.setItem("item", JSON.stringify(item)), [item]);
   useEffect(() => {
@@ -109,6 +108,14 @@ function HireRegalia() {
     else localStorage.removeItem("cart");
     window.dispatchEvent(new Event("cartUpdated"));
   }, [items]);
+
+  useEffect(() => {
+    const saved = showCeremony
+        ? localStorage.getItem("selectedCourseId")
+        : localStorage.getItem("selectedPhotoCourseId");
+
+    setSelectedCourseId(saved ? Number(saved) : null);
+  }, [showCeremony]);
 
   // ---- API CALLS ----
   // Fetch Ceremonies
@@ -131,7 +138,6 @@ function HireRegalia() {
   // Fetch Courses when Ceremony changes
   useEffect(() => {
     const fetchCourses = async () => {
-      console.log("selectedCeremonyId = ", selectedCeremonyId)
       if (!selectedCeremonyId) {
         setCourses([]);
         setSelectedCourseId(null);

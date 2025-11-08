@@ -31,8 +31,8 @@ function Navbar() {
 
   const handleHireClick = (ceremonyId) => {
     // Store the ceremony ID in localStorage
-    localStorage.setItem("selectedCeremonyId", ceremonyId);
-    setSelectedCeremonyId(ceremonyId);
+    // localStorage.setItem("selectedCeremonyId", ceremonyId);
+    // setSelectedCeremonyId(ceremonyId);
   };
 
   // Load cart items from localStorage
