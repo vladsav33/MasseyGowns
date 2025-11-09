@@ -94,17 +94,26 @@ const BuySelectRegalia = ({ setItems }) => {
     //     }
     //   }
     // });
-    const degrees = new Set();
+    const degrees = [];
     items.forEach((item) => {
       if (
           item.category === selectedItemType &&
           item.degreeId &&
-          item.degreeName
+          item.degreeName &&
+          item.degreeOrder
       ) {
-        degrees.add(item.degreeName);
+        degrees.push({order: item.degreeOrder, name: item.degreeName});
       }
     });
-    return Array.from(degrees).sort();
+    degrees.sort((a, b) => a.order - b.order);
+
+    console.log("Degrees=", degrees);
+
+    const sorted = degrees.map(d => d.name);
+
+    console.log("Array=", sorted);
+
+    return sorted;
   }, [items, selectedItemType]);
 
   // Get filtered items based on both selections
