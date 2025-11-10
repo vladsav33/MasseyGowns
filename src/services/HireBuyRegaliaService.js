@@ -69,6 +69,8 @@ export const getDelivery = async () => {
 export const submitCustomerDetails = async (formData) => {
   try {
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const ceremonyId = parseInt(JSON.parse(localStorage.getItem("selectedCeremonyId")) || 0);
+    const degreeId = parseInt(JSON.parse(localStorage.getItem("selectedCourseId")) || 0);
 
     const customerPayload = {
       firstName: formData.firstName || "",
@@ -94,6 +96,8 @@ export const submitCustomerDetails = async (formData) => {
       paymentMethod: parseInt(formData.paymentMethod) || 1,
       purchaseOrder: formData.purchaseOrder || "",
       orderDate: new Date().toISOString().split("T")[0],
+      ceremonyId: ceremonyId,
+      degreeId: degreeId
     };
 
     const response = await axios.post(`${API_URL}/orders`, customerPayload);

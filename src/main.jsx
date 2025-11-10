@@ -1,11 +1,10 @@
-// src/main.jsx
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
 import "./index.css";
-
 import { ThemeProvider, createTheme } from "@mui/material";
+import ScrollToTop from "./components/ScrollToTop.jsx";
 
 const theme = createTheme({
   palette: {
@@ -23,7 +22,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <BrowserRouter>
-        <App />
+        <ScrollToTop />
+          <App />
       </BrowserRouter>
     </ThemeProvider>
   </React.StrictMode>

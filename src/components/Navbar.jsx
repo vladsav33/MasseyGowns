@@ -31,8 +31,8 @@ function Navbar() {
 
   const handleHireClick = (ceremonyId) => {
     // Store the ceremony ID in localStorage
-    localStorage.setItem("selectedCeremonyId", ceremonyId);
-    setSelectedCeremonyId(ceremonyId);
+    // localStorage.setItem("selectedCeremonyId", ceremonyId);
+    // setSelectedCeremonyId(ceremonyId);
   };
 
   // Load cart items from localStorage
@@ -249,12 +249,13 @@ function Navbar() {
 
         <li className="has-dropdown">
           <Link
-            to="/hireregalia"
+            to={{ pathname: "/hireregalia", search: "?mode=photo" }}
+            // to="/hireregalia"
             state={{ step: 1 }}
             onClick={() => handleHireClick(2)}
             className={`menu-link ${isActive("/hireregalia", 2) ? "active" : ""}`}
           >
-            Casual Hire for Photos
+            CASUAL HIRE FOR PHOTOS
           </Link>
         </li>
 
@@ -264,7 +265,7 @@ function Navbar() {
           </Link>
         </li>
         <li>
-          <Link to="/contactus">Contact Us</Link>
+          <Link to="/contactus">CONTACT US</Link>
         </li>
       </ul>
       <div className="navbar-icons">

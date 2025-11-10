@@ -73,7 +73,7 @@ export default function Contact() {
             <p className="icons">
               <Link to="/contact">Home</Link> {"|"}{" "}
               <Link to="/contact">Back to top</Link> {"|"}{" "}
-              <Link to="/contact">Terms & Conditions</Link>
+              <Link to="/terms-and-conditions">Terms & Conditions</Link>
             </p>
           </div>
 

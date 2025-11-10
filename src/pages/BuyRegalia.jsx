@@ -7,7 +7,7 @@ import ProgressButtons from "../components/ProgressButtons";
 import BuySelectRegalia from "../components/BuySelectRegalia";
 import CartList from "../components/CartList";
 import CustomerDetail from "../components/CustomerDetail";
-import PaymentCompleted from "../components/PaymentCompleted";
+import Payment from "../components/Payment";
 import { useLocation } from 'react-router-dom';
 
 function BuyRegalia() {

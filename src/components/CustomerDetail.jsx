@@ -120,6 +120,8 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       await Promise.all([submitCustomerDetails(formData)]);
 
       console.log("Order submission completed successfully");
+      setTimeout(() => { debugger; }, 0);
+      debugger;
 
       // Clear the cart after successful submission
       localStorage.removeItem("cart");
@@ -345,39 +347,33 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
             </div>
           )}
 
-          {/* Student ID */}
-          <div className="form-group">
-            <label className="form-label">Student ID*</label>
-            <input
-              type="text"
-              name="studentId"
-              value={formData.studentId}
-              onChange={handleInputChange}
-              placeholder="Student ID"
-              className="form-input"
-              required
-            />
-          </div>
-
-          {/* Phone & Mobile */}
+          {/* Student ID & Phone Number */}
           <div className="form-row">
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              placeholder="Phone Number"
-              className="form-input"
-              required
-            />
-            <input
-              type="tel"
-              name="mobile"
-              value={formData.mobile}
-              onChange={handleInputChange}
-              placeholder="Mobile"
-              className="form-input"
-            />
+            <div className="form-group">
+              <label className="form-label">Student ID*</label>
+              <input
+                type="text"
+                name="studentId"
+                value={formData.studentId}
+                onChange={handleInputChange}
+                placeholder="Student ID"
+                className="form-input"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Phone Number*</label>
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                placeholder="Phone Number"
+                className="form-input"
+                required
+              />
+            </div>
           </div>
 
           {selectedCeremonyId === 2 && (

@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import "./CeremonyCourseSelection.css";
 
 function CeremonyCourseSelection({
+  showCeremony,
   course,
   courses,
   setCourse,
@@ -25,8 +26,10 @@ function CeremonyCourseSelection({
   };
 
   useEffect(() => {
-    const savedCeremonyId = localStorage.getItem("selectedCeremonyId");
-    const savedCourseId = localStorage.getItem("selectedCourseId");
+    const savedCeremonyId = showCeremony?localStorage.getItem("selectedCeremonyId"):
+        localStorage.getItem("selectedPhotoCeremonyId")?localStorage.getItem("selectedPhotoCeremonyId"):2;
+    const savedCourseId = showCeremony?localStorage.getItem("selectedCourseId"):
+        localStorage.getItem("selectedPhotoCourseId");
 
     if (savedCeremonyId) {
       setCeremony(Number(savedCeremonyId));
@@ -34,15 +37,18 @@ function CeremonyCourseSelection({
     if (savedCourseId) {
       setCourse(Number(savedCourseId));
     }
-  }, [setCeremony, setCourse]);
+  }, [showCeremony]);
 
   const handleCeremonyChange = (e) => {
     const val = e.target.value;
     const id = val ? Number(val) : null;
+
     setCeremony(id);
     onCeremonySelect(id);
-    if (id !== null) localStorage.setItem("selectedCeremonyId", String(id));
+    if (id !== null && showCeremony) localStorage.setItem("selectedCeremonyId", String(id));
     else localStorage.removeItem("selectedCeremonyId");
+    if (id !== null && !showCeremony) localStorage.setItem("selectedPhotoCeremonyId", String(id));
+    else localStorage.removeItem("selectedPhotoCeremonyId");
   };
 
   const handleCourseChange = (e) => {
@@ -50,37 +56,46 @@ function CeremonyCourseSelection({
     const id = val ? Number(val) : null;
     setCourse(id);
     onCourseSelect(id);
-    if (id !== null) localStorage.setItem("selectedCourseId", String(id));
-    else localStorage.removeItem("selectedCourseId");
+    if (showCeremony)
+      if (id !== null) localStorage.setItem("selectedCourseId", String(id));
+      else localStorage.removeItem("selectedCourseId");
+    else
+      if (id !== null) localStorage.setItem("selectedPhotoCourseId", String(id));
+      else localStorage.removeItem("selectedPhotoCourseId");
   };
 
   const selectedCeremonyObj =
-    ceremonies && ceremony != null
+      ceremony !== 2?(ceremonies && ceremony != null
       ? ceremonies.find((c) => c.id === Number(ceremony))
-      : null;
+      : null):ceremony;
 
   return (
     <div className="ceremony-course-container">
-      {/* Ceremony Section */}
-      <h3>Select the ceremony you are ordering regalia for</h3>
-      <select
-        className="dropdown-select"
-        value={ceremony != null ? String(ceremony) : ""}
-        onChange={handleCeremonyChange}
-      >
-        <option value="">Please select a ceremony...</option>
-        {Array.isArray(ceremonies) &&
-          ceremonies
-            .sort((a, b) => a.id - b.id)
-            .map((ceremonyOption) => (
-              <option key={ceremonyOption.id} value={String(ceremonyOption.id)}>
-                {ceremonyOption.name}
-              </option>
-            ))}
-      </select>
+      {showCeremony && (
+        <>
+          {/* Ceremony Section */}
+          <h3>Select the ceremony you are ordering regalia for</h3>
+          <select
+            className="dropdown-select"
+            value={ceremony != null ? String(ceremony) : ""}
+            onChange={handleCeremonyChange}
+          >
+            <option value="">Please select a ceremony...</option>
+            {Array.isArray(ceremonies) &&
+              ceremonies
+                // .sort((a, b) => a.id - b.id)
+                .map((ceremonyOption) => (
+                  <option key={ceremonyOption.id} value={String(ceremonyOption.id)}>
+                    {ceremonyOption.name}
+                  </option>
+                ))}
+          </select>
+        </>
+      )}
+
       {selectedCeremonyObj && (
         <>
-          {selectedCeremonyObj.id === 2 && (
+          {!showCeremony && (
             <p className="info-text">
               Hire your robes outside graduation time for photos and family
               functions. Please put the date of your event in the 'Add a Message
