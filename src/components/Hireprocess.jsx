@@ -6,7 +6,7 @@ export default function Hireprocess() {
     <section>
       <h2 className="HireDressSetTitle">The Hiring Process</h2>
       <div className="HireDressSetImg">
-        <img src="/process.png" alt="hire process" />
+        <img src="/Process.png" alt="hire process" />
       </div>
     </section>
   );
