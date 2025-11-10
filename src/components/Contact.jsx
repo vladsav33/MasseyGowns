@@ -59,7 +59,7 @@ export default function Contact() {
         <div className="contact_left">
           <h2 className="contact_email">Email Contact</h2>
           <p className="clickhere">
-            You can click here{" "}
+            You can click here to{" "}
             <Link to="/contactus" className="contactlink">
               Contact Us
             </Link>
@@ -103,15 +103,16 @@ export default function Contact() {
             info@masseygowns.org.nz
           </p>
           <p className="openinghours">
-            Opening Hours: <br />
-            Monday - Thursday 9am - 2.30pm
+            Our normal hours are 9:00am – 2.30pm, Mon – Thurs. <br />
+            We operate extended hours during the graduation week.
           </p>
+          {/*
           <p className="detail">
             For more details, click{" "}
             <Link to="/contact" className="underline">
               here
             </Link>
-          </p>
+          </p>*/}
         </div>
       </div>
     </section>
