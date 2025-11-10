@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import "./CartItem.css";
 
 function CartItem({
@@ -12,9 +12,20 @@ function CartItem({
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
-
-  const unitPrice = parseFloat(item.hirePrice || 0);
+  const [unitPrice, setUnitPrice] = useState(0);
   const total = unitPrice * quantity;
+  const [selectedOption, setSelectedOption] = useState(null);
+
+  useEffect(() => {
+    if (item.category === 'Delivery') {
+      setUnitPrice(parseFloat(selectedOption?.price ?? 0));
+    } else {
+      // Default fallback
+      setUnitPrice(parseFloat(item.hirePrice || 0));
+    }
+  }, [item.category, item.hirePrice, selectedOption]);
+
+
   // const tax = subtotal * 0.1;
   // const total = subtotal + tax;
 
@@ -59,9 +70,14 @@ function CartItem({
                 <select
                   className="option-select"
                   value={item.selectedOptions?.[option.label] || ""} // bind selected value
-                  onChange={(e) =>
-                    onOptionChange(item.id, option.label, e.target.value)
-                  }
+                  onChange={(e) => {
+                    const selectedId = e.target.value;
+                    const selectedChoice = option.choices.find(
+                        (c) => String(c.id || c.value) === selectedId
+                    );
+                    setSelectedOption(selectedChoice);
+                    onOptionChange(item.id, option.label, selectedId)
+                  }}
                   required
                 >
                   <option value="">Please select...</option>
