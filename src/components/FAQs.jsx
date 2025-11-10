@@ -10,9 +10,9 @@ const items = [
     href: "/faqs",
   },
   {
-    title: "Sizes and Fitting",
-    desc: "Learn about gown sizing, fitting, collection, and what to bring when picking up or returning your graduation regalia.",
-    //href: "/faqs/sizes-and-fitting",
+    title: "Collection and Return Times",
+    desc: "Check your graduation's specific collection and return times, plus what to bring when picking up regalia.",
+    //href: "/faqs/collection-and-return-times",
     href: "/faqs",
   },
   {
@@ -22,9 +22,9 @@ const items = [
     href: "/faqs",
   },
   {
-    title: "Collection and Return Times",
-    desc: "Check your graduation's specific collection and return times, plus what to bring when picking up regalia.",
-    //href: "/faqs/collection-and-return-times",
+    title: "Sizes and Fitting",
+    desc: "Learn about gown sizing, fitting, collection, and what to bring when picking up or returning your graduation regalia.",
+    //href: "/faqs/sizes-and-fitting",
     href: "/faqs",
   },
 ];
