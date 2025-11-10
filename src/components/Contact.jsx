@@ -63,8 +63,7 @@ export default function Contact() {
             <Link to="/contactus" className="contactlink">
               Contact Us
             </Link>
-            , and then send us <br />
-            your queries.
+            , and then send us your queries.
           </p>
           <div className="footer_pay">
             <img src="/visa.png" alt="visa&master" className="visaimg" />
