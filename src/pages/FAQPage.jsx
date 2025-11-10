@@ -3,6 +3,7 @@ import { Search, Plus, Minus } from "lucide-react";
 import PropTypes from "prop-types";
 import Navbar from "../components/Navbar";
 import { fetchFAQs } from "../api/FAQApi";
+import { Link } from "react-router-dom";
 
 const slug = (s) =>
   String(s || "uncategorized")
@@ -130,9 +131,49 @@ const renderAnswer = (answer, query) => {
             </ul>
           )}
 
-          {answer.bottom_note && (
+          {/*{answer.bottom_note && (
             <div className="mt-2 space-y-2">
               {renderMultilineText(answer.bottom_note, query)}
+            </div>
+          )}*/}
+          {answer.bottom_note && (
+            <div className="mt-2 space-y-2">
+              {String(answer.bottom_note)
+                .split(/\n\s*\n/)
+                .map((para, i) => {
+                  const parts = para.split(/(Hire Regalia|Buy Regalia)/);
+                  return (
+                    <p key={i} className="leading-relaxed">
+                      {parts.map((part, j) => {
+                        if (part === "Hire Regalia") {
+                          return (
+                            <Link
+                              key={j}
+                              to="/hireregalia"
+                              className="text-sky-700 underline font-semibold hover:text-sky-900"
+                            >
+                              Hire Regalia
+                            </Link>
+                          );
+                        } else if (part === "Buy Regalia") {
+                          return (
+                            <Link
+                              key={j}
+                              to="/buyregalia"
+                              className="text-sky-700 underline font-semibold hover:text-sky-900"
+                            >
+                              Buy Regalia
+                            </Link>
+                          );
+                        } else {
+                          return (
+                            <React.Fragment key={j}>{part}</React.Fragment>
+                          );
+                        }
+                      })}
+                    </p>
+                  );
+                })}
             </div>
           )}
         </div>
