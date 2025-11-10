@@ -13,19 +13,19 @@
 .contact_inner {
   display: flex;
   align-items: center;
-  gap: 0 60px;
+  gap: 0 30px;
 }
 
 .contact_left {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  /*gap: 12px;*/
   margin-left: 70px;
 }
 
 .contact_map {
   padding-top: 30px;
-  width: 700px;
+  width: 600px;
 }
 
 .contact_info {
@@ -37,7 +37,7 @@
   color: rgb(0, 0, 0);
 }
 
-.contact_form {
+.f_form {
   margin-top: 10px;
   display: flex;
   align-items: center;
