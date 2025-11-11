@@ -81,7 +81,7 @@ export default function ContactUS() {
 
             <p>
               <span className="label">Courier Address :</span> 3 Refectory Road,
-              Massey University, Palmerston North 4410
+              Massey University, Palmerston North 4472
             </p>
             <p className="label">Customer service:</p>
             <ul className="pande">
