@@ -93,7 +93,7 @@ function CartList({ step, items, setItems }) {
       return item;
     });
 
-    console.log(updatedItems);
+    // console.log(updatedItems);
 
     setItems(updatedItems, grandTotal);
     localStorage.setItem("cart", JSON.stringify(updatedItems, grandTotal)); // persist to localStorage
@@ -109,6 +109,7 @@ function CartList({ step, items, setItems }) {
     .filter((item) => !item.isDonation)
     .reduce((acc, item) => acc + (item.quantity || 1), 0);
 
+  // Add delivery price
   const totalPrice = items
     .filter((item) => !item.isDonation)
     .reduce(

@@ -22,11 +22,12 @@ function CartItem({
           (c) => String(c.id || c.value) === item.selectedOptions['Delivery Type'])
       );
       setUnitPrice(parseFloat(selectedChoice?.['price'] ?? 0));
+      item.hirePrice = parseFloat(selectedChoice?.['price'] ?? 0);
     } else {
       // Default fallback
       setUnitPrice(parseFloat(item.hirePrice || 0));
     }
-  }, [item.category, item.hirePrice, selectedOption]);
+  }, [selectedOption]);
 
 
   // const tax = subtotal * 0.1;
