@@ -43,7 +43,7 @@ function ProgressButtons({
       // Check if all required options have values
       item.options.forEach((option) => {
         const selectedValue = item.selectedOptions[option.label];
-        if (!selectedValue || selectedValue.trim() === "") {
+        if (!selectedValue) {
           isDropdownSelected = false;
         }
       });
