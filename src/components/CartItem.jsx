@@ -18,7 +18,10 @@ function CartItem({
 
   useEffect(() => {
     if (item.category === 'Delivery') {
-      setUnitPrice(parseFloat(selectedOption?.price ?? 0));
+      const selectedChoice = (item.options[0].choices.find(
+          (c) => String(c.id || c.value) === item.selectedOptions['Delivery Type'])
+      );
+      setUnitPrice(parseFloat(selectedChoice?.['price'] ?? 0));
     } else {
       // Default fallback
       setUnitPrice(parseFloat(item.hirePrice || 0));
