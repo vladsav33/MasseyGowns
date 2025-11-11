@@ -114,13 +114,7 @@ function CartItem({
                 <div key={index} className="option-row">
                   <span className="option-label">{option.label}:</span>
                   <span className="option-value">
-                    {typeof item.selectedOptions?.[option.label] === 'object'
-                      ? item.selectedOptions[option.label]?.value || 
-                        item.selectedOptions[option.label]?.size ||
-                        item.selectedOptions[option.label]?.name ||
-                        JSON.stringify(item.selectedOptions[option.label])
-                      : item.selectedOptions?.[option.label] || "—"
-                    }
+                    {option.choices.find(c => String(c.id) === item.selectedOptions[option.label])['value']}
                   </span>
                 </div>
               ))}

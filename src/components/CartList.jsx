@@ -93,6 +93,8 @@ function CartList({ step, items, setItems }) {
       return item;
     });
 
+    console.log(updatedItems);
+
     setItems(updatedItems, grandTotal);
     localStorage.setItem("cart", JSON.stringify(updatedItems, grandTotal)); // persist to localStorage
     // console.log(localStorage.getItem("cart"), grandTotal);
