@@ -6,6 +6,8 @@ function CartList({ step, items, setItems }) {
   const [donationQuantity, setDonationQuantity] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  // console.log("Items List", items);
+
   // Centralized cart updater
   const updateCart = (next) => {
     setItems((prev) => {
@@ -92,14 +94,23 @@ function CartList({ step, items, setItems }) {
       }
       return item;
     });
-
-    // console.log(updatedItems);
-
     setItems(updatedItems, grandTotal);
     localStorage.setItem("cart", JSON.stringify(updatedItems, grandTotal)); // persist to localStorage
     // console.log(localStorage.getItem("cart"), grandTotal);
     
   };
+
+  const handleDeliveryChange = (itemId, newPrice) => {
+    const updatedItems = items.map((item) => {
+      if (item.id === itemId) {
+        item.hirePrice = newPrice;
+      }
+      return item;
+    });
+    // console.log("Updated Items=", updatedItems);
+    setItems(updatedItems, grandTotal);
+    localStorage.setItem("cart", JSON.stringify(updatedItems, grandTotal));
+  }
 
   // --- Price utilities ---
   const getNumericPrice = (priceString) =>
@@ -137,7 +148,7 @@ function CartList({ step, items, setItems }) {
       {items.length > 0 ? (
         <>
           <h4>You have {items.length} items in your cart</h4>
-          {items.map((item) => (
+          {items?.map((item) => (
             <CartItem
               key={item.id}
               item={item}
@@ -147,6 +158,7 @@ function CartList({ step, items, setItems }) {
               onDecrease={() => handleDecrease(item.id)}
               onRemove={() => handleRemove(item.id)}
               onOptionChange={handleOptionChange}
+              onDeliveryChange={handleDeliveryChange}
             />
           ))}
           <div></div>

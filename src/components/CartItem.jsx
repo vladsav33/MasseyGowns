@@ -9,6 +9,7 @@ function CartItem({
   onDecrease,
   onRemove,
   onOptionChange,
+  onDeliveryChange,
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -23,6 +24,7 @@ function CartItem({
       );
       setUnitPrice(parseFloat(selectedChoice?.['price'] ?? 0));
       item.hirePrice = parseFloat(selectedChoice?.['price'] ?? 0);
+      onDeliveryChange(item.id, item.hirePrice);
     } else {
       // Default fallback
       setUnitPrice(parseFloat(item.hirePrice || 0));

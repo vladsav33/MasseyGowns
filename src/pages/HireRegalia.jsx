@@ -78,7 +78,7 @@ function HireRegalia() {
       if (item.isDonation) return true;
 
       // If item has no options, it's valid
-      if (!item.options || item.options.length === 0) return true;
+      if (!item.options || item?.options.length === 0) return true;
 
       // Check if all options have selected values
       return item.options.every((option) => {
