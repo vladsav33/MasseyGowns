@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Ceremony from "../components/Ceremony";
 import FAQs from "../components/FAQs";
@@ -8,14 +8,50 @@ import BuyDressSet from "../components/BuyDressSet";
 import "./HomePage.css";
 import { Link } from "react-router-dom";
 
+const API_BASE = import.meta.env.VITE_GOWN_API_BASE;
+
 function HomePage() {
+  const [heroImageUrl, setHeroImageUrl] = useState(null);
+
+  useEffect(() => {
+    async function fetchHeroImage() {
+      try {
+        const res = await fetch(`${API_BASE}/api/HomePage/hero-image`);
+        if (!res.ok) {
+          throw new Error(`Failed to load hero image: ${res.status}`);
+        }
+
+        const json = await res.json();
+        const url =
+          (json && json.data && json.data.heroImageUrl) ||
+          json.heroImageUrl ||
+          null;
+
+        if (url) {
+          setHeroImageUrl(url);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    fetchHeroImage();
+  }, []);
+
+  const finalHeroSrc = heroImageUrl || "./img_small.png";
+
   return (
     <div>
       <Navbar />
       <div className="hero">
         <div className="bigbox">
           <div className="image">
-            <img src="./img_small.png" alt="picture" className="picture" />
+            <img
+              key={finalHeroSrc}
+              src={finalHeroSrc}
+              alt="picture"
+              className="picture"
+            />
           </div>
           <div className="text">
             <h1>Academic</h1>
@@ -36,14 +72,17 @@ function HomePage() {
               <Link to="/buyregalia" className="BuyRegalia">
                 Buy Regalia
               </Link>
-                {/*<Link to="/hireregalia?mode=photo" className="HireRegalia">*/}
-              <Link to={{ pathname: "/hireregalia", search: "?mode=photo" }} className="HireRegalia">
+              <Link
+                to={{ pathname: "/hireregalia", search: "?mode=photo" }}
+                className="HireRegalia"
+              >
                 Casual Hire for Photos
               </Link>
             </div>
           </div>
         </div>
       </div>
+
       <Ceremony />
       <Hireprocess />
       <BuyDressSet />
