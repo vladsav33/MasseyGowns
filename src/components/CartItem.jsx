@@ -9,6 +9,7 @@ function CartItem({
   onDecrease,
   onRemove,
   onOptionChange,
+  onDeliveryChange,
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -22,11 +23,13 @@ function CartItem({
           (c) => String(c.id || c.value) === item.selectedOptions['Delivery Type'])
       );
       setUnitPrice(parseFloat(selectedChoice?.['price'] ?? 0));
+      item.hirePrice = parseFloat(selectedChoice?.['price'] ?? 0);
+      onDeliveryChange(item.id, item.hirePrice);
     } else {
       // Default fallback
       setUnitPrice(parseFloat(item.hirePrice || 0));
     }
-  }, [item.category, item.hirePrice, selectedOption]);
+  }, [selectedOption]);
 
 
   // const tax = subtotal * 0.1;
@@ -114,13 +117,7 @@ function CartItem({
                 <div key={index} className="option-row">
                   <span className="option-label">{option.label}:</span>
                   <span className="option-value">
-                    {typeof item.selectedOptions?.[option.label] === 'object'
-                      ? item.selectedOptions[option.label]?.value || 
-                        item.selectedOptions[option.label]?.size ||
-                        item.selectedOptions[option.label]?.name ||
-                        JSON.stringify(item.selectedOptions[option.label])
-                      : item.selectedOptions?.[option.label] || "—"
-                    }
+                    {option.choices.find(c => String(c.id) === item.selectedOptions[option.label])['value']}
                   </span>
                 </div>
               ))}

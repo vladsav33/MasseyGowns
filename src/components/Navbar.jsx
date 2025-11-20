@@ -107,15 +107,13 @@ function Navbar() {
   const getNumericPrice = (priceString) =>
     parseFloat(String(priceString || 0).replace("$", "")) || 0;
 
-  const totalItems = cartItems.reduce(
-    (acc, item) => acc + (item.quantity || 1),
-    0
-  );
+  const totalItems = cartItems
+    .filter(Boolean)
+    .reduce((acc, item) => acc + (item.quantity || 1), 0);
 
-  const totalPrice = cartItems.reduce(
-    (acc, item) => acc + getNumericPrice(item.hirePrice) * (item.quantity || 1),
-    0
-  );
+  const totalPrice = cartItems
+    .filter(Boolean)
+    .reduce((acc, item) => acc + getNumericPrice(item.hirePrice) * (item.quantity || 1), 0);
 
   const handleCartIconClick = () => {
     setIsCartOpen(!isCartOpen);
