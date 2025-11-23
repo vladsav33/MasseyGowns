@@ -72,8 +72,5 @@
 
 .graduation_text p {
   margin: 20px;
-}
-
-.graduation_text {
-  padding-bottom: 10px;
+  font-size: medium;
 }

@@ -6,44 +6,50 @@ const API_BASE = import.meta.env.VITE_GOWN_API_BASE;
 function Ceremony() {
   const [ceremonyImageUrl, setCeremonyImageUrl] = useState(null);
   const [ceremonyText, setCeremonyText] = useState(null);
+  const [isLoaded, setIsLoaded] = useState(false); // track CMS load status
 
   useEffect(() => {
-    async function loadCeremonyImage() {
+    async function loadCmsContent() {
       try {
-        const res = await fetch(`${API_BASE}/api/HomePage/ceremony-image`);
-        if (!res.ok) throw new Error("Failed to load ceremony image");
-        const json = await res.json();
-        const url =
-          json?.data?.ceremonyImageUrl || json.ceremonyImageUrl || null;
+        const res = await fetch(`${API_BASE}/api/CmsContent`);
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(
+            `Failed to load CMS content (${res.status}): ${text}`
+          );
+        }
 
-        if (url) setCeremonyImageUrl(url);
+        const json = await res.json();
+        const blocks = json.data || [];
+
+        const getValue = (key) => {
+          const block = blocks.find((b) => b.key === key);
+          if (!block) return null;
+          return typeof block.value === "string" ? block.value : null;
+        };
+
+        const img = getValue("home.ceremonyImage");
+        if (img) setCeremonyImageUrl(img);
+
+        const txt = getValue("home.ceremonyText");
+        if (txt) setCeremonyText(txt);
       } catch (err) {
-        console.error("Ceremony image fallback to local", err);
+        console.error("Failed to load ceremony content", err);
+      } finally {
+        // only after we tried to load CMS, we decide whether to use fallback
+        setIsLoaded(true);
       }
     }
 
-    async function loadCeremonyText() {
-      try {
-        const res = await fetch(`${API_BASE}/api/HomePage/ceremony-text`);
-        if (!res.ok) throw new Error("Failed to load ceremony text");
-
-        const json = await res.json();
-        const text = json?.data?.ceremonyText || json.ceremonyText || null;
-
-        if (text) setCeremonyText(text);
-      } catch (err) {
-        console.error("Ceremony text fallback to local", err);
-      }
-    }
-
-    loadCeremonyImage();
-    loadCeremonyText();
+    loadCmsContent();
   }, []);
 
-  // fallback image
-  const finalCeremonyImage = ceremonyImageUrl || "/cere_img.png";
+  // Only decide the final image after CMS load finished
+  const fallbackImage = "/cere_img.png";
+  const finalCeremonyImage = isLoaded
+    ? ceremonyImageUrl || fallbackImage
+    : null;
 
-  // fallback text
   const fallbackText = `
 Your graduation ceremony is a formal celebration of your achievement,and you are encouraged to dress appropriately.
 
@@ -60,7 +66,9 @@ Women: formal clothes and applicable academic dress.
     <section className="ceremony">
       <div className="ceremony_inner">
         <div className="cere_img">
-          <img src={finalCeremonyImage} alt="graduations" />
+          {finalCeremonyImage ? (
+            <img src={finalCeremonyImage} alt="graduations" />
+          ) : null}
         </div>
 
         <div className="ceremony_text">
@@ -70,9 +78,19 @@ Women: formal clothes and applicable academic dress.
           </div>
 
           <div className="graduation_text">
-            {finalCeremonyText.split("\n").map((line, idx) => (
-              <p key={idx}>{line}</p>
-            ))}
+            {finalCeremonyText.split(/\n\s*\n/).map((para, idx) => {
+              const lines = para.split("\n");
+              return (
+                <p key={idx}>
+                  {lines.map((line, i) => (
+                    <React.Fragment key={i}>
+                      {line}
+                      {i < lines.length - 1 && <br />}
+                    </React.Fragment>
+                  ))}
+                </p>
+              );
+            })}
           </div>
         </div>
       </div>

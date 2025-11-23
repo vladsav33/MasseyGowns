@@ -1,3 +1,7 @@
+.hire-process {
+  margin: 40px 0;
+}
+
 .HireDressSetTitle {
   margin-bottom: 20px;
   margin-left: 130px;
@@ -6,13 +10,111 @@
   padding: 24px 0;
 }
 
-.HireDressSetImg {
+.hire-process__steps {
+  position: relative;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 70px;
+  width: 85%;
+  margin: 0 auto;
 }
 
-.HireDressSetImg img {
-  width: 80%;
+.hire-process__steps::before {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 32px;
+  border-top: 3px dotted #d71920;
+  z-index: 0;
+}
+
+.hire-process__step {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.hire-process__circle {
+  position: relative;
+  z-index: 2;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: conic-gradient(
+    #000 0 var(--blackEnd),
+    #00843d var(--blackEnd) 100%
+  );
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hire-process__circle-inner {
+  width: 44px;
+  height: 44px;
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
+  font-size: 22px;
+}
+
+.hire-process__card {
+  position: relative;
+  width: 200px;
+  height: 140px;
+}
+
+.hire-process__svg-box {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.hire-process__text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  width: 90%;
+}
+
+.hire-process__text span {
+  display: block;
+  line-height: 1.4;
+  margin-bottom: 4px;
+  letter-spacing: 0.03em;
+}
+
+.hire-process__text span:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 900px) {
+  .hire-process__steps {
+    flex-wrap: wrap;
+    row-gap: 32px;
+  }
+
+  .hire-process__steps::before {
+    display: none;
+  }
+
+  .hire-process__step {
+    flex: 0 0 48%;
+  }
+}
+
+@media (max-width: 600px) {
+  .hire-process__step {
+    flex: 1 0 100%;
+  }
 }
