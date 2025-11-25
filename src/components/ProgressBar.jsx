@@ -2,21 +2,32 @@ import React, { useState, useEffect } from "react";
 import "./ProgressBar.css";
 
 function ProgressBar({ step, steps }) {
-  const [currentStep, setCurrentStep] = useState(step);
+  const [currentStep, setCurrentStep] = useState(() => {
+    return Number(step || localStorage.getItem("step"));
+  });
 
-  // Sync step with localStorage (persist across refreshes)
-  useEffect(() => {
-    const savedStep = localStorage.getItem("step");
-    if (savedStep) {
-      setCurrentStep(Number(savedStep));
-    } else {
-      setCurrentStep(step);
-    }
-  }, [step]);
+  // useEffect(() => {
+  //   localStorage.setItem("step", currentStep);
+  // }, [currentStep]);
+
+  // const [currentStep, setCurrentStep] = useState(step);
+  // console.log("Step1=", step);
+  //
+  // // Sync step with localStorage (persist across refreshes)
+  // useEffect(() => {
+  //   const savedStep = localStorage.getItem("step");
+  //   console.log("Step2=", savedStep);
+  //   if (savedStep) {
+  //     setCurrentStep(Number(savedStep));
+  //   } else {
+  //     setCurrentStep(step);
+  //   }
+  // }, [step]);
 
   // Update localStorage whenever step changes
   useEffect(() => {
     localStorage.setItem("step", currentStep);
+    console.log("Step3=", currentStep);
   }, [currentStep]);
 
   return (
