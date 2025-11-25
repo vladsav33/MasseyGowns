@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Navbar from "../components/Navbar";
 import Ceremony from "../components/Ceremony";
 import FAQs from "../components/FAQs";
@@ -7,78 +7,24 @@ import Hireprocess from "../components/Hireprocess";
 import BuyDressSet from "../components/BuyDressSet";
 import "./HomePage.css";
 import { Link } from "react-router-dom";
+import { useCmsContent } from "../api/useCmsContent";
 
-const API_BASE = import.meta.env.VITE_GOWN_API_BASE;
-
-function HomePage() {
+export default function HomePage() {
   // Hero content controlled by CMS, with sensible defaults
-  const [heroImageUrl, setHeroImageUrl] = useState(null);
 
-  const [heroTitleLine1, setHeroTitleLine1] = useState("Academic");
-  const [heroTitleLine2, setHeroTitleLine2] = useState("Dress Hire");
-  const [heroTagline, setHeroTagline] = useState("A service provided by");
-  const [heroBoxLine1, setHeroBoxLine1] = useState("Graduate Women Manawatu");
-  const [heroBoxLine2, setHeroBoxLine2] = useState("Charitable Trust Inc.");
-  const [heroIntro, setHeroIntro] = useState(
-    "Home of academic dress for the Massey University graduations and also for other institutions in the Central Districts."
-  );
+  const { getValue, isLoaded } = useCmsContent();
 
-  const [isHeroLoaded, setIsHeroLoaded] = useState(false);
-
-  useEffect(() => {
-    async function fetchCmsContent() {
-      try {
-        const res = await fetch(`${API_BASE}/api/CmsContent`);
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(
-            `Failed to load CMS content (${res.status}): ${text}`
-          );
-        }
-
-        const json = await res.json();
-        const blocks = json.data || [];
-
-        const getValue = (key) => {
-          const block = blocks.find((b) => b.key === key);
-          if (!block) return null;
-          return typeof block.value === "string" ? block.value : null;
-        };
-
-        const heroImg = getValue("home.heroImage");
-        if (heroImg) {
-          setHeroImageUrl(heroImg);
-        }
-
-        const t1 = getValue("home.heroTitleLine1");
-        if (t1) setHeroTitleLine1(t1);
-
-        const t2 = getValue("home.heroTitleLine2");
-        if (t2) setHeroTitleLine2(t2);
-
-        const tagline = getValue("home.heroTagline");
-        if (tagline) setHeroTagline(tagline);
-
-        const box1 = getValue("home.heroBoxLine1");
-        if (box1) setHeroBoxLine1(box1);
-
-        const box2 = getValue("home.heroBoxLine2");
-        if (box2) setHeroBoxLine2(box2);
-
-        const intro = getValue("home.heroIntro");
-        if (intro) setHeroIntro(intro);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setIsHeroLoaded(true);
-      }
-    }
-
-    fetchCmsContent();
-  }, []);
-
-  const fallbackHeroSrc = "./img_small.png";
-  const finalHeroSrc = isHeroLoaded ? heroImageUrl || fallbackHeroSrc : null;
+  if (!isLoaded) return null;
+  const heroImageUrl = getValue("home.heroImage") || "./img_small.png";
+  const heroTitleLine1 = getValue("home.heroTitleLine1") || "Academic";
+  const heroTitleLine2 = getValue("home.heroTitleLine2") || "Dress Hire";
+  const heroTagline = getValue("home.heroTagline") || "A service provided by";
+  const heroBoxLine1 =
+    getValue("home.heroBoxLine1") || "Graduate Women Manawatu";
+  const heroBoxLine2 = getValue("home.heroBoxLine2") || "Charitable Trust Inc.";
+  const heroIntro =
+    getValue("home.heroIntro") ||
+    "Home of academic dress for the Massey University graduations and also for other institutions in the Central Districts.";
 
   return (
     <div>
@@ -86,14 +32,7 @@ function HomePage() {
       <div className="hero">
         <div className="bigbox">
           <div className="image">
-            {finalHeroSrc ? (
-              <img
-                key={finalHeroSrc}
-                src={finalHeroSrc}
-                alt="picture"
-                className="picture"
-              />
-            ) : null}
+            <img src={heroImageUrl} alt="picture" className="picture" />
           </div>
           <div className="text">
             <h1>{heroTitleLine1}</h1>
@@ -121,7 +60,6 @@ function HomePage() {
           </div>
         </div>
       </div>
-
       <Ceremony />
       <Hireprocess />
       <BuyDressSet />
@@ -130,5 +68,3 @@ function HomePage() {
     </div>
   );
 }
-
-export default HomePage;

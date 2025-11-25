@@ -64,6 +64,7 @@ export default function ContactUS() {
       generateCaptcha();
     } catch (error) {
       alert("Something went wrong. Please try again.");
+      console.error(error);
     }
   };
 
