@@ -3,6 +3,7 @@ import "./ContactUs.css";
 import Navbar from "../components/Navbar";
 import Googlemap from "../components/Googlemap";
 import { sendContactForm } from "../api/FormApi";
+import { useCmsContent } from "../api/useCmsContent";
 
 export default function ContactUS() {
   const [formData, setFormData] = useState({
@@ -14,6 +15,29 @@ export default function ContactUS() {
     query: "",
     captchaInput: "",
   });
+
+  const { getValue } = useCmsContent();
+
+  const conIntro =
+    getValue("contactus.Intro") ||
+    "If you have any questions, feedback or issues with your order please contact ACADEMIC DRESS HIRE";
+  const conCourierAddr =
+    getValue("contactus.CourierAddr") ||
+    "3 Refectory Road, Massey University, Palmerston North 4472";
+  const conPhone = getValue("contactus.Phone") || "Phone: 06.350.4166";
+  const conEmail =
+    getValue("contactus.Email") || "Email: info@masseygowns.org.nz";
+  const conServHours =
+    getValue("contactus.ServHours") ||
+    `We will endeavour to respond to your enquiry as soon as possible.
+
+     Our normal hours are 9:00am – 2.30pm, Mon – Thurs.
+
+     We operate extended hours during the graduation week.`.trim();
+
+  const conFormtitle =
+    getValue("contactus.Formtitle") ||
+    "To send us an enquiry please fill in the following form, and we will endeavour to reply to you as soon as possible.";
 
   const [captchaCode, setCaptchaCode] = useState("");
 
@@ -75,35 +99,37 @@ export default function ContactUS() {
         <h2>Contact Us</h2>
         <div className="innercontact">
           <div className="contactinfo">
+            <p>{conIntro}</p>
             <p>
-              If you have any questions, feedback or issues with your order
-              please contact ACADEMIC DRESS HIRE
-            </p>
-
-            <p>
-              <span className="label">Courier Address :</span> 3 Refectory Road,
-              Massey University, Palmerston North 4472
+              <span className="label">Courier Address :</span> {conCourierAddr}
             </p>
             <p className="label">Customer service:</p>
             <ul className="pande">
-              <li>Phone: 06.350.4166</li>
-              <li>Email: info@masseygowns.org.nz</li>
+              <li>{conPhone}</li>
+              <li>{conEmail}</li>
             </ul>
-            <p>
-              We will endeavour to respond to your enquiry as soon as possible.
-            </p>
-            <p>Our normal hours are 9:00am – 2.30pm, Mon – Thurs.</p>
-            <p>We operate extended hours during the graduation week.</p>
+            <div>
+              {conServHours.split(/\n\s*\n/).map((para, index) => {
+                const lines = para.split("\n");
+                return (
+                  <p key={index}>
+                    {lines.map((line, i) => (
+                      <React.Fragment key={i}>
+                        {line}
+                        {i < lines.length - 1 && <br />}
+                      </React.Fragment>
+                    ))}
+                  </p>
+                );
+              })}
+            </div>
           </div>
           <div className="googlemap">
             <Googlemap />
           </div>
         </div>
         <div className="contactform">
-          <p>
-            To send us an enquiry please fill in the following form, and we will
-            endeavour to reply to you as soon as possible.
-          </p>
+          <p>{conFormtitle}</p>
 
           <form onSubmit={handleSubmit}>
             <label>
