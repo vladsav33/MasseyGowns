@@ -199,6 +199,7 @@ const BuySelectRegalia = ({ setItems }) => {
 
     // Save to localStorage
     localStorage.setItem("cart", JSON.stringify(updated));
+    window.dispatchEvent(new Event("cartUpdated"));
 
     // Update parent state if provided
     if (typeof setItems === "function") setItems(updated);
