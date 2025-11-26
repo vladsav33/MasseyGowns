@@ -27,8 +27,12 @@ function HireRegalia() {
   // Initialize step from location.state if available, otherwise from localStorage or default to 1
   const [step, setStep] = useState(() => {
     if (location.state?.step) {
+      console.log("Location=", Number(location.state.step));
       return Number(location.state.step);
     }
+    let temp = Number(localStorage.getItem("step")) || 1;
+    console.log("Temp=", temp);
+
     return Number(localStorage.getItem("step")) || 1;
   });
 
