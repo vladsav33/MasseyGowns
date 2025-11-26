@@ -97,19 +97,19 @@ const BuySelectRegalia = ({ setItems }) => {
     const degrees = [];
     items.forEach((item) => {
       if (
-          item.category === selectedItemType &&
-          item.degreeId &&
-          item.degreeName &&
-          item.degreeOrder
+        item.category === selectedItemType &&
+        item.degreeId &&
+        item.degreeName &&
+        item.degreeOrder
       ) {
-        degrees.push({order: item.degreeOrder, name: item.degreeName});
+        degrees.push({ order: item.degreeOrder, name: item.degreeName });
       }
     });
     degrees.sort((a, b) => a.order - b.order);
 
     console.log("Degrees=", degrees);
 
-    const sorted = degrees.map(d => d.name);
+    const sorted = degrees.map((d) => d.name);
 
     console.log("Array=", sorted);
 
@@ -184,7 +184,7 @@ const BuySelectRegalia = ({ setItems }) => {
         name: delivery[0].name || "Courier Delivery",
         category: delivery[0].category || "Service",
         description: delivery[0].description || "Regalia delivery service",
-        buyPrice:  0,
+        buyPrice: 0,
         hirePrice: 0,
         // buyPrice: Number(delivery[0].buyPrice) || 0,
         // hirePrice: Number(delivery[0].buyPrice) || 0,
@@ -377,6 +377,14 @@ const BuySelectRegalia = ({ setItems }) => {
                         <div key={s.id} className="product-card-set">
                           <div className="product-image">
                             {/* Image placeholder */}
+                            <img
+                              src={`data:image/jpeg;base64,${s.pictureBase64}`}
+                              className="item-image"
+                              onError={(e) => {
+                                e.target.src =
+                                  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0zNSA0MEg2NVY0NEgzNVY0MFpNMzUgNTBINjVWNTRIMzVWNTBaTTM1IDYwSDU1VjY0SDM1VjYwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K";
+                              }}
+                            />
                           </div>
                           <div className="product-info">
                             <span className="item-category">
@@ -572,7 +580,14 @@ const BuySelectRegalia = ({ setItems }) => {
                         {filteredItems.map((product) => (
                           <div key={product.uiId} className="product-card">
                             <div className="product-image">
-                              {/* Image placeholder */}
+                              <img
+                                src={`data:image/jpeg;base64,${product.pictureBase64}`}
+                                className="item-image"
+                                onError={(e) => {
+                                  e.target.src =
+                                    "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0zNSA0MEg2NVY0NEgzNVY0MFpNMzUgNTBINjVWNTRIMzVWNTBaTTM1IDYwSDU1VjY0SDM1VjYwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K";
+                                }}
+                              />
                             </div>
                             <div className="product-info">
                               <span className="item-category">

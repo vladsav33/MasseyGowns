@@ -38,7 +38,7 @@ function CartItem({
   return (
     <div className="cart-item item-image-container">
       <img
-        src={"../../img/2.jpg"}
+        src={`data:image/jpeg;base64,${item.pictureBase64}`}
         className="item-image"
         onError={(e) => {
           e.target.src =
