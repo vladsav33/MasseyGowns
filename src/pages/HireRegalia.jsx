@@ -29,6 +29,8 @@ function HireRegalia() {
     if (location.state?.step) {
       return Number(location.state.step);
     }
+    let temp = Number(localStorage.getItem("step")) || 1;
+
     return Number(localStorage.getItem("step")) || 1;
   });
 
