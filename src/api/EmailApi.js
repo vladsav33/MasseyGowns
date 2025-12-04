@@ -25,6 +25,7 @@ export async function sendWebsiteEmail(payload) {
   const data = await res.json();
 
   if (!res.ok || !data.success) {
+    //console.log(data);
     const err = new Error(data.message || "Failed to send email");
     err.response = data;
     throw err;
