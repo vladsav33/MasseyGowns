@@ -33,3 +33,22 @@ export async function sendWebsiteEmail(payload) {
 
   return data;
 }
+
+export async function sendOrderEmail(payload) {
+  const res = await fetch(`${API_BASE}/api/email/sendOrderEmail`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok || !data.success) {
+    const err = new Error(data.message || "Failed to send email");
+    err.response = data;
+    throw err;
+  }
+  return data;
+}
