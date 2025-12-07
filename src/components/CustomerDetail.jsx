@@ -436,19 +436,10 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
                   onChange={handleInputChange}
                   className="radio-input"
                 />
-                <span>Credit/Debit Card (Paystation)</span>
-              </label>
-              <label className="radio-label">
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="2"
-                  checked={formData.paymentMethod === "2"}
-                  onChange={handleInputChange}
-                  className="radio-input"
-                />
-                <span>Account2Account (on-line)</span>
-              </label>
+                <span>
+                  Credit/Debit Card (Paystation) or Account2Account (Poli)
+                </span>
+              </label>              
               <label className="radio-label">
                 <input
                   type="radio"
