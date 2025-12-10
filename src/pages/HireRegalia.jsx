@@ -14,6 +14,7 @@ import {
   getCeremonies,
   getItemsByCourseId,
 } from "../services/HireBuyRegaliaService";
+import PaymentCompleted from "../components/PaymentCompleted";
 
 function HireRegalia() {
   const action = 0; // Hire
@@ -118,6 +119,10 @@ function HireRegalia() {
 
     setSelectedCourseId(saved ? Number(saved) : null);
   }, [showCeremony]);
+
+  // useEffect(() => { 
+    const paymentMethod = localStorage.getItem("paymentMethod")
+  // })  
 
   // ---- API CALLS ----
   // Fetch Ceremonies
@@ -304,10 +309,18 @@ function HireRegalia() {
       )}
 
       {step === 4 && (
-        <div>
-          {/*<PaymentCompleted />*/}
+        <>
+        {paymentMethod == 1 && ( 
+          <div>
           <Payment />
         </div>
+        )}
+        {paymentMethod == 3 && ( 
+          <div>
+          <PaymentCompleted />
+        </div>
+        )}
+        </>
       )}
 
       <ProgressButtons

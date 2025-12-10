@@ -43,9 +43,16 @@ export async function sendOrderEmail(payload) {
     body: JSON.stringify(payload),
   });
 
-  const data = await res.json();
+  let data;
+  const text = await res.text();
 
-  if (!res.ok || !data.success) {
+  try {
+    data = JSON.parse(text);
+  } catch {
+    data = { success: false, message: text };
+  }
+
+  if (!res.ok || data.success === false) {
     const err = new Error(data.message || "Failed to send email");
     err.response = data;
     throw err;
