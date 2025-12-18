@@ -14,8 +14,7 @@ export default function Payment() {
   const formData = JSON.parse(localStorage.getItem("customerDetails") || "{}");
   const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-
-  // Handle Paystation return
+  //Handle Paystation return
   useEffect(() => {
     const result = searchParams.get("ec"); // Error code
     const message = searchParams.get("em"); // Error message
@@ -86,15 +85,15 @@ export default function Payment() {
       balanceOwing: 0,
     };
 
-const emailHtml = EmailTemplate(emailPayload);
+    const emailHtml = EmailTemplate(emailPayload);
     // console.log("Generated Email Template:", emailHtml);
 
     try {
-    await sendOrderEmail({
-      to: formData.email,
-      subject: "Payment Completed",
-      htmlBody: emailHtml,
-    });
+      await sendOrderEmail({
+        to: formData.email,
+        subject: "Payment Completed",
+        htmlBody: emailHtml,
+      });
     } catch (err) {
       console.error("Email sending failed:", err);
     }
