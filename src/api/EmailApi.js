@@ -59,3 +59,18 @@ export async function sendOrderEmail(payload) {
   }
   return data;
 }
+
+export async function getEmailTemplateByName(name) {
+  try {
+    const res = await fetch(`${API_BASE}/api/EmailTemplates/by-name/${name}`);
+    
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error(err);
+    setStatus({
+      type: "error",
+      message: "Failed to load email templates.",
+    });
+  }
+}

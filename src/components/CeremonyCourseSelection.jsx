@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import "./CeremonyCourseSelection.css";
+import { useCmsContent } from "../api/useCmsContent";
 
 function CeremonyCourseSelection({
   showCeremony,
@@ -69,6 +70,11 @@ function CeremonyCourseSelection({
       ? ceremonies.find((c) => c.id === Number(ceremony))
       : null):ceremony;
 
+  const { getValue } = useCmsContent();
+  const intro =
+    getValue("hireRegaliaIntro") ||
+    "Hire your robes outside graduation time for photos and family functions. Please put the date of your event in the 'Add a Message box' on Page 3. Please allow 2 weeks for us to process the order and for courier delivery.";
+
   return (
     <div className="ceremony-course-container">
       {showCeremony && (
@@ -97,10 +103,7 @@ function CeremonyCourseSelection({
         <>
           {!showCeremony && (
             <p className="info-text">
-              Hire your robes outside graduation time for photos and family
-              functions. Please put the date of your event in the 'Add a Message
-              box' on Page 3. Please allow 2 weeks for us to process the order
-              and for courier delivery.
+              {intro}
             </p>
           )}
 
