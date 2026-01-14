@@ -94,17 +94,23 @@ const BuySelectRegalia = ({ setItems }) => {
     //     }
     //   }
     // });
-    const degrees = [];
+
+    const degreesMap = new Map();
+
     items.forEach((item) => {
       if (
-        item.category === selectedItemType &&
-        item.degreeId &&
-        item.degreeName &&
-        item.degreeOrder
+          item.category === selectedItemType &&
+          item.degreeId &&
+          item.degreeName &&
+          item.degreeOrder
       ) {
-        degrees.push({ order: item.degreeOrder, name: item.degreeName });
+        degreesMap.set(item.degreeName, {
+          order: item.degreeOrder,
+          name: item.degreeName,
+        });
       }
     });
+    const degrees = Array.from(degreesMap.values());
     degrees.sort((a, b) => a.order - b.order);
 
     console.log("Degrees=", degrees);
@@ -120,6 +126,8 @@ const BuySelectRegalia = ({ setItems }) => {
   const filteredItems = React.useMemo(() => {
     if (!selectedItemType || !selectedDegree) return [];
 
+    console.log('SelectedDegree=', selectedDegree);
+
     const filtered = items
       .filter((item) => {
         // if (item?.buyPrice == null) return false;
@@ -133,6 +141,8 @@ const BuySelectRegalia = ({ setItems }) => {
         ...item,
         uiId: `${item.degreeId}-${item.id}-${index}`,
       }));
+
+    console.log("Filtered=", filtered);
 
     // Remove duplicates based on name and category
     const uniqueItems = [];

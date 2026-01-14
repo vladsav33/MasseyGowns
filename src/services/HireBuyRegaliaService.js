@@ -100,6 +100,8 @@ export const submitCustomerDetails = async (formData) => {
       degreeId: degreeId
     };
 
+    console.log("CustomerPayload=", customerPayload);
+
     const response = await axios.post(`${API_URL}/orders`, customerPayload);
     if (response.data) {
       localStorage.setItem("orderResponse", JSON.stringify(response.data));
