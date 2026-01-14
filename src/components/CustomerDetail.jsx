@@ -1,10 +1,13 @@
-import  React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import "./CustomerDetail.css";
 import { Link } from "react-router-dom";
 import { submitCustomerDetails } from "./../services/HireBuyRegaliaService.js";
 import DatePicker from "react-datepicker";
 import { format } from "date-fns";
 import "react-datepicker/dist/react-datepicker.css";
+import { sendOrderEmail } from "../api/EmailApi";
+import { EmailTemplate } from "../components/EmailTemplate.jsx";
+import { getEmailTemplateByName } from "../api/EmailApi";
 
 function CustomerDetail({ item, items = [], step, setStep, steps }) {
   const [countries, setCountries] = useState([]);
@@ -26,6 +29,17 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
     termsAccepted: false,
     message: "",
   });
+
+  // Use props if provided, otherwise load from localStorage
+  const cart =
+    items.length > 0 ? items : JSON.parse(localStorage.getItem("cart") || "[]");
+  localStorage.setItem("customerDetails", JSON.stringify(formData));
+
+  // Calculate total
+  const total = cart.reduce(
+    (sum, item) => sum + (item.hirePrice || 0) * (item.quantity || 1),
+    0
+  );
 
   const handleDateChange = (date) => {
     setFormData({ ...formData, eventDate: date });
@@ -116,12 +130,17 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
       console.log("Cart before submission:", cart);
 
+      localStorage.setItem("paymentMethod", parseInt(formData.paymentMethod));
+
       // Submit order details
       await Promise.all([submitCustomerDetails(formData)]);
+      if (parseInt(formData.paymentMethod) == 3) {
+        orderCompletionEmail();
+      }
 
       console.log("Order submission completed successfully");
-      setTimeout(() => { debugger; }, 0);
-      debugger;
+      // setTimeout(() => { debugger; }, 0);
+      // debugger;
 
       // Clear the cart after successful submission
       localStorage.removeItem("cart");
@@ -149,6 +168,44 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
     } catch (error) {
       console.error("Error during order submission:", error);
       alert("There was an error submitting your order. Please try again.");
+    }
+  };
+
+  const orderCompletionEmail = async () => {
+    const emailPayload = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      gstNumber: 0,
+      invoiceNumber: 0,
+      invoiceDate: 0,
+      studentId: formData.studentId,
+      mobile: formData.mobile,
+      phone: formData.phone,
+      address: formData.address,
+      city: formData.city,
+      postcode: formData.postcode,
+      country: formData.country,
+      cart: cart,
+      grandTotal: 0,
+      amountPaid: 0,
+      balanceOwing: 0,
+    };
+
+    const data = await getEmailTemplateByName("OrderCompleted");
+    console.log(data);
+    
+    const template = data.taxReceiptHtml;
+    const emailHtml = EmailTemplate(emailPayload, template);
+
+    try {
+      await sendOrderEmail({
+        to: formData.email,
+        subject: data.subjectTemplate,
+        htmlBody: emailHtml,
+      });
+    } catch (err) {
+      console.error("Email sending failed:", err);
     }
   };
 
@@ -221,16 +278,6 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       cancelled = true;
     };
   }, []);
-
-  // Use props if provided, otherwise load from localStorage
-  const cart =
-    items.length > 0 ? items : JSON.parse(localStorage.getItem("cart") || "[]");
-
-  // Calculate total
-  const total = cart.reduce(
-    (sum, item) => sum + (item.hirePrice || 0) * (item.quantity || 1),
-    0
-  );
 
   return (
     <div className="checkout-container">
@@ -436,18 +483,9 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
                   onChange={handleInputChange}
                   className="radio-input"
                 />
-                <span>Credit/Debit Card (Paystation)</span>
-              </label>
-              <label className="radio-label">
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="2"
-                  checked={formData.paymentMethod === "2"}
-                  onChange={handleInputChange}
-                  className="radio-input"
-                />
-                <span>Account2Account (on-line)</span>
+                <span>
+                  Credit/Debit Card (Paystation) or Account2Account (Poli)
+                </span>
               </label>
               <label className="radio-label">
                 <input

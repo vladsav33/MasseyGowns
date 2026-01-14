@@ -1,9 +1,11 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import { Search, Plus, Minus } from "lucide-react";
 import PropTypes from "prop-types";
 import Navbar from "../components/Navbar";
 import { fetchFAQs } from "../api/FAQApi";
 import { Link } from "react-router-dom";
+
+// ---------- helpers ----------
 
 const slug = (s) =>
   String(s || "uncategorized")
@@ -57,316 +59,330 @@ Highlighter.propTypes = {
 };
 Highlighter.defaultProps = { query: "", exclude: ["code", "pre"] };
 
-/* Render Answer (support text , list , table) 
-/* Split text containing \n\n into multiple <p> elements. */
+// Turn “Hire Regalia / Buy Regalia” inside plain text into internal links
+const renderTextWithLinks = (text, query) => {
+  const parts = String(text || "").split(/(Hire Regalia|Buy Regalia)/);
 
-const renderMultilineText = (text, query) => {
+  return parts.map((part, i) => {
+    if (part === "Hire Regalia") {
+      return (
+        <Link
+          key={i}
+          to="/hireregalia"
+          className="text-sky-700 underline font-semibold hover:text-sky-900"
+        >
+          <Highlighter query={query}>Hire Regalia</Highlighter>
+        </Link>
+      );
+    }
+
+    if (part === "Buy Regalia") {
+      return (
+        <Link
+          key={i}
+          to="/buyregalia"
+          className="text-sky-700 underline font-semibold hover:text-sky-900"
+        >
+          <Highlighter query={query}>Buy Regalia</Highlighter>
+        </Link>
+      );
+    }
+
+    // Normal text – just apply highlighting
+    return (
+      <React.Fragment key={i}>
+        <Highlighter query={query}>{part}</Highlighter>
+      </React.Fragment>
+    );
+  });
+};
+
+// Split text into paragraphs (separated by blank lines)
+const renderParagraphs = (text, query) => {
   return String(text || "")
     .split(/\n\s*\n/)
     .map((para, i) => (
       <p key={i} className="leading-relaxed">
-        <Highlighter query={query}>{para}</Highlighter>
+        {renderTextWithLinks(para, query)}
       </p>
     ));
 };
 
-const renderAnswer = (answer, query) => {
-  if (!answer || typeof answer !== "object") return null;
-
-  switch (answer.type) {
-    case "text":
-      return (
-        <div className="space-y-3">
-          {String(answer.content || "")
-            .split(/\n\s*\n/)
-            .map((para, i) => (
-              <p key={i} className="leading-relaxed">
-                <Highlighter query={query}>{para}</Highlighter>
-              </p>
-            ))}
-        </div>
-      );
-
-    case "list":
-      return (
-        <div>
-          {answer.top_note && (
-            <div className="mb-2 space-y-2">
-              {renderMultilineText(answer.top_note, query)}
-            </div>
-          )}
-
-          {answer.title && (
-            <div className="font-semibold mb-2">{answer.title}</div>
-          )}
-
-          {answer.items && (
-            <ul className="list-disc pl-6 space-y-1">
-              {answer.items.map((item, i) => (
-                <li key={i}>
-                  <Highlighter query={query}>{item}</Highlighter>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {answer.links_note && (
-            <p className="mt-4 font-semibold">{answer.links_note}</p>
-          )}
-
-          {answer.links && (
-            <ul className="list-disc pl-6 space-y-1">
-              {answer.links.map((link, i) => (
-                <li key={i}>
-                  <a
-                    href={link.url}
-                    className="text-sky-700 hover:underline"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {/*{answer.bottom_note && (
-            <div className="mt-2 space-y-2">
-              {renderMultilineText(answer.bottom_note, query)}
-            </div>
-          )}*/}
-          {answer.bottom_note && (
-            <div className="mt-2 space-y-2">
-              {String(answer.bottom_note)
-                .split(/\n\s*\n/)
-                .map((para, i) => {
-                  const parts = para.split(/(Hire Regalia|Buy Regalia)/);
-                  return (
-                    <p key={i} className="leading-relaxed">
-                      {parts.map((part, j) => {
-                        if (part === "Hire Regalia") {
-                          return (
-                            <Link
-                              key={j}
-                              to="/hireregalia"
-                              className="text-sky-700 underline font-semibold hover:text-sky-900"
-                            >
-                              Hire Regalia
-                            </Link>
-                          );
-                        } else if (part === "Buy Regalia") {
-                          return (
-                            <Link
-                              key={j}
-                              to="/buyregalia"
-                              className="text-sky-700 underline font-semibold hover:text-sky-900"
-                            >
-                              Buy Regalia
-                            </Link>
-                          );
-                        } else {
-                          return (
-                            <React.Fragment key={j}>{part}</React.Fragment>
-                          );
-                        }
-                      })}
-                    </p>
-                  );
-                })}
-            </div>
-          )}
-        </div>
-      );
-
-    case "table":
-      return (
-        <div className="overflow-x-auto mt-3">
-          {answer.top_note && (
-            <div className="mb-2 space-y-2">
-              {renderMultilineText(answer.top_note, query)}
-            </div>
-          )}
-
-          {answer.title && (
-            <div className="font-semibold mb-2">{answer.title}</div>
-          )}
-
-          <table className="w-full table-auto border-collapse overflow-hidden rounded-xl">
-            <thead>
-              <tr className="bg-slate-50 text-left">
-                {answer.columns?.map((col, i) => (
-                  <th
-                    key={i}
-                    className="px-4 py-3 text-slate-600 font-semibold"
-                  >
-                    {col}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {answer.rows?.map((row, i) => (
-                <tr key={i} className="hover:bg-slate-50">
-                  {row.map((cell, j) => (
-                    <td key={j} className="px-4 py-3">
-                      <Highlighter query={query}>{cell}</Highlighter>
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {answer.bottom_note && (
-            <div className="mt-2 space-y-2">
-              {renderMultilineText(answer.bottom_note, query)}
-            </div>
-          )}
-        </div>
-      );
-
-    default:
-      return null;
-  }
+// Intro-style text that should not become a clickable “question”
+const isIntroItem = (item) => {
+  const label = (item?.label || "").toLowerCase();
+  return item?.type === "text" && (label === "intro" || label === "linkintro");
 };
 
-/* FAQ Page */
+// Items that behave like “question + answer” blocks
+const isQuestionItem = (item) => {
+  if (item?.type !== "text") return false;
+  if (isIntroItem(item)) return false;
+
+  const label = (item.label || "").trim();
+  // Text items without a label are treated as extra content only
+  return label.length > 0;
+};
+
+// Extract a baseKey, e.g.
+// "Ordering and Payment.How to order.intro" -> "Ordering and Payment.How to order"
+const getBaseKey = (key) => (key || "").split(".").slice(0, -1).join(".");
+
+// Render a single content block (no title, no BACK TO TOP)
+const renderFaqContent = (item, query) => {
+  const value = String(item.value || "");
+
+  if (item.type === "text") {
+    if (!value) return null;
+    return <div className="space-y-3">{renderParagraphs(value, query)}</div>;
+  }
+
+  if (item.type === "list") {
+    if (!value) return null;
+    const parts = value.split(/\n\s*\n/).filter(Boolean);
+    return (
+      <ul className="list-disc pl-6 space-y-1">
+        {parts.map((t, i) => (
+          <li key={i}>{renderTextWithLinks(t, query)}</li>
+        ))}
+      </ul>
+    );
+  }
+
+  if (item.type === "link") {
+    const link = item.parsedLink;
+    if (!link || !link.url) return null;
+    const label = link.name || item.label || "More information";
+    return (
+      <a
+        href={link.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1 text-sky-700 hover:underline"
+      >
+        <Highlighter query={query}>{label}</Highlighter>
+      </a>
+    );
+  }
+
+  // Table type – backend sends { columns, rows } parsed from Excel
+  if (item.type === "table") {
+    const t = item.parsedTable;
+    if (!t || !Array.isArray(t.columns) || !Array.isArray(t.rows)) {
+      return null;
+    }
+
+    return (
+      <div className="overflow-x-auto mt-3">
+        <table className="w-full table-auto border-collapse overflow-hidden rounded-xl">
+          <thead>
+            <tr className="bg-slate-50 text-left">
+              {t.columns.map((col, i) => (
+                <th key={i} className="px-4 py-3 text-slate-600 font-semibold">
+                  {col}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {t.rows.map((row, i) => (
+              <tr key={i} className="hover:bg-slate-50">
+                {row.map((cell, j) => (
+                  <td key={j} className="px-4 py-3">
+                    {renderTextWithLinks(cell, query)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  // File attachment (Excel etc.) – keeping this for later if needed
+  /*
+  if (item.type === "file") {
+    if (!item.value) return null;
+    const displayLabel =
+      (item.label || "").replace(/\.file$/i, "") || "Download file";
+    return (
+      <a
+        href={item.value}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1 text-sky-700 hover:underline"
+      >
+        <Highlighter query={query}>{displayLabel}</Highlighter>
+      </a>
+    );
+  }
+  */
+
+  return null;
+};
+
+// ---------- FAQ Page ----------
+
 export default function FAQPage() {
   const [query, setQuery] = useState("");
-  const [openCats, setOpenCats] = useState(new Set());
-  const inputRef = useRef(null);
-  const [faqs, setFaqs] = useState([]);
+  const [openSections, setOpenSections] = useState(new Set());
+  const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const inputRef = useRef(null);
   const itemRefs = useRef({});
   const getItemRef = (id) => {
     if (!itemRefs.current[id]) itemRefs.current[id] = React.createRef();
     return itemRefs.current[id];
   };
+  const anchorId = (id) => `faq-q-${id}`;
 
-  React.useEffect(() => {
-    const abort = new AbortController();
+  // Load /faq data
+  useEffect(() => {
+    let cancelled = false;
+
     (async () => {
       try {
         setLoading(true);
         setError("");
 
         const data = await fetchFAQs();
+        const array = Array.isArray(data) ? data : [];
 
-        const normalized = (Array.isArray(data) ? data : []).map((x, i) => {
-          let parsedAnswer = null;
-          try {
-            parsedAnswer =
-              typeof x?.answer === "string" ? JSON.parse(x.answer) : x.answer;
-          } catch (e) {
-            console.error("❌ Failed to parse FAQ answer:", e);
+        const normalized = array.map((x) => {
+          let parsedLink = null;
+          if (x.type === "link" && typeof x.value === "string") {
+            try {
+              parsedLink = JSON.parse(x.value);
+            } catch (e) {
+              console.error("Failed to parse FAQ link JSON:", e);
+            }
+          }
+
+          // Try to parse table JSON
+          let parsedTable = null;
+          if (x.type === "table" && typeof x.value === "string") {
+            try {
+              parsedTable = JSON.parse(x.value);
+            } catch (e) {
+              console.error("Failed to parse FAQ table JSON:", e);
+            }
           }
 
           return {
-            id: Number.isFinite(x?.id) ? x.id : i + 1,
-            question: String(x?.question ?? ""),
-            answer: parsedAnswer,
-            category: String(x?.category ?? ""),
-            tags: [],
-            searchIndex: "",
+            id: x.id,
+            page: x.page,
+            section: x.section || "Other",
+            key: x.key || "",
+            type: x.type || "text",
+            label: x.label || "",
+            value: x.value || "",
+            parsedLink,
+            parsedTable,
           };
         });
 
-        const groupedArray = Object.values(
+        const grouped = Object.values(
           normalized.reduce((acc, item) => {
-            if (!acc[item.category]) {
-              acc[item.category] = { category: item.category, items: [] };
+            const sec = item.section || "Other";
+            if (!acc[sec]) {
+              acc[sec] = { section: sec, items: [] };
             }
-            acc[item.category].items.push(item);
+            acc[sec].items.push(item);
             return acc;
           }, {})
         );
 
-        setFaqs(groupedArray);
+        if (!cancelled) {
+          setGroups(grouped);
+          // Start with everything collapsed
+          setOpenSections(new Set());
+        }
       } catch (e) {
-        if (e.name !== "AbortError") setError("❌ Failed to load FAQs.");
+        console.error("Failed to load FAQs:", e);
+        if (!cancelled) setError("Failed to load FAQs.");
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
-    return () => abort.abort();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const indexedGroups = useMemo(() => {
-    return faqs.map((g) => ({
-      category: g.category,
-      items: g.items.map((it) => {
-        let answerText = "";
-        if (it.answer?.type === "text") {
-          answerText = it.answer.content || "";
-        } else if (it.answer?.type === "list") {
-          answerText =
-            (it.answer.title || "") + " " + (it.answer.items || []).join(" ");
-        } else if (it.answer?.type === "table") {
-          answerText =
-            (it.answer.title || "") +
-            " " +
-            (it.answer.rows || []).map((r) => r.join(" ")).join(" ");
-        }
+  // Build search index
+  const indexedGroups = useMemo(
+    () =>
+      groups.map((g) => ({
+        section: g.section,
+        items: g.items.map((item) => {
+          const valText = String(item.value || "");
+          const linkName = item.parsedLink?.name || "";
+          const linkUrl = item.parsedLink?.url || "";
 
-        return {
-          ...it,
-          __search: [
-            it.question,
-            it.searchIndex,
-            answerText,
-            it.category,
-            (it.tags || []).join(" "),
+          // For tables, just fold the JSON into the search string
+          const tableText =
+            item.type === "table" && item.parsedTable
+              ? JSON.stringify(item.parsedTable)
+              : "";
+
+          const searchText = [
+            g.section,
+            item.label,
+            valText,
+            linkName,
+            linkUrl,
+            tableText,
           ]
             .filter(Boolean)
             .join(" ")
-            .toLowerCase(),
-        };
-      }),
-    }));
-  }, [faqs]);
+            .toLowerCase();
+          return { ...item, __search: searchText };
+        }),
+      })),
+    [groups]
+  );
 
-  const filtered = useMemo(() => {
+  const filteredGroups = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return indexedGroups;
     return indexedGroups
       .map((g) => ({
-        category: g.category,
+        section: g.section,
         items: g.items.filter((it) => it.__search.includes(q)),
       }))
       .filter((g) => g.items.length > 0);
   }, [indexedGroups, query]);
 
   const resultsCount = useMemo(
-    () => filtered.reduce((n, g) => n + g.items.length, 0),
-    [filtered]
+    () => filteredGroups.reduce((n, g) => n + g.items.length, 0),
+    [filteredGroups]
   );
 
-  const toggleCat = (cat) =>
-    setOpenCats((prev) => {
+  const toggleSection = (sec) =>
+    setOpenSections((prev) => {
       const next = new Set(prev);
-      next.has(cat) ? next.delete(cat) : next.add(cat);
+      next.has(sec) ? next.delete(sec) : next.add(sec);
       return next;
     });
-  const expandAll = () =>
-    setOpenCats(
-      new Set((query ? filtered : indexedGroups).map((g) => g.category))
-    );
-  const collapseAll = () => setOpenCats(new Set());
 
-  const jumpToItem = (cat, id) => {
-    if (!openCats.has(cat)) {
-      setOpenCats((prev) => new Set([...prev, cat]));
-      setTimeout(
-        () =>
-          itemRefs.current[id]?.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          }),
-        0
-      );
+  const expandAll = () =>
+    setOpenSections(new Set(filteredGroups.map((g) => g.section)));
+
+  const collapseAll = () => setOpenSections(new Set());
+
+  const jumpToItem = (section, id) => {
+    if (!openSections.has(section)) {
+      setOpenSections((prev) => new Set([...prev, section]));
+      setTimeout(() => {
+        itemRefs.current[id]?.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 0);
     } else {
       itemRefs.current[id]?.current?.scrollIntoView({
         behavior: "smooth",
@@ -375,19 +391,17 @@ export default function FAQPage() {
     }
   };
 
-  const anchorId = (id) => `faq-q-${id}`;
-
   return (
     <div className="bg-white">
       <Navbar />
 
-      <div id="faq-top" className="mx-auto w-full max-w-4xl px-6 py-12" />
-      <div className="mx-auto w-full max-w-4xl px-6 py-12">
+      <div id="faq-top" className="mx-auto w-full max-w-4xl px-6 pt-40" />
+      <div className="mx-auto w-full max-w-4xl px-6 pb-12">
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900">
           Frequently Asked Questions
         </h1>
         <p className="mt-2 text-slate-500">
-          Search the knowledge base and click a question to reveal the answer.
+          Browse by section, search, and click a question to see the answer.
         </p>
 
         {/* Search */}
@@ -402,7 +416,7 @@ export default function FAQPage() {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search question here"
+              placeholder="Search FAQs"
               className="block !w-full max-w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-16 text-slate-900 placeholder-slate-400 shadow-inner focus:outline-none focus:ring-4 focus:ring-sky-100"
             />
             {query && (
@@ -432,42 +446,73 @@ export default function FAQPage() {
               Collapse all
             </button>
             <span className="ml-auto text-slate-500">
-              {resultsCount} result{resultsCount === 1 ? "" : "s"}
+              {loading
+                ? "Loading..."
+                : `${resultsCount} item${resultsCount === 1 ? "" : "s"} found`}
             </span>
           </div>
         </div>
 
-        {/* List */}
+        {/* Content */}
         <div className="mt-6 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white">
+          {error && <div className="p-6 text-sm text-red-600">{error}</div>}
+
           {!loading && !error && resultsCount === 0 && (
-            <div className="p-6 text-slate-500">No matching questions.</div>
+            <div className="p-6 text-slate-500">
+              No matching FAQs. Try a different search term.
+            </div>
           )}
 
           {!loading &&
             !error &&
-            (query ? filtered : indexedGroups).map((group) => {
-              const isOpen = openCats.has(group.category);
-              const contentId = `faq-panel-${slug(group.category)}`;
-              const buttonId = `faq-button-${slug(group.category)}`;
+            filteredGroups.map((group) => {
+              const isOpen = openSections.has(group.section);
+              const contentId = `faq-panel-${slug(group.section)}`;
+              const buttonId = `faq-button-${slug(group.section)}`;
 
-              const tocItems =
-                faqs.find((g) => g.category === group.category)?.items ||
-                group.items;
+              // Merge items with the same baseKey into one “question block”
+              const questions = [];
+              const loose = [];
+              let currentQuestion = null;
 
-              const contentItems = query ? group.items : tocItems;
+              group.items.forEach((item) => {
+                const baseKey = getBaseKey(item.key);
+
+                if (isQuestionItem(item)) {
+                  currentQuestion = {
+                    id: item.id,
+                    baseKey,
+                    title: item.label,
+                    items: [item],
+                  };
+                  questions.push(currentQuestion);
+                } else if (
+                  currentQuestion &&
+                  baseKey &&
+                  baseKey === currentQuestion.baseKey
+                ) {
+                  // Extra content belonging to the current question (list/link/file/table etc.)
+                  currentQuestion.items.push(item);
+                } else {
+                  // Standalone content for this section, such as section-level intro
+                  loose.push(item);
+                }
+              });
+
+              const tocQuestions = questions;
 
               return (
-                <div key={group.category} className="group">
+                <div key={group.section} className="group">
                   <button
                     id={buttonId}
                     aria-controls={contentId}
                     aria-expanded={isOpen}
-                    onClick={() => toggleCat(group.category)}
+                    onClick={() => toggleSection(group.section)}
                     className="flex w-full items-center justify-between gap-4 p-5 text-left focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-100"
                   >
                     <span className="text-lg font-semibold text-slate-900">
                       <Highlighter query={query}>
-                        {group.category || "Uncategorized"}
+                        {group.section || "Other"}
                       </Highlighter>
                     </span>
                     {isOpen ? (
@@ -489,27 +534,23 @@ export default function FAQPage() {
                       role="region"
                       aria-labelledby={buttonId}
                     >
-                      <div className="px-5 pb-5 text-slate-600 space-y-4">
-                        {tocItems.length > 0 && (
+                      <div className="px-5 pb-5 text-slate-600 space-y-6">
+                        {/* Mini table of contents – show only question titles */}
+                        {tocQuestions.length > 0 && (
                           <div className="rounded-xl bg-yellow-50/50 p-4">
-                            <div className="font-semibold text-slate-900 mb-2">
-                              <Highlighter query={query}>
-                                {group.category || "Uncategorized"}
-                              </Highlighter>
-                            </div>
                             <ul className="list-disc pl-6 space-y-1">
-                              {tocItems.map((it) => (
-                                <li key={`toc-${it.id}`}>
+                              {tocQuestions.map((q) => (
+                                <li key={`toc-${q.id}`}>
                                   <a
-                                    href={`#${anchorId(it.id)}`}
+                                    href={`#${anchorId(q.id)}`}
                                     className="text-sky-700 hover:underline"
                                     onClick={(e) => {
                                       e.preventDefault();
-                                      jumpToItem(group.category, it.id);
+                                      jumpToItem(group.section, q.id);
                                     }}
                                   >
                                     <Highlighter query={query}>
-                                      {it.question}
+                                      {q.title}
                                     </Highlighter>
                                   </a>
                                 </li>
@@ -518,21 +559,31 @@ export default function FAQPage() {
                           </div>
                         )}
 
-                        {contentItems.map((it) => (
+                        {/* Standalone content in this section (no question title) */}
+                        {loose.map((it) => (
+                          <div key={it.id} className="py-2">
+                            {renderFaqContent(it, query)}
+                          </div>
+                        ))}
+
+                        {/* Question blocks: title + all related content + BACK TO TOP */}
+                        {questions.map((q) => (
                           <div
-                            key={it.id}
-                            id={anchorId(it.id)}
-                            ref={getItemRef(it.id)}
+                            key={q.id}
+                            id={anchorId(q.id)}
+                            ref={getItemRef(q.id)}
                             className="py-2 scroll-mt-24"
                           >
                             <div className="text-xl font-semibold text-slate-900">
-                              <Highlighter query={query}>
-                                {it.question}
-                              </Highlighter>
+                              <Highlighter query={query}>{q.title}</Highlighter>
                             </div>
 
-                            <div className="mt-2">
-                              {renderAnswer(it.answer, query)}
+                            <div className="mt-2 space-y-3">
+                              {q.items.map((block) => (
+                                <div key={block.id}>
+                                  {renderFaqContent(block, query)}
+                                </div>
+                              ))}
                             </div>
 
                             <div className="mt-3">
@@ -540,7 +591,7 @@ export default function FAQPage() {
                                 href="#faq-top"
                                 className="text-sky-700 text-sm font-medium uppercase tracking-wide hover:underline"
                               >
-                                BACK TO TOP»
+                                BACK TO TOP »
                               </a>
                             </div>
                           </div>

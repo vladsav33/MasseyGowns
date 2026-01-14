@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import Googlemap from "../components/Googlemap";
 import { sendContactForm } from "../api/FormApi";
 import { useCmsContent } from "../api/useCmsContent";
+import { sendWebsiteEmail } from "../api/EmailApi";
 
 export default function ContactUS() {
   const [formData, setFormData] = useState({
@@ -72,9 +73,20 @@ export default function ContactUS() {
     }
 
     try {
-      const result = await sendContactForm(formData);
+      const cmsResult = await sendContactForm(formData);
+      console.log("CMS API Response:", cmsResult);
+
+      const emailPayload = {
+        email: formData.email,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        subject: formData.subject,
+        enquiry: formData.query,
+      };
+
+      await sendWebsiteEmail(emailPayload);
+
       alert("Your enquiry has been sent successfully!");
-      console.log("API Response:", result);
 
       setFormData({
         id: "",
@@ -87,8 +99,21 @@ export default function ContactUS() {
       });
       generateCaptcha();
     } catch (error) {
-      alert("Something went wrong. Please try again.");
+      alert(
+        "Your enquiry has been recorded, but there was an issue sending the email. " +
+          "We will still be able to see your message."
+      );
       console.error(error);
+      setFormData({
+        id: "",
+        email: "",
+        firstName: "",
+        lastName: "",
+        subject: "",
+        query: "",
+        captchaInput: "",
+      });
+      generateCaptcha();
     }
   };
 

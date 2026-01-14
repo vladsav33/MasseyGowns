@@ -5,6 +5,7 @@ import {
   getItemSets,
   getDelivery,
 } from "../services/HireBuyRegaliaService";
+import { useCmsContent } from "../api/useCmsContent";
 
 const placeholderSvg = "data:image/svg+xml;base64,...";
 
@@ -15,6 +16,12 @@ const BuySelectRegalia = ({ setItems }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+
+  const { getValue } = useCmsContent();
+  const intro =
+    getValue("buyRegaliaIntro") ||
+    "Thank you for your order to purchase your own Massey University regalia. Please allow four weeks for manufacture - this may be longer during the graduation season due to the increase in demand on our supplies around this time. For more information and a detailed quote email us info@masseygowns.org.nz";
+
 
   // individual items
   const [items, setItemsLocal] = useState([]);
@@ -196,8 +203,6 @@ const BuySelectRegalia = ({ setItems }) => {
         description: delivery[0].description || "Regalia delivery service",
         buyPrice: 0,
         hirePrice: 0,
-        // buyPrice: Number(delivery[0].buyPrice) || 0,
-        // hirePrice: Number(delivery[0].buyPrice) || 0,
         quantity: 1,
         options: delivery[0].options,
         selectedOptions: selectedOptions,
@@ -311,7 +316,7 @@ const BuySelectRegalia = ({ setItems }) => {
     setSelectedItem(item);
     setIsDialogOpen(true);
   };
-
+  
   return (
     <div className="regalia-shop">
       <div className="main-container">
@@ -340,31 +345,7 @@ const BuySelectRegalia = ({ setItems }) => {
 
         <div className="content-grid">
           <div className="main-content">
-            <div>
-              <ul style={{ listStyleType: "disc", paddingLeft: "1.5rem" }}>
-                <li>
-                  <p>
-                    Thank you for your order to purchase your own Massey
-                    University regalia.
-                  </p>
-                </li>
-                <li>
-                  <p>
-                    For more information email us{" "}
-                    <a href="mailto:info@masseygowns.org.nz?subject=Quote Request">
-                      info@masseygowns.org.nz
-                    </a>
-                  </p>
-                </li>
-                <li>
-                  <p>
-                    Please allow four weeks for manufacture - this may be longer
-                    during the graduation season due to the increase in demand
-                    on our supplies around this time.
-                  </p>
-                </li>
-              </ul>
-            </div>
+            <div>{intro}</div>
             <br />
 
             {/* --------- Sets Tab --------- */}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./Navbar.css";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
 
 function Navbar() {
   const location = useLocation();
@@ -17,23 +17,23 @@ function Navbar() {
     setSelectedCeremonyId(ceremonyId ? parseInt(ceremonyId) : null);
   }, [location]);
 
-  const isActive = (path, ceremonyId = null) => {
+  /*const isActive = (path, ceremonyId = null) => {
     if (location.pathname !== path) return false;
-    
+
     // If a ceremony ID is specified, check if it matches
     if (ceremonyId !== null) {
       const storedCeremonyId = localStorage.getItem("selectedCeremonyId");
       return storedCeremonyId && parseInt(storedCeremonyId) === ceremonyId;
     }
-    
-    return true;
-  };
 
-  const handleHireClick = (ceremonyId) => {
+    return true;
+  };*/
+
+  /*const handleHireClick = (ceremonyId) => {
     // Store the ceremony ID in localStorage
     // localStorage.setItem("selectedCeremonyId", ceremonyId);
     // setSelectedCeremonyId(ceremonyId);
-  };
+  };*/
 
   // Load cart items from localStorage
   useEffect(() => {
@@ -113,7 +113,11 @@ function Navbar() {
 
   const totalPrice = cartItems
     .filter(Boolean)
-    .reduce((acc, item) => acc + getNumericPrice(item.hirePrice) * (item.quantity || 1), 0);
+    .reduce(
+      (acc, item) =>
+        acc + getNumericPrice(item.hirePrice) * (item.quantity || 1),
+      0
+    );
 
   const handleCartIconClick = () => {
     setIsCartOpen(!isCartOpen);
@@ -226,44 +230,43 @@ function Navbar() {
       </div>
       <ul className="navbar-menu">
         <li className="has-dropdown">
-          <Link
+          <NavLink
             to="/hireregalia"
             state={{ step: 1 }}
-            onClick={() => handleHireClick(0)}
-            className={`menu-link ${isActive("/hireregalia", 0) ? "active" : ""}`}
+            className={({ isActive }) => {
+              const isPhoto =
+                new URLSearchParams(location.search).get("mode") === "photo";
+              return isActive && !isPhoto ? "menu-link active" : "menu-link";
+            }}
           >
             HIRE REGALIA
-          </Link>
+          </NavLink>
         </li>
         <li className="has-dropdown">
-          <Link
-            to="/buyregalia"
-            state={{ step: 1 }}
-            className={`menu-link ${isActive("/buyregalia") ? "active" : ""}`}
-          >
+          <NavLink to="/buyregalia" state={{ step: 1 }}>
             BUY REGALIA
-          </Link>
+          </NavLink>
         </li>
 
         <li className="has-dropdown">
-          <Link
-            to={{ pathname: "/hireregalia", search: "?mode=photo" }}
-            // to="/hireregalia"
+          <NavLink
+            to="/hireregalia?mode=photo"
             state={{ step: 1 }}
-            onClick={() => handleHireClick(2)}
-            className={`menu-link ${isActive("/hireregalia", 2) ? "active" : ""}`}
+            className={({ isActive }) => {
+              const isPhoto =
+                new URLSearchParams(location.search).get("mode") === "photo";
+              return isActive && isPhoto ? "menu-link active" : "menu-link";
+            }}
           >
             CASUAL HIRE FOR PHOTOS
-          </Link>
+          </NavLink>
         </li>
 
         <li>
-          <Link to="/faqs" className={isActive("/faqs") ? "active" : ""}>
-            FAQs
-          </Link>
+          <NavLink to="/faqs">FAQs</NavLink>
         </li>
         <li>
-          <Link to="/contactus">CONTACT US</Link>
+          <NavLink to="/contactus">CONTACT US</NavLink>
         </li>
       </ul>
       <div className="navbar-icons">
