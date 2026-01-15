@@ -3,7 +3,8 @@ import { useSearchParams } from "react-router-dom";
 import { sendOrderEmail } from "../api/EmailApi";
 import { EmailTemplate } from "../components/EmailTemplate.jsx";
 
-const API_URL = import.meta.env.VITE_GOWN_API_BASE;
+// const API_URL = import.meta.env.VITE_GOWN_API_BASE;
+const API_URL = 'http://localhost:5144';
 
 export default function Payment() {
   const [loading, setLoading] = useState(false);
@@ -36,6 +37,9 @@ export default function Payment() {
     try {
       const grandTotal = localStorage.getItem("grandTotal");
       const orderNo = localStorage.getItem("orderNo");
+
+      console.log("Order Number=", orderNo);
+      
       const res = await fetch(`${API_URL}/api/payment/create-payment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
