@@ -27,9 +27,9 @@ export function EmailTemplate(payload = {}, template) {
           .map((item) => {
             const name = item.name ?? "";
             const qty = Number(item.quantity ?? 1);
-            const price = Number(item.hirePrice ?? 0);
+            const price = Number(item.hirePrice ?? 0)-Number(item.gst ?? price * 0.15);
             const gst = Number(item.gst ?? price * 0.15);
-            const rowTotal = qty * price;
+            const rowTotal = Number(item.hirePrice ?? 0);
 
             return `
               <tr style="border-bottom:1px solid #e5e5e5;">

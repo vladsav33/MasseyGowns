@@ -574,7 +574,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
                   </div>
 
                   <div className="summary-price">
-                    ${(item.hirePrice || 0).toFixed(2)} × {item.quantity || 1}
+                    ${(item.hirePrice || 0).toFixed(2)} * {item.quantity || 1}
                     <br />
                     <strong>
                       $
