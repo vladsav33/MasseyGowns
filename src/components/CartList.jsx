@@ -27,19 +27,19 @@ function CartList({ step, items, setItems }) {
   };
 
   // Load cart from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem("cart");
-
-    console.log("From saved cart: ", saved);
-
-    if (saved) {
-      try {
-        setItems(JSON.parse(saved));
-      } catch {
-        console.error("Failed to parse cart from localStorage");
-      }
-    }
-  }, [setItems]);
+  // useEffect(() => {
+  //   const saved = localStorage.getItem("cart");
+  //
+  //   console.log("From saved cart: ", saved);
+  //
+  //   if (saved) {
+  //     try {
+  //       setItems(JSON.parse(saved));
+  //     } catch {
+  //       console.error("Failed to parse cart from localStorage");
+  //     }
+  //   }
+  // }, [setItems]);
 
   // --- Cart actions ---
   const handleAddDonationToCart = () => {
