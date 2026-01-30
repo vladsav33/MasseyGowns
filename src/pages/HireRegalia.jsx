@@ -181,6 +181,7 @@ function HireRegalia() {
 
     // Preserve buy items and donations when course changes
     const preserveNonHireItems = (currentItems) => {
+      console.log("Items before=", currentItems);
       return currentItems.filter(
         (item) =>
           (item.type === "individual" && !item.isHiring) || // buy items
@@ -191,6 +192,7 @@ function HireRegalia() {
 
     // Get items to preserve before clearing
     const itemsToPreserve = preserveNonHireItems(items);
+    console.log("ItemsToPreserve=", itemsToPreserve);
 
     // Clear only hire items, keep buy items and donations
     setItem({});
@@ -205,6 +207,8 @@ function HireRegalia() {
         // Combine preserved items with new hire items
         const combinedItems = [...itemsToPreserve, ...newHireItems];
         setItems(combinedItems);
+        
+        console.log("Items=", combinedItems);
       } catch (err) {
         setError(err.message);
         // If fetch fails, at least keep the preserved items
