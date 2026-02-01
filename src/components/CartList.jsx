@@ -3,6 +3,8 @@ import CartItem from "./CartItem.jsx";
 import "./CartList.css";
 
 function CartList({ step, items, setItems }) {
+  console.log("items in cart list: ", items);
+
   const [donationQuantity, setDonationQuantity] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -18,21 +20,26 @@ function CartList({ step, items, setItems }) {
         localStorage.removeItem("cart");
       }
       window.dispatchEvent(new Event("cartUpdated"));
+
+      console.log("Updated cart: ", updated);
       return updated;
     });
   };
 
   // Load cart from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem("cart");
-    if (saved) {
-      try {
-        setItems(JSON.parse(saved));
-      } catch {
-        console.error("Failed to parse cart from localStorage");
-      }
-    }
-  }, [setItems]);
+  // useEffect(() => {
+  //   const saved = localStorage.getItem("cart");
+  //
+  //   console.log("From saved cart: ", saved);
+  //
+  //   if (saved) {
+  //     try {
+  //       setItems(JSON.parse(saved));
+  //     } catch {
+  //       console.error("Failed to parse cart from localStorage");
+  //     }
+  //   }
+  // }, [setItems]);
 
   // --- Cart actions ---
   const handleAddDonationToCart = () => {

@@ -107,10 +107,11 @@ function HireRegalia() {
   }, [selectedCourseId]);
   useEffect(() => localStorage.setItem("item", JSON.stringify(item)), [item]);
   useEffect(() => {
+    if (loading) return;
     if (items?.length) localStorage.setItem("cart", JSON.stringify(items));
     else localStorage.removeItem("cart");
     window.dispatchEvent(new Event("cartUpdated"));
-  }, [items]);
+  }, [items, loading]);
 
   useEffect(() => {
     const saved = showCeremony
@@ -166,21 +167,29 @@ function HireRegalia() {
     fetchCourses();
   }, [selectedCeremonyId]);
 
+  useEffect(() => {
+    const saved = localStorage.getItem("cart");
+    if (saved) {
+      setItems(JSON.parse(saved));
+    }
+  }, []);
+
   // Fetch Items only if courseChanged is true
   useEffect(() => {
     if (!selectedCourseId) return;
 
     const savedCart = localStorage.getItem("cart");
 
-    if (!courseChanged && savedCart) {
-      setItems(JSON.parse(savedCart));
-      return;
-    }
+    // if (!courseChanged && savedCart) {
+    //   setItems(JSON.parse(savedCart));
+    //   return;
+    // }
 
     if (!courseChanged) return; // don't fetch if nothing changed
 
     // Preserve buy items and donations when course changes
     const preserveNonHireItems = (currentItems) => {
+      console.log("Items before=", currentItems);
       return currentItems.filter(
         (item) =>
           (item.type === "individual" && !item.isHiring) || // buy items
@@ -191,6 +200,7 @@ function HireRegalia() {
 
     // Get items to preserve before clearing
     const itemsToPreserve = preserveNonHireItems(items);
+    console.log("ItemsToPreserve=", itemsToPreserve);
 
     // Clear only hire items, keep buy items and donations
     setItem({});
@@ -204,13 +214,21 @@ function HireRegalia() {
 
         // Combine preserved items with new hire items
         const combinedItems = [...itemsToPreserve, ...newHireItems];
-        setItems(combinedItems);
+        // setItems(combinedItems);
+
+        setItems(prevItems => {
+          const itemsToPreserve = preserveNonHireItems(prevItems);
+          return [...itemsToPreserve, ...newHireItems];
+        });
+
+        console.log("Items=", combinedItems);
       } catch (err) {
         setError(err.message);
         // If fetch fails, at least keep the preserved items
         setItems(itemsToPreserve);
       } finally {
         setLoading(false);
+        setCourseChanged(false);
       }
     };
 

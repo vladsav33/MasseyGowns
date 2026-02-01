@@ -95,7 +95,8 @@ export const submitCustomerDetails = async (formData) => {
       paid: false,
       paymentMethod: parseInt(formData.paymentMethod) || 1,
       purchaseOrder: formData.purchaseOrder || "",
-      orderDate: new Date().toISOString().split("T")[0],
+      orderDate: new Date().toLocaleDateString("en-CA"), // YYYY-MM-DD
+
       ceremonyId: ceremonyId,
       degreeId: degreeId
     };
