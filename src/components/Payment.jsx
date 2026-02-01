@@ -3,8 +3,8 @@ import { useSearchParams } from "react-router-dom";
 import { sendOrderEmail } from "../api/EmailApi";
 import { EmailTemplate } from "../components/EmailTemplate.jsx";
 
-// const API_URL = import.meta.env.VITE_GOWN_API_BASE;
-const API_URL = 'http://localhost:5144';
+const API_URL = import.meta.env.VITE_GOWN_API_BASE;
+// const API_URL = 'http://localhost:5144';
 
 export default function Payment() {
   const [loading, setLoading] = useState(false);
