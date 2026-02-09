@@ -65,8 +65,7 @@ function BuyRegalia() {
             {step === 1 && (
               <>
                 <BuySelectRegalia setItems={setItems} />
-
-                {/* Show items base on selected ceremony and course */}
+                <h2 className="cart-label">Shopping Cart</h2>
                 <CartList
                   step={step}
                   item={item}

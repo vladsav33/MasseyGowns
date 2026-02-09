@@ -104,7 +104,6 @@ function CartList({ step, items, setItems }) {
     setItems(updatedItems, grandTotal);
     localStorage.setItem("cart", JSON.stringify(updatedItems, grandTotal)); // persist to localStorage
     // console.log(localStorage.getItem("cart"), grandTotal);
-    
   };
 
   const handleDeliveryChange = (itemId, newPrice) => {
@@ -117,7 +116,7 @@ function CartList({ step, items, setItems }) {
     // console.log("Updated Items=", updatedItems);
     setItems(updatedItems, grandTotal);
     localStorage.setItem("cart", JSON.stringify(updatedItems, grandTotal));
-  }
+  };
 
   // --- Price utilities ---
   const getNumericPrice = (priceString) =>
@@ -252,10 +251,15 @@ function CartList({ step, items, setItems }) {
                       style={{ listStyleType: "disc", paddingLeft: "1.5rem" }}
                     >
                       <li>
-                        <p>To provide a robe hire service of the highest quality</p>
+                        <p>
+                          To provide a robe hire service of the highest quality
+                        </p>
                       </li>
                       <li>
-                        <p>To disburse funds raised by robe hire for the advancement of education</p>
+                        <p>
+                          To disburse funds raised by robe hire for the
+                          advancement of education
+                        </p>
                       </li>
                     </ul>
                   </div>
