@@ -75,9 +75,8 @@ export const submitCustomerDetails = async (formData) => {
     const degreeId = parseInt(
       JSON.parse(localStorage.getItem("selectedCourseId")) || 0,
     );
-    const orderType = parseInt(
-      JSON.parse(localStorage.getItem("orderType")) || 0,
-    );
+    const orderType = localStorage.getItem("orderType") || "0";
+  
     const customerPayload = {
       firstName: formData.firstName || "",
       lastName: formData.lastName || "",

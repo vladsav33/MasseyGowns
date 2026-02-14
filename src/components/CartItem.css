@@ -383,12 +383,6 @@
   border-radius: 6px;
 }
 
-.purchase-price {
-  margin-top: 6px;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
 /* Wrapper to hold the cart item and purchase box side by side */
 .cart-item-wrapper {
   display: flex;
@@ -471,7 +465,7 @@
 .purchase-price {
   font-size: 15px;
   font-weight: 700;
-  color: #117832;
+  color: #5d5f5d;
 }
 
 /* Responsive: Stack on mobile */
