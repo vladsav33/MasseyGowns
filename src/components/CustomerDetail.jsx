@@ -135,7 +135,6 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
     try {
       // Get the current cart
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      console.log("Cart before submission:", cart);
 
       localStorage.setItem("paymentMethod", parseInt(formData.paymentMethod));
 
@@ -145,13 +144,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
         orderCompletionEmail();
       }
 
-      console.log("Order received=", result);
       localStorage.setItem("orderNo", result.referenceNo);
-      debugger;
-
-      console.log("Order submission completed successfully");
-      // setTimeout(() => { debugger; }, 0);
-      // debugger;
 
       // Clear the cart after successful submission
       localStorage.removeItem("cart");
@@ -204,7 +197,6 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
     };
 
     const data = await getEmailTemplateByName("OrderCompleted");
-    console.log(data);
 
     const template = data.taxReceiptHtml;
     const emailHtml = EmailTemplate(emailPayload, template);

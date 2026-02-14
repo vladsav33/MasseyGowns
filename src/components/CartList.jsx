@@ -3,12 +3,8 @@ import CartItem from "./CartItem.jsx";
 import "./CartList.css";
 
 function CartList({ step, items, setItems }) {
-  console.log("items in cart list: ", items);
-
   const [donationQuantity, setDonationQuantity] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  // console.log("Items List", items);
 
   // Centralized cart updater
   const updateCart = (next) => {
@@ -21,25 +17,9 @@ function CartList({ step, items, setItems }) {
       }
       window.dispatchEvent(new Event("cartUpdated"));
 
-      console.log("Updated cart: ", updated);
       return updated;
     });
   };
-
-  // Load cart from localStorage on mount
-  // useEffect(() => {
-  //   const saved = localStorage.getItem("cart");
-  //
-  //   console.log("From saved cart: ", saved);
-  //
-  //   if (saved) {
-  //     try {
-  //       setItems(JSON.parse(saved));
-  //     } catch {
-  //       console.error("Failed to parse cart from localStorage");
-  //     }
-  //   }
-  // }, [setItems]);
 
   // --- Cart actions ---
   const handleAddDonationToCart = () => {
@@ -104,7 +84,6 @@ function CartList({ step, items, setItems }) {
     });
     setItems(updatedItems, grandTotal);
     localStorage.setItem("cart", JSON.stringify(updatedItems, grandTotal)); // persist to localStorage
-    // console.log(localStorage.getItem("cart"), grandTotal);
   };
 
   const handleDeliveryChange = (itemId, newPrice) => {
@@ -114,7 +93,6 @@ function CartList({ step, items, setItems }) {
       }
       return item;
     });
-    // console.log("Updated Items=", updatedItems);
     setItems(updatedItems, grandTotal);
     localStorage.setItem("cart", JSON.stringify(updatedItems, grandTotal));
   };

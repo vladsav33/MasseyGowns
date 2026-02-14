@@ -41,6 +41,10 @@ function CartItem({
   // const tax = subtotal * 0.1;
   // const total = subtotal + tax;
 
+  const orderType = parseInt(
+      JSON.parse(localStorage.getItem("orderType")) || 0,
+    );
+
   return (
     <>
       <div className="cart-item-wrapper">
@@ -226,7 +230,7 @@ function CartItem({
 
         <div></div>
         {/* Purchase this item - moved outside the card */}
-        {item.category !== "Delivery" && item.name !== "Donation" && (
+        {item.category !== "Delivery" && item.name !== "Donation" && orderType == "1" && (
           <div className="purchase-box">
             <span className="purchase-label">Purchase this item</span>
 

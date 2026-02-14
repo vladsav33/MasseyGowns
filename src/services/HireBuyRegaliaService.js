@@ -15,7 +15,7 @@ export const getCeremonies = async () => {
 export const getCoursesByCeremonyId = async (selectedCeremonyId) => {
   try {
     const response = await axios.get(
-      `${API_URL}/degreesbyceremony/${selectedCeremonyId}`
+      `${API_URL}/degreesbyceremony/${selectedCeremonyId}`,
     );
     return response.data;
   } catch (err) {
@@ -27,7 +27,7 @@ export const getCoursesByCeremonyId = async (selectedCeremonyId) => {
 export const getItemsByCourseId = async (selectedCourseId) => {
   try {
     const response = await axios.get(
-      `${API_URL}/itemsbydegree/${selectedCourseId}`
+      `${API_URL}/itemsbydegree/${selectedCourseId}`,
     );
     return response.data;
   } catch (err) {
@@ -64,14 +64,20 @@ export const getDelivery = async () => {
     console.error("Error fetching delivery data:", err);
     return [];
   }
-}
+};
 
 export const submitCustomerDetails = async (formData) => {
   try {
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    const ceremonyId = parseInt(JSON.parse(localStorage.getItem("selectedCeremonyId")) || 0);
-    const degreeId = parseInt(JSON.parse(localStorage.getItem("selectedCourseId")) || 0);
-
+    const ceremonyId = parseInt(
+      JSON.parse(localStorage.getItem("selectedCeremonyId")) || 0,
+    );
+    const degreeId = parseInt(
+      JSON.parse(localStorage.getItem("selectedCourseId")) || 0,
+    );
+    const orderType = parseInt(
+      JSON.parse(localStorage.getItem("orderType")) || 0,
+    );
     const customerPayload = {
       firstName: formData.firstName || "",
       lastName: formData.lastName || "",
@@ -86,7 +92,10 @@ export const submitCustomerDetails = async (formData) => {
       message: formData.message || "",
       items: cart.map((item) => ({
         itemId: parseInt(item.id?.toString()) || 0,
-        sizeId: parseInt(item.selectedOptions?.["Head Size"]) || parseInt(item.selectedOptions?.["Gown Size"]) || 0,
+        sizeId:
+          parseInt(item.selectedOptions?.["Head Size"]) ||
+          parseInt(item.selectedOptions?.["Gown Size"]) ||
+          0,
         fitId: parseInt(item.selectedOptions?.["My full height"]) || 0,
         hoodId: parseInt(item.selectedOptions?.["Hood Type"]) || 0,
         hire: item.isHiring ?? false,
@@ -96,9 +105,20 @@ export const submitCustomerDetails = async (formData) => {
       paymentMethod: parseInt(formData.paymentMethod) || 1,
       purchaseOrder: formData.purchaseOrder || "",
       orderDate: new Date().toLocaleDateString("en-CA"), // YYYY-MM-DD
-
       ceremonyId: ceremonyId,
-      degreeId: degreeId
+      degreeId: degreeId,
+      orderType: orderType
+      // note: "",
+      // changes: "",
+      // packNote: "",
+      // amountPaid: 0,
+      // amountOwning: 0,
+      // donation: 0,
+      // freight: 0,
+      // refund: 0,
+      // adminCharges: 0,
+      // payBy: "2026-02-14",
+      // status: 0,
     };
 
     console.log("CustomerPayload=", customerPayload);
@@ -118,7 +138,7 @@ export const submitCustomerDetails = async (formData) => {
 export const updatePaidStatus = async () => {
   try {
     const orderResponse = JSON.parse(
-      localStorage.getItem("orderResponse") || "[]"
+      localStorage.getItem("orderResponse") || "[]",
     );
 
     if (!orderResponse || !orderResponse.id) {
@@ -133,7 +153,7 @@ export const updatePaidStatus = async () => {
 
     const response = await axios.put(
       `${API_URL}/orders/${orderResponse.id}`,
-      updatedOrder
+      updatedOrder,
     );
     return response.data;
   } catch (error) {
