@@ -111,13 +111,14 @@ function Navbar() {
     .filter(Boolean)
     .reduce((acc, item) => acc + (item.quantity || 1), 0);
 
-  const totalPrice = cartItems
-    .filter(Boolean)
-    .reduce(
-      (acc, item) =>
-        acc + getNumericPrice(item.hirePrice) * (item.quantity || 1),
-      0
-    );
+  const totalPrice = cartItems.filter(Boolean).reduce((acc, item) => {
+    // Use buyPrice if item is in buy mode (isHiring === false), otherwise use hirePrice
+    const price =
+      item.isHiring === false
+        ? getNumericPrice(item.buyPrice)
+        : getNumericPrice(item.hirePrice);
+    return acc + price * (item.quantity || 1);
+  }, 0);
 
   const handleCartIconClick = () => {
     setIsCartOpen(!isCartOpen);
@@ -144,7 +145,7 @@ function Navbar() {
       (item) =>
         item.isHiring === false ||
         (item.type === "individual" && item.isHiring !== true) ||
-        (item.type === "set" && item.isHiring !== true)
+        (item.type === "set" && item.isHiring !== true),
     );
 
     // Check for hire items (items where isHiring is true or undefined/null - old hire items)
@@ -152,7 +153,7 @@ function Navbar() {
       (item) =>
         item.isHiring === true ||
         item.isHiring === undefined ||
-        item.isHiring === null
+        item.isHiring === null,
     );
 
     return analysis;
@@ -219,6 +220,15 @@ function Navbar() {
 
     // Dispatch custom event to notify other components
     window.dispatchEvent(new Event("cartUpdated"));
+  };
+
+  // Helper function to get item price based on hire/buy mode
+  const getItemPrice = (item) => {
+    const price =
+      item.isHiring === false
+        ? getNumericPrice(item.buyPrice)
+        : getNumericPrice(item.hirePrice);
+    return price * (item.quantity || 1);
   };
 
   return (
@@ -303,28 +313,46 @@ function Navbar() {
                             {item.selectedOptions &&
                               Object.keys(item.selectedOptions).length > 0 && (
                                 <div className="cart-item-options">
-                                  {Object.entries(item.selectedOptions).map(
-                                    ([label, value]) => (
-                                      <div key={label} className="cart-option">
-                                        <span className="option-label">
-                                          {label}:
-                                        </span>
-                                        <span className="option-value">
-                                          {value}
-                                        </span>
-                                      </div>
-                                    )
-                                  )}
+                                  {item.options &&
+                                    item.options.map((option) => {
+                                      const selectedId =
+                                        item.selectedOptions[option.label];
+                                      if (!selectedId) return null;
+
+                                      const selectedChoice =
+                                        option.choices.find(
+                                          (c) =>
+                                            String(c.id || c.value) ===
+                                            String(selectedId),
+                                        );
+
+                                      const displayValue = selectedChoice
+                                        ? selectedChoice.value ||
+                                          selectedChoice.size ||
+                                          selectedChoice.name ||
+                                          selectedChoice
+                                        : selectedId;
+
+                                      return (
+                                        <div
+                                          key={option.label}
+                                          className="cart-option"
+                                        >
+                                          <span className="option-label">
+                                            {option.label}:
+                                          </span>
+                                          <span className="option-value">
+                                            {displayValue}
+                                          </span>
+                                        </div>
+                                      );
+                                    })}
                                 </div>
                               )}
                           </div>
                           <div className="cart-item-actions">
                             <div className="cart-item-price">
-                              $
-                              {(
-                                getNumericPrice(item.hirePrice) *
-                                (item.quantity || 1)
-                              ).toFixed(2)}
+                              ${getItemPrice(item).toFixed(2)}
                             </div>
                             <button
                               className="remove-item-btn"
