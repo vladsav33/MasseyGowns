@@ -45,6 +45,8 @@ function CeremonyCourseSelection({
   };
 
   const handleCourseChange = (e) => {
+    console.log("E=", e);
+
     const val = e.target.value;
     const id = val ? Number(val) : null;
     setCourse(id);
@@ -108,7 +110,7 @@ function CeremonyCourseSelection({
         <option value="">Please select a qualification...</option>
         {Array.isArray(courses) &&
           courses.map((courseOption) => (
-            <option key={courseOption.id} value={String(courseOption.id)}>
+            <option key={courseOption.degreeId} value={String(courseOption.degreeId)}>
               {courseOption.degreeName}
             </option>
           ))}

@@ -140,11 +140,9 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
 
       console.log("Order received=", result);
       localStorage.setItem("orderNo", result.referenceNo);
-      debugger;
+      // debugger;
 
       console.log("Order submission completed successfully");
-      // setTimeout(() => { debugger; }, 0);
-      // debugger;
 
       // Clear the cart after successful submission
       localStorage.removeItem("cart");
