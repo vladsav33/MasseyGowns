@@ -83,7 +83,7 @@ h2 {
   background-color: #2563eb;
   color: #fff;
   box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
-  animation: pulse 2s infinite;
+  /* animation: pulse 2s infinite; */
 }
 
 @keyframes pulse {
