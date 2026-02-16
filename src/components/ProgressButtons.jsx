@@ -1,16 +1,19 @@
 import React, { useEffect } from "react";
 import "./ProgressButtons.css";
+import { useNavigate } from "react-router-dom";
 
 function ProgressButtons({
   step,
   setStep,
   steps,
-  selectedCeremonyId,
-  selectedCourseId,
-  action,
-  areAllOptionsSelected,
+  areAllOptionsSelected = () => true,
+
+  prevPath,
+  nextPath,
 }) {
-  const cartData = JSON.parse(localStorage.getItem("cart"));
+  const navigate = useNavigate();
+
+  const cartData = JSON.parse(localStorage.getItem("cart") || "[]");
   const cart = cartData?.length || 0;
 
   let isDropdownSelected = true;
@@ -30,8 +33,8 @@ function ProgressButtons({
         isOnlyBuy = true;
       }
     }
+
     if (item.options?.length > 0) {
-      // Check if selectedOptions exists and is not empty
       if (
         !item.selectedOptions ||
         Object.keys(item.selectedOptions).length === 0
@@ -40,55 +43,80 @@ function ProgressButtons({
         return;
       }
 
-      // Check if all required options have values
       item.options.forEach((option) => {
         const selectedValue = item.selectedOptions[option.label];
-        if (!selectedValue) {
-          isDropdownSelected = false;
-        }
+        if (!selectedValue) isDropdownSelected = false;
       });
     }
   });
 
-  // Save step into localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("step", step);
   }, [step]);
 
-  const handlePrev = () => {
-    if (step > 1) {
+  const scrollTop = () =>
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+
+  const goPrev = () => {
+    // routing mode
+    if (prevPath) {
+      localStorage.setItem("step", String(step - 1));
+      navigate(prevPath);
+      scrollTop();
+      return;
+    }
+
+    // old step mode
+    if (setStep && step > 1) {
       const newStep = step - 1;
       setStep(newStep);
       localStorage.setItem("step", newStep);
-
-      window.scrollTo({
-        top: 0,
-        left: 0,
-        behavior: "smooth",
-      });
+      scrollTop();
     }
   };
 
-  const handleNext = () => {
-    if (step < steps.length) {
+  const goNext = () => {
+    // routing mode
+    if (nextPath) {
+      localStorage.setItem("step", String(step + 1));
+      navigate(nextPath);
+      scrollTop();
+      return;
+    }
+
+    // old step mode
+    if (setStep && step < steps.length) {
       const newStep = step + 1;
       setStep(newStep);
       localStorage.setItem("step", newStep);
-
-      window.scrollTo({
-        top: 0,
-        left: 0,
-        behavior: "smooth",
-      });
+      scrollTop();
     }
   };
+
+  const orderType = Number(localStorage.getItem("orderType") || 0);
+
+  // Common disable logic (same as your code)
+  const disableHireNext =
+    step === steps.length ||
+    step === 3 ||
+    cart === 0 ||
+    !(typeof areAllOptionsSelected === "function"
+      ? areAllOptionsSelected()
+      : true);
+  const disableBuyNext =
+    step === steps.length ||
+    step === 3 ||
+    cart === 0 ||
+    !isDropdownSelected;
 
   return (
     <>
       {/* Hire Regalia */}
-      {action === 0 ? (
+      {orderType === 1 && (
         <div>
-          {!areAllOptionsSelected() && (
+          {!(typeof areAllOptionsSelected === "function"
+            ? areAllOptionsSelected()
+            : true) && (
             <div className="dropDownLabel">
               Please select all required options for your items before
               proceeding...
@@ -96,44 +124,31 @@ function ProgressButtons({
           )}
 
           <div className="btns">
-            {/* Prev Button (only if step > 1) */}
-            {step > 1 && step < 4 && (
+            {step > 2 && step < 4 && (
               <button
                 className="btn prev"
-                onClick={handlePrev}
+                onClick={goPrev}
                 disabled={step === 1}
               >
                 &lt;
               </button>
             )}
 
-            {/* Next Button */}
             {step < 3 && (
               <button
-                className={`btn next ${
-                  step === steps.length ||
-                  step === 3 ||
-                  cart === 0 ||
-                  !isOnlyHire ||
-                  !areAllOptionsSelected()
-                    ? "disabled"
-                    : ""
-                }`}
-                onClick={handleNext}
-                disabled={
-                  step === steps.length ||
-                  step === 3 ||
-                  cart === 0 ||
-                  !isOnlyHire ||
-                  !areAllOptionsSelected()
-                }
+                className={`btn next ${disableHireNext ? "disabled" : ""}`}
+                onClick={goNext}
+                disabled={disableHireNext}
               >
                 &gt;
               </button>
             )}
           </div>
         </div>
-      ) : (
+      )}
+
+      {/* Buy Regalia */}
+      {orderType === 2 && (
         <div>
           {!isDropdownSelected && (
             <div className="dropDownLabel">
@@ -141,39 +156,57 @@ function ProgressButtons({
               proceeding.
             </div>
           )}
+
           <div className="btns">
-            {/* Buy Regalia */}
-            {/* Prev */}
-            {step > 1 && step < 4 && (
+            {step === 3 && (
               <button
                 className="btn prev"
-                onClick={handlePrev}
+                onClick={goPrev}
                 disabled={step === 1}
               >
                 &lt;
               </button>
             )}
 
-            {/* Next */}
             {step < 3 && (
               <button
-                className={`btn next ${
-                  step === steps.length ||
-                  step === 3 ||
-                  cart === 0 ||
-                  !isOnlyBuy ||
-                  !isDropdownSelected
-                    ? "disabled"
-                    : ""
-                }`}
-                onClick={handleNext}
-                disabled={
-                  step === steps.length ||
-                  step === 3 ||
-                  cart === 0 ||
-                  !isOnlyBuy ||
-                  !isDropdownSelected
-                }
+                className={`btn next ${disableBuyNext ? "disabled" : ""}`}
+                onClick={goNext}
+                disabled={disableBuyNext}
+              >
+                &gt;
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Casual photo Regalia */}
+      {orderType === 3 && (
+        <div>
+          {!isDropdownSelected && (
+            <div className="dropDownLabel">
+              Please select all required options for your items before
+              proceeding.
+            </div>
+          )}
+
+          <div className="btns">
+            {step > 1 && step < 4 && (
+              <button
+                className="btn prev"
+                onClick={goPrev}
+                disabled={step === 1}
+              >
+                &lt;
+              </button>
+            )}
+
+            {step < 3 && (
+              <button
+                className={`btn next ${disableBuyNext ? "disabled" : ""}`}
+                onClick={goNext}
+                disabled={disableBuyNext}
               >
                 &gt;
               </button>

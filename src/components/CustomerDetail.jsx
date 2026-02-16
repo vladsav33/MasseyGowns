@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import "./CustomerDetail.css";
-import { Link } from "react-router-dom";
 import { submitCustomerDetails } from "./../services/HireBuyRegaliaService.js";
 import DatePicker from "react-datepicker";
 import { format } from "date-fns";
@@ -8,6 +7,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { sendOrderEmail } from "../api/EmailApi";
 import { EmailTemplate } from "../components/EmailTemplate.jsx";
 import { getEmailTemplateByName } from "../api/EmailApi";
+import { Link, useNavigate } from "react-router-dom";
 
 function CustomerDetail({ item, items = [], step, setStep, steps }) {
   const [countries, setCountries] = useState([]);
@@ -29,6 +29,8 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
     termsAccepted: false,
     message: "",
   });
+
+  const navigate = useNavigate();
 
   // Use props if provided, otherwise load from localStorage
   const cart =
@@ -156,19 +158,25 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       // Dispatch cart update event to notify other components (like Navbar)
       window.dispatchEvent(new Event("cartUpdated"));
 
-      // Proceed to next step
-      if (step < steps.length) {
-        const newStep = step + 1;
-        setStep(newStep);
-        localStorage.setItem("step", newStep);
-
-        // Scroll to top for better UX
-        window.scrollTo({
-          top: 0,
-          left: 0,
-          behavior: "smooth",
-        });
+      if (parseInt(formData.paymentMethod) === 1) {
+        navigate("/payment"); // page that renders <Payment />
+      } else {
+        navigate("/paymentcompleted"); // page that renders <PaymentCompleted />
       }
+
+      // Proceed to next step
+      // if (step < steps.length) {
+      //   const newStep = step + 1;
+      //   setStep(newStep);
+      //   localStorage.setItem("step", newStep);
+
+      //   // Scroll to top for better UX
+      //   window.scrollTo({
+      //     top: 0,
+      //     left: 0,
+      //     behavior: "smooth",
+      //   });
+      // }
     } catch (error) {
       console.error("Error during order submission:", error);
       alert("There was an error submitting your order. Please try again.");

@@ -1,3 +1,5 @@
+/* PaymentCompleted.css */
+
 /* Payment Form Styles */
 .payment-container {
   min-height: 100vh;
@@ -20,10 +22,12 @@
 }
 
 .payment-content {
-  max-width: 45%;
+  max-width: 1100px;
+  width: 100%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
+  padding: 16px;
 }
 
 .payment-summary-card {
@@ -321,7 +325,8 @@
   max-width: 500px;
   width: 100%;
   text-align: center;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
   transform: scale(1);
   animation: slideIn 0.3s ease-out;
   max-height: 90vh;
@@ -363,7 +368,7 @@
   }
 }
 
-.checkmark {
+.success-icon .checkmark {
   width: 32px;
   height: 32px;
   stroke: white;
@@ -373,7 +378,7 @@
   stroke-linejoin: round;
 }
 
-.checkmark path {
+.success-icon .checkmark path {
   stroke-dasharray: 30;
   stroke-dashoffset: 30;
   animation: checkmark 0.5s ease-out 0.3s forwards;
@@ -433,7 +438,7 @@
 }
 
 .transaction-id {
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 12px;
   color: #6b7280;
   background-color: #f3f4f6;
@@ -454,7 +459,8 @@
   gap: 12px;
 }
 
-.btns Pay {
+/* ✅ FIXED: proper .btn styles */
+.dialog-actions .btn {
   flex: 1;
   padding: 12px 24px;
   border-radius: 8px;
@@ -465,6 +471,7 @@
   transition: all 0.2s;
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .btn-primary {
@@ -481,7 +488,6 @@
 .btn-secondary {
   background-color: #e8e8e8;
   color: #374151;
-  /* border: 1px solid #d1d5db; */
 }
 
 .btn-secondary:hover {
@@ -720,13 +726,13 @@
     grid-template-columns: 140px 1fr;
   }
 
-  /* Payment form responsive styles */
   .payment-container {
     padding: 0.5rem;
   }
 
   .payment-content {
     max-width: 100%;
+    padding: 8px;
   }
 
   .field-row {
@@ -746,56 +752,73 @@
     font-size: 1.25rem;
   }
 
-  /* Dialog responsive styles */
   .dialog-overlay {
     padding: 10px;
   }
-  
+
   .success-dialog {
     padding: 24px;
     max-width: 100%;
   }
-  
+
   .dialog-title {
     font-size: 20px;
   }
-  
+
   .success-icon {
     width: 60px;
     height: 60px;
   }
-  
-  .checkmark {
-    width: 24px;
-    height: 24px;
-  }
-  
+
   .dialog-actions {
     flex-direction: column;
   }
-  
-  .btn {
+
+  .dialog-actions .btn {
     width: 100%;
   }
 }
 
-.thank-you-container {
-  text-align: center;
-  padding: 40px;
-}
+/* Print styles */
+@media print {
+  nav,
+  .navbar,
+  .oc-print-row,
+  .oc-form,
+  .contact,
+  .Contact,
+  footer {
+    display: none !important;
+  }
 
-.home-btn {
-  display: inline-block;
-  margin-top: 20px;
-  padding: 12px 24px;
-  background: #4caf50;
-  color: white;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: bold;
-}
+  .payment-container {
+    background: #fff !important;
+    padding: 0 !important;
+    min-height: auto !important;
+  }
 
-.home-btn:hover {
-  background: #43a047;
-  color: white;
+  .payment-content {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .oc-wrap {
+    max-width: 100% !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+  }
+
+  .oc-table,
+  .oc-meta-grid,
+  .oc-note {
+    font-size: 12px !important;
+  }
+
+  a {
+    color: #000 !important;
+    text-decoration: none !important;
+  }
 }

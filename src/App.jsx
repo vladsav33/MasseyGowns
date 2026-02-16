@@ -9,6 +9,9 @@ import Payment from "./components/Payment.jsx";
 import Checkout from "./components/Checkout.jsx";
 import TermsAndConditions from "./pages/TermsAndConditions.jsx";
 import HireprocessWrapper from "./components/HireprocessWrapper.jsx";
+import ShoppingCart from "./pages/ShoppingCart.jsx";
+import CustomerDetailsPage from "./pages/CustomerDetailsPage.jsx";
+import PaymentCompleted from "./components/PaymentCompleted.jsx";
 
 export default function App() {
   return (
@@ -17,10 +20,13 @@ export default function App() {
       <Route path="/faqs" element={<FAQPage />} />
       <Route path="/hireregalia" element={<HireRegalia />} />
       <Route path="/buyregalia" element={<BuyRegalia />} />
+      <Route path="/cart" element={<ShoppingCart />} />
+      <Route path="/customerdetails" element={<CustomerDetailsPage />} />
       <Route path="/contactus" element={<ContactUS />} />
       <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
       <Route path="/hireregalia/:degree" element={<HireprocessWrapper />} />
       <Route path="/payment" element={<Payment />} />
+      <Route path="/paymentcompleted" element={<PaymentCompleted />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

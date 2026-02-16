@@ -5,24 +5,20 @@ import ProgressBar from "../components/ProgressBar";
 import ProgressButtons from "../components/ProgressButtons";
 import CeremonyCourseSelection from "../components/CeremonyCourseSelection";
 import CartList from "../components/CartList";
-import CustomerDetail from "../components/CustomerDetail";
 import Contact from "../components/Contact";
-import Payment from "../components/Payment";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   getCoursesByCeremonyId,
   getCeremonies,
   getItemsByCourseId,
 } from "../services/HireBuyRegaliaService";
-import PaymentCompleted from "../components/PaymentCompleted";
 
 function HireRegalia() {
-  const action = 0; // Hire
-
   // ---- STATES ----
   const location = useLocation();
   const mode = new URLSearchParams(location.search).get("mode");
   const showCeremony = mode !== "photo"; // hide only for casual hire
+  const navigate = useNavigate();
 
   // Set orderType in localStorage when component mounts or mode changes
   useEffect(() => {
@@ -181,12 +177,12 @@ function HireRegalia() {
   useEffect(() => {
     const cart = localStorage.getItem("cart");
     const parsedCart = cart ? JSON.parse(cart) : [];
-    
+
     if (!parsedCart || parsedCart.length === 0) {
       // Clear ceremony and course selections
       setSelectedCeremonyId(null);
       setSelectedCourseId(null);
-      
+
       // Clear from localStorage
       if (showCeremony) {
         localStorage.removeItem("selectedCeremonyId");
@@ -217,7 +213,7 @@ function HireRegalia() {
         (item) =>
           (item.type === "individual" && !item.isHiring) || // buy items
           (item.type === "set" && !item.isHiring) || // buy sets
-          item.isDonation // donations
+          item.isDonation, // donations
       );
     };
 
@@ -238,11 +234,10 @@ function HireRegalia() {
         const combinedItems = [...itemsToPreserve, ...newHireItems];
         // setItems(combinedItems);
 
-        setItems(prevItems => {
+        setItems((prevItems) => {
           const itemsToPreserve = preserveNonHireItems(prevItems);
           return [...itemsToPreserve, ...newHireItems];
         });
-
       } catch (err) {
         setError(err.message);
         // If fetch fails, at least keep the preserved items
@@ -256,6 +251,12 @@ function HireRegalia() {
     fetchItems();
   }, [selectedCourseId, courseChanged]);
 
+  useEffect(() => {
+    if (step === 2) {
+      navigate("/cart", { state: { step: 2 } });
+    }
+  }, [step, navigate]);
+
   return (
     <div>
       <Navbar />
@@ -263,7 +264,6 @@ function HireRegalia() {
         <div className="content">
           <ProgressBar step={step} steps={steps} className="progressbar" />
           <ProgressButtons
-            action={action}
             step={step}
             setStep={setStep}
             steps={steps}
@@ -324,46 +324,7 @@ function HireRegalia() {
             </>
           )}
 
-          {step === 2 && (
-            <div>
-              <h2 className="cart-label">Shopping Cart</h2>
-              <CartList
-                step={step}
-                item={item}
-                items={items}
-                setItem={setItem}
-                setItems={setItems}
-              />
-            </div>
-          )}
-
-          {step === 3 && (
-            <CustomerDetail
-              item={item}
-              quantity={item.quantity || 1}
-              step={step}
-              setStep={setStep}
-              steps={steps}
-            />
-          )}
-
-          {step === 4 && (
-            <>
-              {paymentMethod == 1 && (
-                <div>
-                  <Payment />
-                </div>
-              )}
-              {paymentMethod == 3 && (
-                <div>
-                  <PaymentCompleted />
-                </div>
-              )}
-            </>
-          )}
-
           <ProgressButtons
-            action={action}
             step={step}
             setStep={setStep}
             steps={steps}

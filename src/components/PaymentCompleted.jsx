@@ -1,14 +1,10 @@
-import React, { useState, useEffect } from "react";
+// PaymentCompleted.jsx
+import React, { useMemo } from "react";
 import "./PaymentCompleted.css";
-import { CreditCard, Eye } from "lucide-react";
-import jsPDF from "jspdf";
-import { Link } from "react-router-dom";
-import { updatePaidStatus } from "./../services/HireBuyRegaliaService";
+import Navbar from "../components/Navbar";
 
 function PaymentCompleted() {
-
-
-  // Other Payment methods
+  // --- Static config ---
   const org = {
     gstNo: "41782315",
     name: "Academic Dress Hire",
@@ -19,22 +15,6 @@ function PaymentCompleted() {
     email: "info@masseygowns.org.nz",
     phone: "+64 6 350 4166",
   };
-
-  const customerDetails =
-    JSON.parse(localStorage.getItem("customerDetails")) || {};
-  const items = JSON.parse(localStorage.getItem("cart")) || [];
-
-  const totals = {
-    grandTotal: 48.0,
-    amountPaid: 0.0,
-    balanceOwing: 48.0,
-    includeGstNote: "All prices include GST",
-  };
-  // Calculate total
-  const total = items.reduce(
-    (sum, item) => sum + (item.hirePrice || 0) * (item.quantity || 1),
-    0
-  );
 
   const bank = {
     heading: "Direct Credit Payment Instructions:",
@@ -54,10 +34,46 @@ function PaymentCompleted() {
     referenceHint: "Leave the 'Reference' field blank.",
   };
 
+  // --- Load data from localStorage safely ---
+  const customerDetails = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem("customerDetails") || "{}");
+    } catch {
+      return {};
+    }
+  }, []);
 
-  // ------- Helpers & handlers -------
-  const currency = (n) =>
-    n.toLocaleString("en-NZ", { style: "currency", currency: "NZD" });
+  const items = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem("cart") || "[]");
+    } catch {
+      return [];
+    }
+  }, []);
+
+  // Prefer the orderNo you store on submit
+  const orderNo = localStorage.getItem("orderNo") || customerDetails.id || "-";
+
+  // --- Helpers ---
+  const currency = (n) => {
+    const num = Number(n) || 0;
+    return num.toLocaleString("en-NZ", { style: "currency", currency: "NZD" });
+  };
+
+  const getUnitPrice = (it) => {
+    // correct for buy/hire items
+    return it?.isHiring === false
+      ? Number(it?.buyPrice || 0)
+      : Number(it?.hirePrice || 0);
+  };
+
+  const grandTotal = useMemo(() => {
+    return items.reduce((sum, it) => {
+      const unit = getUnitPrice(it);
+      const qty = Number(it?.quantity || 1);
+      return sum + unit * qty;
+    }, 0);
+  }, [items]);
 
   const onPrint = () => window.print();
 
@@ -68,7 +84,10 @@ function PaymentCompleted() {
   };
 
   return (
-    <>
+    <div className="payment-container">
+      <Navbar />
+
+      <div className="payment-content">
         <div className="oc-wrap">
           {/* Header */}
           <header className="oc-header">
@@ -76,6 +95,7 @@ function PaymentCompleted() {
               <h1 className="oc-title">Order Confirmation</h1>
               <div className="oc-gst">GST No: {org.gstNo}</div>
             </div>
+
             <div className="oc-org">
               <div className="oc-org-name">{org.name}</div>
               {org.addressLines.map((l, i) => (
@@ -87,10 +107,10 @@ function PaymentCompleted() {
           </header>
 
           <p className="oc-note">
-            Congratulations, you have successfully ordered. Please click on the
-            print link below to print your receipt. All collection and return
-            information can be found on the attached receipt. Your receipt and
-            order confirmation will also be emailed to you shortly!
+            Congratulations, you have successfully ordered. Please click the
+            print button below to print your receipt. Collection and return
+            information can be found on the receipt. Your receipt and order
+            confirmation will also be emailed to you shortly.
           </p>
 
           {/* Order meta */}
@@ -98,17 +118,18 @@ function PaymentCompleted() {
             <div>
               <div className="oc-meta-row">
                 <span>Order Number</span>
-                <strong>{customerDetails.id}</strong>
+                <strong>{orderNo}</strong>
               </div>
               <div className="oc-meta-row">
                 <span>Name</span>
                 <strong>
-                  {customerDetails.firstName} {customerDetails.lastName}
+                  {customerDetails.firstName || "-"}{" "}
+                  {customerDetails.lastName || ""}
                 </strong>
               </div>
               <div className="oc-meta-row">
                 <span>Email Address</span>
-                <strong>{customerDetails.email}</strong>
+                <strong>{customerDetails.email || "-"}</strong>
               </div>
               <div className="oc-meta-row">
                 <span>Mobile Number</span>
@@ -119,21 +140,23 @@ function PaymentCompleted() {
             <div>
               <div className="oc-meta-row">
                 <span>Address</span>
-                <strong>{customerDetails.address}</strong>
+                <strong>{customerDetails.address || "-"}</strong>
               </div>
               <div className="oc-meta-row">
                 <span>City, Post Code</span>
                 <strong>
-                  {customerDetails.city} {customerDetails.postcode}
+                  {(customerDetails.city || "-") +
+                    " " +
+                    (customerDetails.postcode || "")}
                 </strong>
               </div>
               <div className="oc-meta-row">
                 <span>Country</span>
-                <strong>{customerDetails.country}</strong>
+                <strong>{customerDetails.country || "-"}</strong>
               </div>
               <div className="oc-meta-row">
                 <span>Phone Number</span>
-                <strong>{customerDetails.phone}</strong>
+                <strong>{customerDetails.phone || "-"}</strong>
               </div>
             </div>
           </section>
@@ -149,21 +172,55 @@ function PaymentCompleted() {
                   <th className="oc-col-total">Total</th>
                 </tr>
               </thead>
+
               <tbody>
-                {items.map((it, idx) => (
-                  <tr key={idx}>
-                    <td>
-                      <div className="oc-item-name">{it.name}</div>
-                      {it.details && (
-                        <div className="oc-item-details">{it.details}</div>
-                      )}
+                {items.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} style={{ padding: 16 }}>
+                      No items found.
                     </td>
-                    <td>{it.hirePrice}</td>
-                    <td>Quantity {it.quantity}</td>
-                    <td>{(it.hirePrice) * (it.quantity || 1)}</td>
                   </tr>
-                ))}
+                ) : (
+                  items.map((it, idx) => {
+                    const unit = getUnitPrice(it);
+                    const qty = Number(it?.quantity || 1);
+                    const lineTotal = unit * qty;
+
+                    return (
+                      <tr key={it?.id ?? idx}>
+                        <td>
+                          <div className="oc-item-name">
+                            {it?.name || "Item"}
+                          </div>
+
+                          {/* Optional details string */}
+                          {it?.details && (
+                            <div className="oc-item-details">{it.details}</div>
+                          )}
+
+                          {/* Optional selected options display (nice to have) */}
+                          {it?.selectedOptions &&
+                            Object.keys(it.selectedOptions).length > 0 && (
+                              <div className="oc-item-details">
+                                {Object.entries(it.selectedOptions).map(
+                                  ([k, v]) => (
+                                    <div key={k}>
+                                      {k}: <strong>{String(v)}</strong>
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                            )}
+                        </td>
+                        <td>{currency(unit)}</td>
+                        <td>{qty}</td>
+                        <td>{currency(lineTotal)}</td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
+
               <tfoot>
                 <tr className="oc-row-spacer">
                   <td colSpan={4} />
@@ -172,11 +229,11 @@ function PaymentCompleted() {
                   <td className="oc-right" colSpan={3}>
                     Grand total
                   </td>
-                  <td>{currency(total)}</td>
+                  <td>{currency(grandTotal)}</td>
                 </tr>
                 <tr>
                   <td colSpan={4} className="oc-gst-note">
-                    {totals.includeGstNote}
+                    All prices include GST
                   </td>
                 </tr>
               </tfoot>
@@ -206,8 +263,7 @@ function PaymentCompleted() {
             </ul>
 
             <p>
-              {bank.particularsHintPrefix} <strong>{customerDetails.id}</strong>
-              .
+              {bank.particularsHintPrefix} <strong>{orderNo}</strong>.
               <br />
               {bank.payeeCodeHintPrefix}
               <br />
@@ -229,7 +285,7 @@ function PaymentCompleted() {
                 <input
                   id="email"
                   name="email"
-                  defaultValue={customerDetails.email}
+                  defaultValue={customerDetails.email || ""}
                   type="email"
                 />
               </div>
@@ -241,7 +297,7 @@ function PaymentCompleted() {
                 <input
                   id="firstName"
                   name="firstName"
-                  defaultValue="Abc"
+                  defaultValue={customerDetails.firstName || ""}
                   required
                 />
               </div>
@@ -253,14 +309,14 @@ function PaymentCompleted() {
                 <input
                   id="lastName"
                   name="lastName"
-                  defaultValue="abc"
+                  defaultValue={customerDetails.lastName || ""}
                   required
                 />
               </div>
 
               <label className="oc-check">
                 <input type="checkbox" name="newsletter" /> I would like to
-                receive email newsletters and Academic Award information -
+                receive email newsletters and Academic Award information
               </label>
 
               <div className="oc-actions">
@@ -271,7 +327,8 @@ function PaymentCompleted() {
             </form>
           </section>
         </div>
-    </>
+      </div>
+    </div>
   );
 }
 
