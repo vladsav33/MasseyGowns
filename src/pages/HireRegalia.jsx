@@ -24,6 +24,15 @@ function HireRegalia() {
   const mode = new URLSearchParams(location.search).get("mode");
   const showCeremony = mode !== "photo"; // hide only for casual hire
 
+  // Set orderType in localStorage when component mounts or mode changes
+  useEffect(() => {
+    if (mode === "photo") {
+      localStorage.setItem("orderType", "3"); // 3 for casual hire photos
+    } else {
+      localStorage.setItem("orderType", "1"); // 1 for regular hire
+    }
+  }, [mode]);
+
   // Initialize step from location.state if available, otherwise from localStorage or default to 1
   const [step, setStep] = useState(() => {
     if (location.state?.step) {
@@ -44,12 +53,6 @@ function HireRegalia() {
 
   const [courses, setCourses] = useState([]);
   const [selectedCourseId, setSelectedCourseId] = useState(null); // => {
-  // const saved = showCeremony?localStorage.getItem("selectedCourseId"):localStorage.getItem("selectedPhotoCourseId");
-  //
-  // console.log("Course Saved = ", saved);
-  //
-  // return saved ? Number(saved) : null;
-  // });
 
   const [courseChanged, setCourseChanged] = useState(false);
 
@@ -174,6 +177,27 @@ function HireRegalia() {
     }
   }, []);
 
+  // Reset dropdowns if cart is empty on page load/refresh
+  useEffect(() => {
+    const cart = localStorage.getItem("cart");
+    const parsedCart = cart ? JSON.parse(cart) : [];
+    
+    if (!parsedCart || parsedCart.length === 0) {
+      // Clear ceremony and course selections
+      setSelectedCeremonyId(null);
+      setSelectedCourseId(null);
+      
+      // Clear from localStorage
+      if (showCeremony) {
+        localStorage.removeItem("selectedCeremonyId");
+        localStorage.removeItem("selectedCourseId");
+      } else {
+        localStorage.removeItem("selectedPhotoCeremonyId");
+        localStorage.removeItem("selectedPhotoCourseId");
+      }
+    }
+  }, []); // Run only on mount (page load/refresh)
+
   // Fetch Items only if courseChanged is true
   useEffect(() => {
     if (!selectedCourseId) return;
@@ -189,7 +213,6 @@ function HireRegalia() {
 
     // Preserve buy items and donations when course changes
     const preserveNonHireItems = (currentItems) => {
-      console.log("Items before=", currentItems);
       return currentItems.filter(
         (item) =>
           (item.type === "individual" && !item.isHiring) || // buy items
@@ -200,7 +223,6 @@ function HireRegalia() {
 
     // Get items to preserve before clearing
     const itemsToPreserve = preserveNonHireItems(items);
-    console.log("ItemsToPreserve=", itemsToPreserve);
 
     // Clear only hire items, keep buy items and donations
     setItem({});
@@ -221,7 +243,6 @@ function HireRegalia() {
           return [...itemsToPreserve, ...newHireItems];
         });
 
-        console.log("Items=", combinedItems);
       } catch (err) {
         setError(err.message);
         // If fetch fails, at least keep the preserved items

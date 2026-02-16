@@ -35,11 +35,18 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
     items.length > 0 ? items : JSON.parse(localStorage.getItem("cart") || "[]");
   localStorage.setItem("customerDetails", JSON.stringify(formData));
 
-  // Calculate total
-  const total = cart.reduce(
-    (sum, item) => sum + (item.hirePrice || 0) * (item.quantity || 1),
-    0
-  );
+  // Calculate total - use buyPrice or hirePrice based on item mode
+  const total = cart.reduce((sum, item) => {
+    // Use buyPrice if item is in buy mode (isHiring === false), otherwise use hirePrice
+    const price =
+      item.isHiring === false ? item.buyPrice || 0 : item.hirePrice || 0;
+    return sum + price * (item.quantity || 1);
+  }, 0);
+
+  // Helper function to get item price based on hire/buy mode
+  const getItemPrice = (item) => {
+    return item.isHiring === false ? item.buyPrice || 0 : item.hirePrice || 0;
+  };
 
   const handleDateChange = (date) => {
     setFormData({ ...formData, eventDate: date });
@@ -48,7 +55,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
   const today = new Date().toISOString().split("T")[0];
 
   const selectedCeremonyId = JSON.parse(
-    localStorage.getItem("selectedCeremonyId") || 0
+    localStorage.getItem("selectedCeremonyId") || 0,
   );
 
   const handleChange = (e) => {
@@ -128,7 +135,6 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
     try {
       // Get the current cart
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      console.log("Cart before submission:", cart);
 
       localStorage.setItem("paymentMethod", parseInt(formData.paymentMethod));
 
@@ -138,11 +144,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
         orderCompletionEmail();
       }
 
-      console.log("Order received=", result);
       localStorage.setItem("orderNo", result.referenceNo);
-      // debugger;
-
-      console.log("Order submission completed successfully");
 
       // Clear the cart after successful submission
       localStorage.removeItem("cart");
@@ -195,8 +197,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
     };
 
     const data = await getEmailTemplateByName("OrderCompleted");
-    console.log(data);
-    
+
     const template = data.taxReceiptHtml;
     const emailHtml = EmailTemplate(emailPayload, template);
 
@@ -218,7 +219,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       // Try REST Countries (preferred)
       try {
         const res = await fetch(
-          "https://restcountries.com/v3.1/all?fields=name,cca2,flags"
+          "https://restcountries.com/v3.1/all?fields=name,cca2,flags",
         );
         if (!res.ok) throw new Error(`REST Countries HTTP ${res.status}`);
         const data = await res.json();
@@ -264,13 +265,13 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       const staticList = [
         { label: "New Zealand", value: "NZ", flag: "" },
         { label: "Australia", value: "AU", flag: "" },
-        { label: "United States", value: "US", flag: "" },
         { label: "United Kingdom", value: "UK", flag: "" },
+        { label: "United States", value: "US", flag: "" },
       ];
       if (!cancelled) {
         setCountries(staticList);
         setCountriesError(
-          "Could not load countries from network; using a shortened fallback list."
+          "Could not load countries from network; using a shortened fallback list.",
         );
       }
     };
@@ -544,6 +545,9 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
         {cart.length > 0 ? (
           <>
             {cart.map((item) => {
+              const itemPrice = getItemPrice(item);
+              const itemTotal = itemPrice * (item.quantity || 1);
+
               return (
                 <div
                   key={item.id}
@@ -561,25 +565,34 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
                   <div className="summary-info">
                     <p className="summary-name">{item.name}</p>
 
-                    {item.selectedOptions &&
-                      Object.entries(item.selectedOptions).map(
-                        ([label, value]) => (
-                          <p key={label} className="summary-option">
-                            {label}: <strong>{value}</strong>
+                    {item.options &&
+                      item.options.map((option) => {
+                        const selectedId = item.selectedOptions?.[option.label];
+                        if (!selectedId) return null;
+
+                        const selectedChoice = option.choices.find(
+                          (c) => String(c.id || c.value) === String(selectedId),
+                        );
+
+                        const displayValue = selectedChoice
+                          ? selectedChoice.value ||
+                            selectedChoice.size ||
+                            selectedChoice.name ||
+                            selectedChoice
+                          : selectedId;
+
+                        return (
+                          <p key={option.label} className="summary-option">
+                            {option.label}: <strong>{displayValue}</strong>
                           </p>
-                        )
-                      )}
+                        );
+                      })}
                   </div>
 
                   <div className="summary-price">
-                    ${(item.hirePrice || 0).toFixed(2)} * {item.quantity || 1}
+                    ${itemPrice.toFixed(2)} * {item.quantity || 1}
                     <br />
-                    <strong>
-                      $
-                      {((item.hirePrice || 0) * (item.quantity || 1)).toFixed(
-                        2
-                      )}
-                    </strong>
+                    <strong>${itemTotal.toFixed(2)}</strong>
                   </div>
                 </div>
               );

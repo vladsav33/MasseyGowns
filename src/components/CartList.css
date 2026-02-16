@@ -1,10 +1,12 @@
 .cart {
-    max-width: 90%;
-    margin: 40px auto;
-    text-align: center;
-    font-family: sans-serif;
-    padding: 3%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  max-width: 90%;
+  margin: 40px auto;
+  text-align: center;
+  font-family: sans-serif;
+  padding: 3%;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, sans-serif;
 }
 
 .cart-summary {
@@ -12,7 +14,7 @@
   border-radius: 12px;
   padding: 24px;
   margin-top: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border: 1px solid #e5e7eb;
 }
 
@@ -40,36 +42,81 @@
   margin-top: 16px;
 }
 
-.donate-btn {
+/* Add to Cart button in donation dialog */
+.donate-add-btn {
   width: 30%;
   background-color: #117832;
   color: white;
   border: none;
-  padding: 14px;
+  padding: 10px;
   border-radius: 8px;
   margin-top: 20px;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-.donate-btn:focus {
+
+.donate-add-btn:focus {
   border: none;
   outline: none;
 }
 
-.donate-btn:hover {
+.donate-add-btn:hover {
   background: #288a47;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px #95a99b;
 }
 
-.donate-btn:active {
+.donate-add-btn:active {
   transform: translateY(0);
 }
 
+/* Main Donate button */
+.donate-btn {
+  width: 15%;
+  background-color: #117832;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.donate-btn:focus {
+  border: none;
+  outline: none;
+}
+
+.donate-btn:hover:not(:disabled) {
+  background: #288a47;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px #95a99b;
+}
+
+.donate-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Disabled state for donate button */
+.donate-btn:disabled {
+  background-color: #9ca3af;
+  color: #e5e7eb;
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Cancel button */
 .cancel-btn {
   width: 30%;
   background-color: #7d7e7d;
@@ -101,13 +148,6 @@
   transform: translateY(0);
 }
 
-.dialog-footer {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 20px;  
-}
-
 .empty-cart {
   text-align: center;
   padding: 60px 20px;
@@ -125,8 +165,120 @@
   text-align: left;
 }
 
+/* ====== DIALOG ONLY (overlay + box) ====== */
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 9999;
+}
+
+.dialog-box {
+  width: min(760px, 100%);
+  max-height: 85vh;
+  overflow: auto;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  animation: dialogPop 140ms ease-out;
+}
+
+/* smooth pop */
+@keyframes dialogPop {
+  from {
+    transform: translateY(8px) scale(0.99);
+    opacity: 0.6;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* your existing inner container */
 .dialog-content {
-  text-align: justify;
-  padding: 0%;
-  margin-top: 0%;
+  padding: 18px 20px;
+  text-align: left;
+  color: #111827;
+  line-height: 1.55;
+}
+
+/* header area you already have */
+.dialog-header {
+  margin: 0 0 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.dialog-header h1,
+.dialog-header h2,
+.dialog-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #0a4a1e;
+}
+
+/* make lists and sections breathe */
+.dialog-body {
+  display: grid;
+  gap: 14px;
+}
+
+.dialog-body p {
+  margin: 0;
+}
+
+/* donation quantity block looks nicer without touching your existing classes */
+.dialog-body .quantity-controls {
+  background: #f8fafc;
+  border: 1px solid #eef2f7;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+/* input polish */
+.dialog-body .quantity-input {
+  width: 160px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+  outline: none;
+}
+
+.dialog-body .quantity-input:focus {
+  border-color: #117832;
+  box-shadow: 0 0 0 3px rgba(17, 120, 50, 0.15);
+}
+
+/* footer layout only */
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid #eef2f7;
+  margin-top: 14px;
+}
+
+/* mobile friendliness */
+@media (max-width: 520px) {
+  .dialog-box {
+    max-height: 90vh;
+  }
+
+  .dialog-footer {
+    flex-direction: column;
+  }
+
+  .dialog-body .quantity-input {
+    width: 100%;
+  }
 }

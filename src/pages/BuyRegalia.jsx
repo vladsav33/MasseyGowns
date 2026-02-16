@@ -14,6 +14,11 @@ import PaymentCompleted from "../components/PaymentCompleted";
 function BuyRegalia() {
   const action = 1; // Buy
 
+    // Set orderType in localStorage when component mounts
+    useEffect(() => {
+      localStorage.setItem("orderType", "2"); // 2 for buy
+    }, []);
+
   const paymentMethod = localStorage.getItem("paymentMethod");
 
   // const [step, setStep] = useState(() => {
@@ -65,8 +70,7 @@ function BuyRegalia() {
             {step === 1 && (
               <>
                 <BuySelectRegalia setItems={setItems} />
-
-                {/* Show items base on selected ceremony and course */}
+                <h2 className="cart-label">Shopping Cart</h2>
                 <CartList
                   step={step}
                   item={item}

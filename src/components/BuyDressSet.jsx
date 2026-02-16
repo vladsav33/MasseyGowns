@@ -23,7 +23,7 @@ export default function BuyDressSet() {
         if (!res.ok) {
           const text = await res.text();
           throw new Error(
-            `Failed to load CMS content (${res.status}): ${text}`
+            `Failed to load CMS content (${res.status}): ${text}`,
           );
         }
 
@@ -67,25 +67,21 @@ export default function BuyDressSet() {
   return (
     <section>
       <h2 className="BuyDressSetTitle">{title}</h2>
-      <div className="BuyDressSetImg">
-        <div className="threepic">
-          <img src={bachelorImage} alt={bachelorLabel} />
-          <Link to="/buyregalia" className="buyrobes">
-            {bachelorLabel}
-          </Link>
-        </div>
-        <div className="threepic">
-          <img src={mastersImage} alt={mastersLabel} />
-          <Link to="/buyregalia" className="buyrobes">
-            {mastersLabel}
-          </Link>
-        </div>
-        <div className="threepic">
-          <img src={phdImage} alt={phdLabel} />
-          <Link to="/buyregalia" className="buyrobes">
-            {phdLabel}
-          </Link>
-        </div>
+      <div className="BuyDressSetGrid">
+        <Link to="/buyregalia" className="regaliaCard">
+          <img src={bachelorImage} alt={bachelorLabel} className="regaliaImg" />
+          <span>{bachelorLabel}</span>
+        </Link>
+
+        <Link to="/buyregalia" className="regaliaCard">
+          <img src={mastersImage} alt={mastersLabel} className="regaliaImg" />
+          <span>{mastersLabel}</span>
+        </Link>
+
+        <Link to="/buyregalia" className="regaliaCard">
+          <img src={phdImage} alt={phdLabel} className="regaliaImg" />
+          <span>{phdLabel}</span>
+        </Link>
       </div>
     </section>
   );

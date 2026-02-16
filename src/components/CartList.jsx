@@ -3,12 +3,8 @@ import CartItem from "./CartItem.jsx";
 import "./CartList.css";
 
 function CartList({ step, items, setItems }) {
-  console.log("items in cart list: ", items);
-
   const [donationQuantity, setDonationQuantity] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  // console.log("Items List", items);
 
   // Centralized cart updater
   const updateCart = (next) => {
@@ -21,25 +17,9 @@ function CartList({ step, items, setItems }) {
       }
       window.dispatchEvent(new Event("cartUpdated"));
 
-      console.log("Updated cart: ", updated);
       return updated;
     });
   };
-
-  // Load cart from localStorage on mount
-  // useEffect(() => {
-  //   const saved = localStorage.getItem("cart");
-  //
-  //   console.log("From saved cart: ", saved);
-  //
-  //   if (saved) {
-  //     try {
-  //       setItems(JSON.parse(saved));
-  //     } catch {
-  //       console.error("Failed to parse cart from localStorage");
-  //     }
-  //   }
-  // }, [setItems]);
 
   // --- Cart actions ---
   const handleAddDonationToCart = () => {
@@ -48,6 +28,7 @@ function CartList({ step, items, setItems }) {
       name: "Donation",
       category: "Graduate Women Manawatu Charitable Trust Inc.",
       hirePrice: 2,
+      // buyPrice: 2,
       quantity: donationQuantity,
       isDonation: true,
     };
@@ -70,8 +51,8 @@ function CartList({ step, items, setItems }) {
   const handleIncrease = (id) => {
     updateCart(
       items.map((item) =>
-        item.id === id ? { ...item, quantity: (item.quantity || 1) + 1 } : item
-      )
+        item.id === id ? { ...item, quantity: (item.quantity || 1) + 1 } : item,
+      ),
     );
   };
 
@@ -80,8 +61,8 @@ function CartList({ step, items, setItems }) {
       items.map((item) =>
         item.id === id && (item.quantity || 1) > 1
           ? { ...item, quantity: item.quantity - 1 }
-          : item
-      )
+          : item,
+      ),
     );
   };
 
@@ -103,8 +84,6 @@ function CartList({ step, items, setItems }) {
     });
     setItems(updatedItems, grandTotal);
     localStorage.setItem("cart", JSON.stringify(updatedItems, grandTotal)); // persist to localStorage
-    // console.log(localStorage.getItem("cart"), grandTotal);
-    
   };
 
   const handleDeliveryChange = (itemId, newPrice) => {
@@ -114,10 +93,9 @@ function CartList({ step, items, setItems }) {
       }
       return item;
     });
-    // console.log("Updated Items=", updatedItems);
     setItems(updatedItems, grandTotal);
     localStorage.setItem("cart", JSON.stringify(updatedItems, grandTotal));
-  }
+  };
 
   // --- Price utilities ---
   const getNumericPrice = (priceString) =>
@@ -127,14 +105,15 @@ function CartList({ step, items, setItems }) {
     .filter((item) => !item.isDonation)
     .reduce((acc, item) => acc + (item.quantity || 1), 0);
 
-  // Add delivery price
+  // Add delivery price - use buyPrice or hirePrice based on item mode
   const totalPrice = items
     .filter((item) => !item.isDonation)
-    .reduce(
-      (acc, item) =>
-        acc + getNumericPrice(item.hirePrice) * (item.quantity || 1),
-      0
-    );
+    .reduce((acc, item) => {
+      const price = item.isHiring === false 
+        ? getNumericPrice(item.buyPrice) 
+        : getNumericPrice(item.hirePrice);
+      return acc + price * (item.quantity || 1);
+    }, 0);
 
   const totalDonationPrice = items
     .filter((item) => item.isDonation)
@@ -149,6 +128,17 @@ function CartList({ step, items, setItems }) {
 
   const grandTotal = totalPrice + totalDonationPrice;
   localStorage.setItem("grandTotal", grandTotal);
+
+  const onTogglePurchaseType = (itemId, newIsHiring) => {
+    setItems((prev) =>
+      prev.map((it) =>
+        it.id === itemId ? { ...it, isHiring: newIsHiring } : it,
+      ),
+    );
+  };
+
+  // Check if donation already exists in cart
+  const hasDonation = items.some((item) => item.isDonation);
 
   return (
     <div className="cart">
@@ -166,9 +156,9 @@ function CartList({ step, items, setItems }) {
               onRemove={() => handleRemove(item.id)}
               onOptionChange={handleOptionChange}
               onDeliveryChange={handleDeliveryChange}
+              onTogglePurchaseType={onTogglePurchaseType}
             />
           ))}
-          <div></div>
 
           {step === 2 && (
             <div>
@@ -183,6 +173,7 @@ function CartList({ step, items, setItems }) {
                 <button
                   className="donate-btn"
                   onClick={() => setIsDialogOpen(true)}
+                  disabled={hasDonation}
                 >
                   Donate
                 </button>
@@ -207,7 +198,7 @@ function CartList({ step, items, setItems }) {
                 </div> */}
 
                 <div className="summary-row">
-                  <span>Total Donation ({totalDonationCount} × $2):</span>
+                  <span>Total Donation ({totalDonationCount} * $2):</span>
                   <span>${totalDonationPrice.toFixed(2)}</span>
                 </div>
 
@@ -252,10 +243,15 @@ function CartList({ step, items, setItems }) {
                       style={{ listStyleType: "disc", paddingLeft: "1.5rem" }}
                     >
                       <li>
-                        <p>To provide a robe hire service of the highest quality</p>
+                        <p>
+                          To provide a robe hire service of the highest quality
+                        </p>
                       </li>
                       <li>
-                        <p>To disburse funds raised by robe hire for the advancement of education</p>
+                        <p>
+                          To disburse funds raised by robe hire for the
+                          advancement of education
+                        </p>
                       </li>
                     </ul>
                   </div>
@@ -284,7 +280,7 @@ function CartList({ step, items, setItems }) {
                       value={donationQuantity}
                       onChange={(e) =>
                         setDonationQuantity(
-                          Math.max(1, parseInt(e.target.value) || 1)
+                          Math.max(1, parseInt(e.target.value) || 1),
                         )
                       }
                       className="quantity-input"
@@ -299,7 +295,7 @@ function CartList({ step, items, setItems }) {
 
               <div className="dialog-footer">
                 <button
-                  className="donate-btn"
+                  className="donate-add-btn"
                   onClick={handleAddDonationToCart}
                 >
                   Add to Cart
