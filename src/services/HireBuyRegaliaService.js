@@ -70,13 +70,17 @@ export const submitCustomerDetails = async (formData) => {
   try {
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
     const ceremonyId = parseInt(
-      JSON.parse(localStorage.getItem("selectedCeremonyId")) || 0,
+      JSON.parse(localStorage.getItem("selectedCeremonyId")) ||
+        JSON.parse(localStorage.getItem("selectedPhotoCeremonyId")) ||
+        0,
     );
     const degreeId = parseInt(
-      JSON.parse(localStorage.getItem("selectedCourseId")) || 0,
+      JSON.parse(localStorage.getItem("selectedCourseId")) ||
+        JSON.parse(localStorage.getItem("selectedPhotoCourseId")) ||
+        0,
     );
     const orderType = localStorage.getItem("orderType") || "0";
-  
+
     const customerPayload = {
       firstName: formData.firstName || "",
       lastName: formData.lastName || "",
@@ -106,7 +110,7 @@ export const submitCustomerDetails = async (formData) => {
       orderDate: new Date().toLocaleDateString("en-CA"), // YYYY-MM-DD
       ceremonyId: ceremonyId,
       degreeId: degreeId,
-      orderType: orderType
+      orderType: orderType,
       // note: "",
       // changes: "",
       // packNote: "",
@@ -119,8 +123,6 @@ export const submitCustomerDetails = async (formData) => {
       // payBy: "2026-02-14",
       // status: 0,
     };
-
-    console.log("CustomerPayload=", customerPayload);
 
     const response = await axios.post(`${API_URL}/orders`, customerPayload);
     if (response.data) {
