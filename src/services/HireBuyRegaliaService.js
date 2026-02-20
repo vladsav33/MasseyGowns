@@ -93,9 +93,9 @@ export const submitCustomerDetails = async (formData) => {
         itemId: parseInt(item.id?.toString()) || 0,
         sizeId:
           parseInt(item.selectedOptions?.["Head Size"]) ||
-          parseInt(item.selectedOptions?.["Gown Size"]) ||
+          parseInt(item.selectedOptions?.["My Full height"]) ||
           0,
-        fitId: parseInt(item.selectedOptions?.["My full height"]) || 0,
+        fitId: parseInt(item.selectedOptions?.["Gown Size"]) || 0,
         hoodId: parseInt(item.selectedOptions?.["Hood Type"]) || 0,
         hire: item.isHiring ?? false,
         quantity: item.quantity || 1,
