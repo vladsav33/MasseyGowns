@@ -230,7 +230,7 @@ function CartItem({
 
         <div></div>
         {/* Purchase this item - moved outside the card */}
-        {item.category !== "Delivery" && item.name !== "Donation" && orderType == "1" && (
+        {item.category !== "Delivery" && item.name !== "Donation" && orderType == "1" && step === 1 && (
           <div className="purchase-box">
             <span className="purchase-label">Purchase this item</span>
 

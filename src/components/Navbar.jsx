@@ -17,24 +17,6 @@ function Navbar() {
     setSelectedCeremonyId(ceremonyId ? parseInt(ceremonyId) : null);
   }, [location]);
 
-  /*const isActive = (path, ceremonyId = null) => {
-    if (location.pathname !== path) return false;
-
-    // If a ceremony ID is specified, check if it matches
-    if (ceremonyId !== null) {
-      const storedCeremonyId = localStorage.getItem("selectedCeremonyId");
-      return storedCeremonyId && parseInt(storedCeremonyId) === ceremonyId;
-    }
-
-    return true;
-  };*/
-
-  /*const handleHireClick = (ceremonyId) => {
-    // Store the ceremony ID in localStorage
-    // localStorage.setItem("selectedCeremonyId", ceremonyId);
-    // setSelectedCeremonyId(ceremonyId);
-  };*/
-
   // Load cart items from localStorage
   useEffect(() => {
     const loadCartItems = () => {
@@ -124,88 +106,9 @@ function Navbar() {
     setIsCartOpen(!isCartOpen);
   };
 
-  // Analyze cart contents to determine item types
-  const analyzeCartContents = () => {
-    const analysis = {
-      hasBuyItems: false,
-      hasHireItems: false,
-      hasOnlyDonations: false,
-    };
-
-    // Filter out donations first
-    const nonDonationItems = cartItems.filter((item) => !item.isDonation);
-
-    if (nonDonationItems.length === 0) {
-      analysis.hasOnlyDonations = true;
-      return analysis;
-    }
-
-    // Check for buy items (items where isHiring is false or type indicates buying)
-    analysis.hasBuyItems = nonDonationItems.some(
-      (item) =>
-        item.isHiring === false ||
-        (item.type === "individual" && item.isHiring !== true) ||
-        (item.type === "set" && item.isHiring !== true),
-    );
-
-    // Check for hire items (items where isHiring is true or undefined/null - old hire items)
-    analysis.hasHireItems = nonDonationItems.some(
-      (item) =>
-        item.isHiring === true ||
-        item.isHiring === undefined ||
-        item.isHiring === null,
-    );
-
-    return analysis;
-  };
-
   const handleViewCart = () => {
     setIsCartOpen(false);
-
-    const { hasBuyItems, hasHireItems, hasOnlyDonations } =
-      analyzeCartContents();
-
-    // If cart is empty or only has donations, default behavior
-    if (cartItems.length === 0 || hasOnlyDonations) {
-      if (location.pathname === "/hireregalia") {
-        navigate("/hireregalia", { state: { step: 2 } });
-      } else if (location.pathname === "/buyregalia") {
-        navigate("/buyregalia", { state: { step: 2 } });
-      } else {
-        navigate("/buyregalia", { state: { step: 2 } });
-      }
-      return;
-    }
-
-    // Only buy items in cart → go to step 2 in buyRegalia
-    if (hasBuyItems && !hasHireItems) {
-      navigate("/buyregalia", { state: { step: 2 } });
-      return;
-    }
-
-    // Only hire items in cart → go to step 2 in hireRegalia
-    if (hasHireItems && !hasBuyItems) {
-      navigate("/hireregalia", { state: { step: 2 } });
-      return;
-    }
-
-    // Both hire and buy items in cart
-    if (hasBuyItems && hasHireItems) {
-      if (location.pathname === "/hireregalia") {
-        // Already on hire page → go to step 2 in hireRegalia
-        navigate("/hireregalia", { state: { step: 2 } });
-      } else if (location.pathname === "/buyregalia") {
-        // Already on buy page → go to step 2 in buyRegalia
-        navigate("/buyregalia", { state: { step: 2 } });
-      } else {
-        // Not on hire or buy pages → go to step 2 in hireRegalia
-        navigate("/hireregalia", { state: { step: 2 } });
-      }
-      return;
-    }
-
-    // Fallback
-    navigate("/buyregalia", { state: { step: 2 } });
+    navigate("/cart");
   };
 
   const removeFromCart = (itemId) => {

@@ -37,8 +37,6 @@ export default function Payment() {
     try {
       const grandTotal = localStorage.getItem("grandTotal");
       const orderNo = localStorage.getItem("orderNo");
-
-      console.log("Order Number=", orderNo);
       
       const res = await fetch(`${API_URL}/api/payment/create-payment`, {
         method: "POST",
@@ -49,9 +47,7 @@ export default function Payment() {
         }),
       });
       const data = await res.json();
-      console.log(data);
       if (data.redirectUrl) {
-        console.log(data.redirectUrl);
         setRedirectUrl(data.redirectUrl);
         setTimeout(() => {
           window.location.href = data.redirectUrl;
@@ -92,7 +88,6 @@ export default function Payment() {
     };
 
     const emailHtml = EmailTemplate(emailPayload);
-    // console.log("Generated Email Template:", emailHtml);
 
     try {
       await sendOrderEmail({

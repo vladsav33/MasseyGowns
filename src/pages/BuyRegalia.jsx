@@ -8,16 +8,16 @@ import BuySelectRegalia from "../components/BuySelectRegalia";
 import CartList from "../components/CartList";
 import CustomerDetail from "../components/CustomerDetail";
 import Payment from "../components/Payment";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import PaymentCompleted from "../components/PaymentCompleted";
 
 function BuyRegalia() {
-  const action = 1; // Buy
+  // Set orderType in localStorage when component mounts
+  useEffect(() => {
+    localStorage.setItem("orderType", "2"); // 2 for buy
+  }, []);
 
-    // Set orderType in localStorage when component mounts
-    useEffect(() => {
-      localStorage.setItem("orderType", "2"); // 2 for buy
-    }, []);
+  const navigate = useNavigate();
 
   const paymentMethod = localStorage.getItem("paymentMethod");
 
@@ -53,6 +53,12 @@ function BuyRegalia() {
     "Payment Completed",
   ];
 
+  useEffect(() => {
+    if (step === 2) {
+      navigate("/cart", { state: { step: 2 } });
+    }
+  }, [step, navigate]);
+
   return (
     <div>
       <Navbar />
@@ -60,12 +66,7 @@ function BuyRegalia() {
         <div className="content">
           <div className="body-content">
             <ProgressBar step={step} steps={steps} />
-            <ProgressButtons
-              action={action}
-              step={step}
-              setStep={setStep}
-              steps={steps}
-            />
+            <ProgressButtons step={step} setStep={setStep} steps={steps} />
 
             {step === 1 && (
               <>
@@ -119,12 +120,7 @@ function BuyRegalia() {
                 )}
               </>
             )}
-            <ProgressButtons
-              action={action}
-              step={step}
-              setStep={setStep}
-              steps={steps}
-            />
+            <ProgressButtons step={step} setStep={setStep} steps={steps} />
             <Contact />
           </div>
         </div>
