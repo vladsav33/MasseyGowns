@@ -82,8 +82,9 @@ function CartList({ step, items, setItems }) {
       }
       return item;
     });
-    setItems(updatedItems, grandTotal);
-    localStorage.setItem("cart", JSON.stringify(updatedItems, grandTotal)); // persist to localStorage
+    setItems(updatedItems);
+    localStorage.setItem("cart", JSON.stringify(updatedItems));
+    window.dispatchEvent(new Event("cartUpdated"));
   };
 
   const handleDeliveryChange = (itemId, newPrice) => {
@@ -109,9 +110,10 @@ function CartList({ step, items, setItems }) {
   const totalPrice = items
     .filter((item) => !item.isDonation)
     .reduce((acc, item) => {
-      const price = item.isHiring === false 
-        ? getNumericPrice(item.buyPrice) 
-        : getNumericPrice(item.hirePrice);
+      const price =
+        item.isHiring === false
+          ? getNumericPrice(item.buyPrice)
+          : getNumericPrice(item.hirePrice);
       return acc + price * (item.quantity || 1);
     }, 0);
 

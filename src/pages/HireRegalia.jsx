@@ -1,41 +1,28 @@
+// HireRegalia.jsx (only the parts you MUST add/change)
+// ✅ Add these new state + handler + pass onEditItems to ProgressButtons
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import "./HireRegalia.css";
 import ProgressBar from "../components/ProgressBar";
 import ProgressButtons from "../components/ProgressButtons";
 import CeremonyCourseSelection from "../components/CeremonyCourseSelection";
-import CartList from "../components/CartList";
 import Contact from "../components/Contact";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  getCoursesByCeremonyId,
-  getCeremonies,
-  getItemsByCourseId,
-} from "../services/HireBuyRegaliaService";
+import { getCoursesByCeremonyId, getCeremonies } from "../services/HireBuyRegaliaService";
 
 function HireRegalia() {
-  // ---- STATES ----
   const location = useLocation();
   const mode = new URLSearchParams(location.search).get("mode");
-  const showCeremony = mode !== "photo"; // hide only for casual hire
+  const showCeremony = mode !== "photo";
   const navigate = useNavigate();
 
-  // Set orderType in localStorage when component mounts or mode changes
   useEffect(() => {
-    if (mode === "photo") {
-      localStorage.setItem("orderType", "3"); // 3 for casual hire photos
-    } else {
-      localStorage.setItem("orderType", "1"); // 1 for regular hire
-    }
+    if (mode === "photo") localStorage.setItem("orderType", "3");
+    else localStorage.setItem("orderType", "1");
   }, [mode]);
 
-  // Initialize step from location.state if available, otherwise from localStorage or default to 1
   const [step, setStep] = useState(() => {
-    if (location.state?.step) {
-      return Number(location.state.step);
-    }
-    let temp = Number(localStorage.getItem("step")) || 1;
-
+    if (location.state?.step) return Number(location.state.step);
     return Number(localStorage.getItem("step")) || 1;
   });
 
@@ -48,84 +35,23 @@ function HireRegalia() {
   });
 
   const [courses, setCourses] = useState([]);
-  const [selectedCourseId, setSelectedCourseId] = useState(null); // => {
-
-  const [courseChanged, setCourseChanged] = useState(false);
-
-  const [item, setItem] = useState(() => {
-    const saved = localStorage.getItem("item");
-    return saved ? JSON.parse(saved) : {};
+  const [selectedCourseId, setSelectedCourseId] = useState(() => {
+    const saved = showCeremony
+      ? localStorage.getItem("selectedCourseId")
+      : localStorage.getItem("selectedPhotoCourseId");
+    return saved ? Number(saved) : null;
   });
 
-  const [items, setItems] = useState(() => {
-    const saved = localStorage.getItem("cart");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [cardOptionsComplete, setCardOptionsComplete] = useState(true);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const steps = [
-    "Select Regalia",
-    "Place Order",
-    "Customer Details",
-    "Payment Completed",
-  ];
+  const steps = ["Select Regalia", "Place Order", "Customer Details", "Payment Completed"];
 
-  // ---- VALIDATION FUNCTIONS ----
+  useEffect(() => localStorage.setItem("step", String(step)), [step]);
 
-  const areAllOptionsSelected = () => {
-    return items.every((item) => {
-      // Skip validation for donation items
-      if (item.isDonation) return true;
-
-      // If item has no options, it's valid
-      if (!item.options || item?.options.length === 0) return true;
-
-      // Check if all options have selected values
-      return item.options.every((option) => {
-        const selectedValue = item.selectedOptions?.[option.label];
-        return selectedValue && selectedValue.trim() !== "";
-      });
-    });
-  };
-
-  // ---- PERSIST TO LOCALSTORAGE ----
-  useEffect(() => localStorage.setItem("step", step), [step]);
-  useEffect(() => {
-    if (selectedCeremonyId !== null && showCeremony)
-      localStorage.setItem("selectedCeremonyId", selectedCeremonyId);
-    if (selectedCeremonyId !== null && !showCeremony)
-      localStorage.setItem("selectedPhotoCeremonyId", selectedCeremonyId);
-  }, [selectedCeremonyId]);
-  useEffect(() => {
-    if (selectedCourseId !== null && showCeremony)
-      localStorage.setItem("selectedCourseId", selectedCourseId);
-    if (selectedCourseId !== null && !showCeremony)
-      localStorage.setItem("selectedPhotoCourseId", selectedCourseId);
-  }, [selectedCourseId]);
-  useEffect(() => localStorage.setItem("item", JSON.stringify(item)), [item]);
-  useEffect(() => {
-    if (loading) return;
-    if (items?.length) localStorage.setItem("cart", JSON.stringify(items));
-    else localStorage.removeItem("cart");
-    window.dispatchEvent(new Event("cartUpdated"));
-  }, [items, loading]);
-
-  useEffect(() => {
-    const saved = showCeremony
-      ? localStorage.getItem("selectedCourseId")
-      : localStorage.getItem("selectedPhotoCourseId");
-
-    setSelectedCourseId(saved ? Number(saved) : null);
-  }, [showCeremony]);
-
-  // useEffect(() => {
-  const paymentMethod = localStorage.getItem("paymentMethod");
-  // })
-
-  // ---- API CALLS ----
-  // Fetch Ceremonies
+  // load ceremonies
   useEffect(() => {
     const fetchCeremonies = async () => {
       try {
@@ -142,114 +68,79 @@ function HireRegalia() {
     fetchCeremonies();
   }, []);
 
-  // Fetch Courses when Ceremony changes
+  // load courses when ceremony changes
   useEffect(() => {
     const fetchCourses = async () => {
-      if (!selectedCeremonyId) {
+      if (showCeremony && !selectedCeremonyId) {
         setCourses([]);
         setSelectedCourseId(null);
         return;
       }
+      if (!showCeremony) {
+        // casual hire can still have courses without ceremony depending on your API;
+        // if your API still needs ceremony, keep the same logic as above.
+      }
 
       try {
         setLoading(true);
         setError(null);
-        const data = await getCoursesByCeremonyId(selectedCeremonyId);
-        setCourses(Array.isArray(data) ? data : []);
+
+        if (selectedCeremonyId) {
+          const data = await getCoursesByCeremonyId(selectedCeremonyId);
+          setCourses(Array.isArray(data) ? data : []);
+        } else {
+          setCourses([]);
+        }
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-
     fetchCourses();
-  }, [selectedCeremonyId]);
+  }, [selectedCeremonyId, showCeremony]);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("cart");
-    if (saved) {
-      setItems(JSON.parse(saved));
+  // ✅ Edit button handler (Step 2 -> Step 1 restore selections)
+  const handleEditItems = () => {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const items = cart.filter((x) => !x.isDonation);
+
+    if (items.length === 0) return;
+
+    const ceremonyId = items[0].ceremonyId ?? null;
+    const courseId = items[0].courseId ?? null;
+
+    const itemOptions = {};
+    const purchaseTypeByUiId = {};
+
+    items.forEach((it) => {
+      const uiId = `${courseId}-${it.id}`;
+      itemOptions[uiId] = it.selectedOptions || {};
+      purchaseTypeByUiId[uiId] = it.isHiring ?? true;
+    });
+
+    localStorage.setItem(
+      "hireStep1Temp",
+      JSON.stringify({ ceremonyId, courseId, itemOptions, purchaseTypeByUiId })
+    );
+
+    // restore dropdown localStorage (both modes safe)
+    if (ceremonyId != null) {
+      localStorage.setItem("selectedCeremonyId", String(ceremonyId));
+      localStorage.setItem("selectedPhotoCeremonyId", String(ceremonyId));
     }
-  }, []);
-
-  // Reset dropdowns if cart is empty on page load/refresh
-  useEffect(() => {
-    const cart = localStorage.getItem("cart");
-    const parsedCart = cart ? JSON.parse(cart) : [];
-
-    if (!parsedCart || parsedCart.length === 0) {
-      // Clear ceremony and course selections
-      setSelectedCeremonyId(null);
-      setSelectedCourseId(null);
-
-      // Clear from localStorage
-      if (showCeremony) {
-        localStorage.removeItem("selectedCeremonyId");
-        localStorage.removeItem("selectedCourseId");
-      } else {
-        localStorage.removeItem("selectedPhotoCeremonyId");
-        localStorage.removeItem("selectedPhotoCourseId");
-      }
+    if (courseId != null) {
+      localStorage.setItem("selectedCourseId", String(courseId));
+      localStorage.setItem("selectedPhotoCourseId", String(courseId));
     }
-  }, []); // Run only on mount (page load/refresh)
 
-  // Fetch Items only if courseChanged is true
-  useEffect(() => {
-    if (!selectedCourseId) return;
+    // set state
+    setSelectedCeremonyId(ceremonyId);
+    setSelectedCourseId(courseId);
 
-    const savedCart = localStorage.getItem("cart");
-
-    // if (!courseChanged && savedCart) {
-    //   setItems(JSON.parse(savedCart));
-    //   return;
-    // }
-
-    if (!courseChanged) return; // don't fetch if nothing changed
-
-    // Preserve buy items and donations when course changes
-    const preserveNonHireItems = (currentItems) => {
-      return currentItems.filter(
-        (item) =>
-          (item.type === "individual" && !item.isHiring) || // buy items
-          (item.type === "set" && !item.isHiring) || // buy sets
-          item.isDonation, // donations
-      );
-    };
-
-    // Get items to preserve before clearing
-    const itemsToPreserve = preserveNonHireItems(items);
-
-    // Clear only hire items, keep buy items and donations
-    setItem({});
-
-    const fetchItems = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getItemsByCourseId(selectedCourseId);
-        const newHireItems = Array.isArray(data) ? data : [];
-
-        // Combine preserved items with new hire items
-        const combinedItems = [...itemsToPreserve, ...newHireItems];
-        // setItems(combinedItems);
-
-        setItems((prevItems) => {
-          const itemsToPreserve = preserveNonHireItems(prevItems);
-          return [...itemsToPreserve, ...newHireItems];
-        });
-      } catch (err) {
-        setError(err.message);
-        // If fetch fails, at least keep the preserved items
-        setItems(itemsToPreserve);
-      } finally {
-        setLoading(false);
-        setCourseChanged(false);
-      }
-    };
-
-    fetchItems();
-  }, [selectedCourseId, courseChanged]);
+    setStep(1);
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  };
 
   useEffect(() => {
     if (step === 2) {
@@ -260,83 +151,68 @@ function HireRegalia() {
   return (
     <div>
       <Navbar />
-      <>
-        <div className="content">
-          <ProgressBar step={step} steps={steps} className="progressbar" />
-          <ProgressButtons
-            step={step}
-            setStep={setStep}
-            steps={steps}
-            selectedCeremonyId={selectedCeremonyId}
-            selectedCourseId={selectedCourseId}
-            areAllOptionsSelected={areAllOptionsSelected}
-            items={items}
-          />
+      <div className="content">
+        <ProgressBar step={step} steps={steps} className="progressbar" />
 
-          {step === 1 && (
-            <>
-              {loading && (
-                <div style={{ padding: "20px", textAlign: "center" }}>
-                  Loading data...
-                </div>
-              )}
+        {/* <ProgressButtons
+          step={step}
+          setStep={setStep}
+          steps={steps}
+          selectedCeremonyId={selectedCeremonyId}
+          selectedCourseId={selectedCourseId}
+          showCeremony={showCeremony}
+          cardOptionsComplete={cardOptionsComplete}
+          onEditItems={handleEditItems}
+        /> */}
 
-              {error && (
-                <div
-                  style={{
-                    padding: "10px",
-                    backgroundColor: "#fef2f2",
-                    color: "#dc2626",
-                    borderRadius: "4px",
-                    margin: "10px 0",
-                  }}
-                >
-                  Error loading data: {error}
-                </div>
-              )}
+        {step === 1 && (
+          <>
+            {loading && <div style={{ padding: 20, textAlign: "center" }}>Loading data...</div>}
 
-              {!loading && (
-                <CeremonyCourseSelection
-                  showCeremony={showCeremony}
-                  ceremonies={ceremonies}
-                  ceremony={selectedCeremonyId}
-                  setCeremony={setSelectedCeremonyId}
-                  courses={courses}
-                  course={selectedCourseId}
-                  setCourse={setSelectedCourseId}
-                  onCeremonySelect={(id) => setSelectedCeremonyId(id)}
-                  onCourseSelect={(id) => {
-                    setSelectedCourseId(id);
-                    setCourseChanged(true);
-                  }}
-                />
-              )}
+            {error && (
+              <div
+                style={{
+                  padding: 10,
+                  backgroundColor: "#fef2f2",
+                  color: "#dc2626",
+                  borderRadius: 4,
+                  margin: "10px 0",
+                }}
+              >
+                Error loading data: {error}
+              </div>
+            )}
 
-              {!loading && (
-                <CartList
-                  step={step}
-                  item={item}
-                  items={items}
-                  setItem={setItem}
-                  setItems={setItems}
-                />
-              )}
-            </>
-          )}
+            {!loading && (
+              <CeremonyCourseSelection
+                showCeremony={showCeremony}
+                ceremonies={ceremonies}
+                ceremony={selectedCeremonyId}
+                setCeremony={setSelectedCeremonyId}
+                courses={courses}
+                course={selectedCourseId}
+                setCourse={setSelectedCourseId}
+                onCeremonySelect={(id) => setSelectedCeremonyId(id)}
+                onCourseSelect={(id) => setSelectedCourseId(id)}
+                setCardOptionsComplete={setCardOptionsComplete}
+              />
+            )}
+          </>
+        )}
 
-          <ProgressButtons
-            step={step}
-            setStep={setStep}
-            steps={steps}
-            selectedCeremonyId={selectedCeremonyId}
-            selectedCourseId={selectedCourseId}
-            areAllOptionsSelected={areAllOptionsSelected}
-            items={items}
-          />
+        <ProgressButtons
+          step={step}
+          setStep={setStep}
+          steps={steps}
+          selectedCeremonyId={selectedCeremonyId}
+          selectedCourseId={selectedCourseId}
+          showCeremony={showCeremony}
+          cardOptionsComplete={cardOptionsComplete}
+          onEditItems={handleEditItems}
+        />
 
-          <Contact />
-        </div>
-      </>
+        <Contact />
+      </div>
     </div>
   );
 }

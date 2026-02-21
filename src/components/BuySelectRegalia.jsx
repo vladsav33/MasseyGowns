@@ -1,5 +1,6 @@
+// BuySelectRegalia.jsx ✅ TEMP CARDS UNDER (NO CART) + DELIVERY CARD + ADD MORE ONLY FOR INDIVIDUAL
 import "./BuySelectRegalia.css";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   getItems,
   getItemSets,
@@ -10,8 +11,28 @@ import { useCmsContent } from "../api/useCmsContent";
 const placeholderSvg =
   "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0zNSA0MEg2NVY0NEgzNVY0MFpNMzUgNTBINjVWNTRIMzVWNTBaTTM1IDYwSDU1VjY0SDM1VjYwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K";
 
-const BuySelectRegalia = ({ setItems }) => {
-  const [activeTab, setActiveTab] = useState("sets");
+const TEMP_KEY = "buyStep1Temp";
+
+const readTemp = () => {
+  try {
+    return JSON.parse(localStorage.getItem(TEMP_KEY) || "{}");
+  } catch {
+    return {};
+  }
+};
+
+const writeTemp = (patch) => {
+  const prev = readTemp();
+  const next = { ...prev, ...patch };
+  localStorage.setItem(TEMP_KEY, JSON.stringify(next));
+  return next;
+};
+
+const BuySelectRegalia = ({ onOptionsComplete }) => {
+  const saved = readTemp();
+
+  const [activeTab, setActiveTab] = useState(saved.activeTab || "sets");
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -25,21 +46,46 @@ const BuySelectRegalia = ({ setItems }) => {
   const [items, setItemsLocal] = useState([]);
   const [sets, setSets] = useState([]);
 
-  const [selectedItemType, setSelectedItemType] = useState("");
-  const [selectedDegree, setSelectedDegree] = useState("");
+  const [selectedItemType, setSelectedItemType] = useState(
+    saved.selectedItemType || "",
+  );
+  const [selectedDegree, setSelectedDegree] = useState(
+    saved.selectedDegree || "",
+  );
 
-  const [displayedItems, setDisplayedItems] = useState([]);
-  const [itemOptions, setItemOptions] = useState({});
+  // ✅ TEMP cards shown under selection (includes sets, individuals, delivery)
+  const [displayedItems, setDisplayedItems] = useState(
+    saved.displayedItems || [],
+  );
+  const [itemOptions, setItemOptions] = useState(saved.itemOptions || {});
 
-  const lastSelectionKeyRef = useRef("");
-  const itemTypeSelectRef = useRef(null); //  first dropdown ref
+  const lastSelectionKeyRef = useRef(saved.lastSelectionKey || "");
+  const itemTypeSelectRef = useRef(null);
 
   const { getValue } = useCmsContent();
   const intro =
     getValue("buyRegaliaIntro") ||
     "Thank you for your order to purchase your own Massey University regalia. Please allow four weeks for manufacture - this may be longer during the graduation season due to the increase in demand on our supplies around this time. For more information and a detailed quote email us info@masseygowns.org.nz";
 
-  // -------------------- Fetch items --------------------
+  const isProductOptionsComplete = (product, itemOptions) => {
+    const opts = Array.isArray(product?.options) ? product.options : [];
+    if (opts.length === 0) return true;
+
+    const selected = itemOptions?.[product.uiId] || {};
+    return opts.every((opt) => {
+      const label = opt?.label;
+      const val = label ? selected[label] : null;
+      return val !== undefined && val !== null && String(val).trim() !== "";
+    });
+  };
+
+  const areAllDisplayedItemsComplete = (displayedItems, itemOptions) => {
+    const list = Array.isArray(displayedItems) ? displayedItems : [];
+    if (list.length === 0) return false; // must add at least one item to proceed
+    return list.every((p) => isProductOptionsComplete(p, itemOptions));
+  };
+
+  // fetch items
   useEffect(() => {
     const fetchItems = async () => {
       try {
@@ -56,7 +102,7 @@ const BuySelectRegalia = ({ setItems }) => {
     fetchItems();
   }, []);
 
-  // -------------------- Fetch sets --------------------
+  // fetch sets
   useEffect(() => {
     const fetchSets = async () => {
       try {
@@ -73,8 +119,51 @@ const BuySelectRegalia = ({ setItems }) => {
     fetchSets();
   }, []);
 
-  // -------------------- Memo-ish helpers --------------------
-  const itemTypes = React.useMemo(() => {
+  // persist temp
+  useEffect(() => {
+    writeTemp({
+      activeTab,
+      selectedItemType,
+      selectedDegree,
+      displayedItems,
+      itemOptions,
+      lastSelectionKey: lastSelectionKeyRef.current,
+    });
+  }, [
+    activeTab,
+    selectedItemType,
+    selectedDegree,
+    displayedItems,
+    itemOptions,
+  ]);
+
+// ✅ if there are NO items, don't show any "incomplete" message
+const areAllCardOptionsSelected = useMemo(() => {
+  // no items -> treat as complete (prevents showing warning msg in step 1)
+  if (!Array.isArray(displayedItems) || displayedItems.length === 0) return true;
+
+  return displayedItems.every((product) => {
+    const opts = Array.isArray(product?.options) ? product.options : [];
+    if (opts.length === 0) return true;
+
+    const selected = itemOptions?.[product.uiId] || {};
+    return opts.every((opt) => {
+      const label = opt?.label;
+      const val = label ? selected[label] : "";
+      return val !== undefined && val !== null && String(val).trim() !== "";
+    });
+  });
+}, [displayedItems, itemOptions]);
+
+useEffect(() => {
+  // ✅ if parent passes onOptionsComplete, keep it updated like CeremonyCourseSelection
+  if (typeof onOptionsComplete === "function") {
+    onOptionsComplete(areAllCardOptionsSelected);
+  }
+}, [areAllCardOptionsSelected, onOptionsComplete]);
+
+  // item types
+  const itemTypes = useMemo(() => {
     const types = new Set();
     items.forEach((item) => {
       if (item?.buyPrice != null && item.category) types.add(item.category);
@@ -82,10 +171,11 @@ const BuySelectRegalia = ({ setItems }) => {
     return Array.from(types).sort();
   }, [items]);
 
-  const availableDegrees = React.useMemo(() => {
+  // degrees
+  const availableDegrees = useMemo(() => {
     if (!selectedItemType) return [];
-
     const degreesMap = new Map();
+
     items.forEach((item) => {
       if (
         item.category === selectedItemType &&
@@ -105,9 +195,9 @@ const BuySelectRegalia = ({ setItems }) => {
     return degrees.map((d) => d.name);
   }, [items, selectedItemType]);
 
-  const filteredItems = React.useMemo(() => {
+  // filtered items for selection
+  const filteredItems = useMemo(() => {
     if (!selectedItemType || !selectedDegree) return [];
-
     const filtered = items
       .filter((item) => item.category === selectedItemType)
       .filter(
@@ -116,9 +206,9 @@ const BuySelectRegalia = ({ setItems }) => {
       .map((item) => ({
         ...item,
         uiId: `${item.degreeId ?? "deg"}-${item.id}`,
+        __kind: "individual",
       }));
 
-    // unique by uiId
     const seen = new Set();
     const unique = [];
     for (const it of filtered) {
@@ -133,7 +223,7 @@ const BuySelectRegalia = ({ setItems }) => {
     );
   }, [items, selectedItemType, selectedDegree]);
 
-  // Merge into displayed items when selection changes
+  // ✅ show individual items as TEMP cards under selection when selection changes
   useEffect(() => {
     if (!selectedItemType || !selectedDegree) return;
 
@@ -142,6 +232,7 @@ const BuySelectRegalia = ({ setItems }) => {
     lastSelectionKeyRef.current = selectionKey;
 
     setDisplayedItems((prev) => {
+      // keep sets + delivery + previous individuals, then merge new individuals
       const map = new Map(prev.map((p) => [p.uiId, p]));
       for (const it of filteredItems) map.set(it.uiId, it);
       return Array.from(map.values());
@@ -152,7 +243,13 @@ const BuySelectRegalia = ({ setItems }) => {
     setSelectedDegree("");
   }, [selectedItemType]);
 
-  // -------------------- UI Actions --------------------
+  const handleOptionChange = (itemId, optionLabel, value) => {
+    setItemOptions((prev) => ({
+      ...prev,
+      [itemId]: { ...(prev[itemId] || {}), [optionLabel]: value },
+    }));
+  };
+
   const removeDisplayedItem = (uiId) => {
     setDisplayedItems((prev) => prev.filter((p) => p.uiId !== uiId));
     setItemOptions((prev) => {
@@ -162,177 +259,102 @@ const BuySelectRegalia = ({ setItems }) => {
     });
   };
 
-  const handleOptionChange = (itemId, optionLabel, value) => {
-    setItemOptions((prev) => ({
-      ...prev,
-      [itemId]: {
-        ...prev[itemId],
-        [optionLabel]: value,
-      },
-    }));
-  };
-
   const areAllOptionsSelected = (product) => {
-    if (!product.options || product.options.length === 0) return true;
-    const itemId = product.uiId || product.id;
-    const selected = itemOptions[itemId] || {};
+    if (!product?.options || product.options.length === 0) return true;
+    const key = product.uiId ?? product.id;
+    const selected = itemOptions[key] || {};
     return product.options.every(
       (opt) => selected[opt.label] && selected[opt.label] !== "",
     );
   };
 
-  // When user clicks "Add Selected Items to Cart" with missing dropdowns -> show message
-  const validateDisplayedItems = () => {
-    for (const item of displayedItems) {
-      if (!item.options || item.options.length === 0) continue;
+const addSetToTemp = (setItem) => {
+  const uiId = `set-${setItem.id}`;
+  const tempSet = { ...setItem, uiId, __kind: "set" };
 
-      const selected = itemOptions[item.uiId] || {};
-      const missing = item.options.find(
-        (opt) => !selected[opt.label] || selected[opt.label] === "",
-      );
-
-      if (missing) {
-        alert(
-          `Please select "${missing.label}" for "${item.name}" before adding to cart.`,
-        );
-        return false;
-      }
-    }
-    return true;
-  };
-
-  const buildCartItemFromProduct = (product) => ({
-    id: product.id,
-    name: product.name,
-    category: product.category,
-    description: product.description,
-    pictureBase64: product.pictureBase64 ?? null,
-    hirePrice: Number(product.buyPrice) || 0,
-    buyPrice: product.buyPrice ?? null,
-    quantity: 1,
-    options: product.options || [],
-    selectedOptions: itemOptions[product.uiId] || {},
-    type: "individual",
-    isHiring: false,
-  });
-
-  const addAllDisplayedToCart = async () => {
-    if (displayedItems.length === 0) return;
-
-    // show message if missing options
-    if (!validateDisplayedItems()) return;
-
-    const prev = JSON.parse(localStorage.getItem("cart") || "[]");
-    const itemsToAdd = displayedItems.map(buildCartItemFromProduct);
-    const updated = [...prev, ...itemsToAdd];
-
-    const data = await getDelivery();
-    const delivery = Array.isArray(data) ? data : [];
-    const hasDelivery = updated.some((i) => i.type === "delivery");
-
-    if (!hasDelivery && delivery?.length) {
-      const selectedOptions = itemOptions[delivery[0].id] || {};
-      updated.push({
-        id: delivery[0].id || "",
-        name: delivery[0].name || "Courier Delivery",
-        category: delivery[0].category || "Service",
-        description: delivery[0].description || "Regalia delivery service",
-        buyPrice: 0,
-        hirePrice: 0,
-        quantity: 1,
-        options: delivery[0].options,
-        selectedOptions,
-        type: "delivery",
-        isHiring: false,
-      });
-    }
-
-    localStorage.setItem("cart", JSON.stringify(updated));
-    window.dispatchEvent(new Event("cartUpdated"));
-    if (typeof setItems === "function") setItems(updated);
-
-    //  CLEAR selected cards AFTER add
-    setDisplayedItems([]);
-
-    //  OPTIONAL: clear all dropdown selections for those cards
-    setItemOptions((prevOptions) => {
-      const next = { ...prevOptions };
-      for (const p of displayedItems) {
-        delete next[p.uiId];
-      }
-      return next;
+  // validate ONLY this set’s options
+  const opts = Array.isArray(tempSet?.options) ? tempSet.options : [];
+  if (opts.length > 0) {
+    const selected = itemOptions?.[uiId] || {};
+    const missing = opts.find((opt) => {
+      const val = selected?.[opt.label];
+      return val === undefined || val === null || String(val).trim() === "";
     });
-
-    //  OPTIONAL: reset the top cascading dropdowns too
-    setSelectedItemType("");
-    setSelectedDegree("");
-
-    //  OPTIONAL: allow re-adding same selection again (reset last key)
-    lastSelectionKeyRef.current = "";
-  };
-
-  const pushToCart = async (newItem) => {
-    const data = await getDelivery();
-    const delivery = Array.isArray(data) ? data : [];
-
-    const prev = JSON.parse(localStorage.getItem("cart") || "[]");
-    const hasDelivery = prev.some((item) => item.type === "delivery");
-
-    const updated = [...prev, newItem];
-
-    if (!hasDelivery && delivery.length) {
-      const selectedOptions = itemOptions[delivery[0].id] || {};
-      updated.push({
-        id: delivery[0].id || "",
-        name: delivery[0].name || "Courier Delivery",
-        category: delivery[0].category || "Service",
-        description: delivery[0].description || "Regalia delivery service",
-        buyPrice: 0,
-        hirePrice: 0,
-        quantity: 1,
-        options: delivery[0].options,
-        selectedOptions,
-        type: "delivery",
-        isHiring: false,
-      });
-    }
-
-    localStorage.setItem("cart", JSON.stringify(updated));
-    window.dispatchEvent(new Event("cartUpdated"));
-    if (typeof setItems === "function") setItems(updated);
-  };
-
-  const addSetToCart = (setItem) => {
-    if (!areAllOptionsSelected({ ...setItem, uiId: setItem.id })) {
-      alert("Please select all required options before adding to cart.");
+    if (missing) {
+      alert(`Please select "${missing.label}" for "${tempSet.name}".`);
       return;
     }
+  }
 
-    const selectedOptions = itemOptions[setItem.id] || {};
-    pushToCart({
-      id: setItem.id,
-      name: setItem.name,
-      category: setItem.category || "Set",
-      description: setItem.description,
-      pictureBase64: setItem.pictureBase64 ?? null,
-      hirePrice: Number(setItem.buyPrice) || 0,
-      buyPrice: setItem.buyPrice ?? null,
-      quantity: 1,
-      options: setItem.options || [],
-      selectedOptions,
-      type: "set",
-      isHiring: false,
-    });
+  setDisplayedItems((prev) => {
+    const map = new Map(prev.map((p) => [p.uiId, p]));
+    map.set(uiId, tempSet);
+    return Array.from(map.values());
+  });
+};
 
-    setItemOptions((prev) => ({ ...prev, [setItem.id]: {} }));
-  };
+  // -------------------- DELIVERY TEMP CARD --------------------
+  // delivery should exist when there is at least one non-delivery item
+  const hasNonDelivery = useMemo(
+    () => displayedItems.some((x) => x.__kind !== "delivery"),
+    [displayedItems],
+  );
+
+  useEffect(() => {
+    const ensureDelivery = async () => {
+      try {
+        const hasDelivery = displayedItems.some((x) => x.__kind === "delivery");
+        if (!hasNonDelivery) {
+          // remove delivery if no items
+          if (hasDelivery) {
+            setDisplayedItems((prev) =>
+              prev.filter((x) => x.__kind !== "delivery"),
+            );
+          }
+          return;
+        }
+        if (hasDelivery) return;
+
+        const data = await getDelivery();
+        const delivery = Array.isArray(data) ? data : [];
+        if (!delivery.length) return;
+
+        const d0 = delivery[0];
+        const uiId = `delivery-${d0.id ?? "0"}`;
+
+        const deliveryCard = {
+          id: d0.id,
+          uiId,
+          __kind: "delivery",
+          name: d0.name || "Courier Delivery (includes return tickets)",
+          category: d0.category || "DELIVERY",
+          description: d0.description || "",
+          pictureBase64: d0.pictureBase64 ?? null,
+          buyPrice: 0,
+          options: d0.options || [],
+        };
+
+        setDisplayedItems((prev) => [...prev, deliveryCard]);
+      } catch {
+        // ignore delivery errors (don’t block selection)
+      }
+    };
+
+    ensureDelivery();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasNonDelivery]);
+
+  // ✅ “Add more items” should be ONLY for individual items
+  const hasAnyIndividual = useMemo(
+    () => displayedItems.some((x) => x.__kind === "individual"),
+    [displayedItems],
+  );
 
   const openDialog = (item) => {
     setSelectedItem(item);
     setIsDialogOpen(true);
   };
 
-  //  Add more items button: go to first dropdown and focus it
   const handleAddMoreItems = () => {
     setActiveTab("individual");
     setTimeout(() => {
@@ -354,17 +376,13 @@ const BuySelectRegalia = ({ setItems }) => {
             <nav className="tabs-nav">
               <button
                 onClick={() => setActiveTab("sets")}
-                className={`tab-button ${
-                  activeTab === "sets" ? "tab-active" : "tab-inactive"
-                }`}
+                className={`tab-button ${activeTab === "sets" ? "tab-active" : "tab-inactive"}`}
               >
                 Complete Sets
               </button>
               <button
                 onClick={() => setActiveTab("individual")}
-                className={`tab-button ${
-                  activeTab === "individual" ? "tab-active" : "tab-inactive"
-                }`}
+                className={`tab-button ${activeTab === "individual" ? "tab-active" : "tab-inactive"}`}
               >
                 Individual Items
               </button>
@@ -372,7 +390,6 @@ const BuySelectRegalia = ({ setItems }) => {
           </div>
         </div>
 
-        {/* <div className="content-grid"> */}
         <div className="main-content">
           <div>{intro}</div>
           <br />
@@ -393,97 +410,126 @@ const BuySelectRegalia = ({ setItems }) => {
                 <div className="items-grid">
                   {sets
                     .sort((a, b) => a.id - b.id)
-                    .map((s) => (
-                      <div key={s.id} className="product-card-set">
-                        <div className="product-image">
-                          <img
-                            src={`data:image/jpeg;base64,${s.pictureBase64}`}
-                            className="item-image"
-                            onError={(e) => {
-                              e.target.src = placeholderSvg;
-                            }}
-                          />
-                        </div>
+                    .map((s) => {
+                      const setUiId = `set-${s.id}`;
+                      return (
+                        <div key={s.id} className="product-card-set">
+                          <div className="product-image">
+                            <img
+                              src={
+                                s.pictureBase64
+                                  ? `data:image/jpeg;base64,${s.pictureBase64}`
+                                  : placeholderSvg
+                              }
+                              className="item-image"
+                              onError={(e) =>
+                                (e.currentTarget.src = placeholderSvg)
+                              }
+                              alt={s.name}
+                            />
+                          </div>
 
-                        <div className="product-info">
-                          <span className="item-category">
-                            {s.category || "Set"}
-                          </span>
-
-                          <h4
-                            className="product-name item-title clickable"
-                            onClick={() => openDialog(s)}
-                            onMouseEnter={() => setShowTooltip(true)}
-                            onMouseLeave={() => setShowTooltip(false)}
-                          >
-                            {s.name}
-                          </h4>
-
-                          {s.options && s.options.length > 0 && (
-                            <div className="product-options">
-                              {s.options.map((option, index) => (
-                                <div key={index} className="option-group">
-                                  <label className="option-label">
-                                    {option.label}:
-                                  </label>
-                                  <select
-                                    className="option-select"
-                                    value={
-                                      itemOptions[s.id]?.[option.label] || ""
-                                    }
-                                    onChange={(e) =>
-                                      handleOptionChange(
-                                        s.id,
-                                        option.label,
-                                        e.target.value,
-                                      )
-                                    }
-                                  >
-                                    <option value="">Please select...</option>
-                                    {option.choices.map((choice, idx) => (
-                                      <option
-                                        key={idx}
-                                        value={
-                                          typeof choice === "object"
-                                            ? choice.id
-                                            : choice
-                                        }
-                                      >
-                                        {typeof choice === "object"
-                                          ? choice.value ||
-                                            choice.name ||
-                                            JSON.stringify(choice)
-                                          : choice}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-
-                          <div className="product-footer">
-                            <span className="product-price">
-                              ${Number(s.buyPrice ?? 0).toFixed(2)}
+                          <div className="product-info">
+                            <span className="item-category">
+                              {s.category || "Set"}
                             </span>
 
-                            <button
-                              onClick={() => addSetToCart(s)}
-                              className={`add-to-cart-btn ${
-                                !areAllOptionsSelected({ ...s, uiId: s.id })
-                                  ? "disabled"
-                                  : ""
-                              }`}
-                              disabled={
-                                !areAllOptionsSelected({ ...s, uiId: s.id })
-                              }
+                            <h4
+                              className="product-name item-title clickable"
+                              onClick={() => openDialog(s)}
+                              onMouseEnter={() => setShowTooltip(true)}
+                              onMouseLeave={() => setShowTooltip(false)}
                             >
-                              Add to Cart
-                            </button>
+                              {s.name}
+                            </h4>
+
+                            {Array.isArray(s.options) &&
+                              s.options.length > 0 && (
+                                <div className="product-options">
+                                  {s.options.map((option, index) => (
+                                    <div key={index} className="option-group">
+                                      <label className="option-label">
+                                        {option.label}:
+                                      </label>
+                                      <select
+                                        className="option-select"
+                                        value={
+                                          itemOptions[setUiId]?.[
+                                            option.label
+                                          ] || ""
+                                        }
+                                        onChange={(e) =>
+                                          handleOptionChange(
+                                            setUiId,
+                                            option.label,
+                                            e.target.value,
+                                          )
+                                        }
+                                      >
+                                        <option value="">
+                                          Please select...
+                                        </option>
+                                        {(Array.isArray(option.choices)
+                                          ? option.choices
+                                          : []
+                                        ).map((choice, idx) => {
+                                          const val =
+                                            typeof choice === "object" && choice
+                                              ? (choice.id ?? choice.value)
+                                              : choice;
+                                          const label =
+                                            typeof choice === "object" && choice
+                                              ? choice.value ||
+                                                choice.size ||
+                                                choice.name ||
+                                                choice.id
+                                              : choice;
+                                          return (
+                                            <option
+                                              key={idx}
+                                              value={String(val)}
+                                            >
+                                              {String(label)}
+                                            </option>
+                                          );
+                                        })}
+                                      </select>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                            <div className="product-footer">
+                              <span className="product-price">
+                                ${Number(s.buyPrice ?? 0).toFixed(2)}
+                              </span>
+
+                              <button
+                                onClick={() => addSetToTemp(s)}
+                                className={`add-to-cart-btn ${
+                                  !areAllOptionsSelected({
+                                    ...s,
+                                    uiId: setUiId,
+                                    __kind: "set",
+                                  })
+                                    ? "disabled"
+                                    : ""
+                                }`}
+                                disabled={
+                                  !areAllOptionsSelected({
+                                    ...s,
+                                    uiId: setUiId,
+                                    __kind: "set",
+                                  })
+                                }
+                              >
+                                Add
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                 </div>
               )}
             </div>
@@ -545,172 +591,157 @@ const BuySelectRegalia = ({ setItems }) => {
               <div className="items-section">
                 {loading && <p className="muted">Loading items…</p>}
                 {error && <p className="error-text">{error}</p>}
+              </div>
+            </div>
+          )}
 
-                {!loading && !error && !selectedItemType && !selectedDegree && (
-                  <p className="muted">
-                    Please select an item type and degree to view available
-                    items.
-                  </p>
-                )}
+          {/* ✅✅✅ TEMP CARDS UNDER (sets + individuals + delivery) */}
+          {displayedItems.length > 0 && (
+            <div className="filtered-items" style={{ marginTop: 24 }}>
+              <div className="items-header">
+                <div className="items-header-two">
+                  <h3 className="items-title">Selected items</h3>
+                  <span className="items-count">
+                    {displayedItems.length} item
+                    {displayedItems.length === 1 ? "" : "s"}
+                  </span>
+                </div>
+              </div>
 
-                {!loading && !error && selectedItemType && !selectedDegree && (
-                  <p className="muted">
-                    Please select a degree to view available items.
-                  </p>
-                )}
+              <div className="items-list">
+                {displayedItems.map((product) => {
+                  const isDelivery = product.__kind === "delivery";
+                  const isSet = product.__kind === "set";
+                  const price = isDelivery ? 0 : Number(product.buyPrice ?? 0);
 
-                {!loading &&
-                  !error &&
-                  selectedItemType &&
-                  selectedDegree &&
-                  filteredItems.length === 0 && (
-                    <p className="muted">
-                      No items available for the selected combination.
-                    </p>
-                  )}
+                  return (
+                    <div key={product.uiId} className="cart-item-wrapper">
+                      <div className="cart-item item-image-container">
+                        <img
+                          src={
+                            product.pictureBase64
+                              ? `data:image/jpeg;base64,${product.pictureBase64}`
+                              : placeholderSvg
+                          }
+                          className="item-image"
+                          onError={(e) =>
+                            (e.currentTarget.src = placeholderSvg)
+                          }
+                          alt={product.name}
+                        />
 
-                {!loading && !error && displayedItems.length > 0 && (
-                  <div className="filtered-items">
-                    <div className="items-header">
-                      <div className="items-header-two">
-                        <h3 className="items-title">Selected items</h3>
-                        <span className="items-count">
-                          {displayedItems.length} item
-                          {displayedItems.length === 1 ? "" : "s"}
-                        </span>
-                      </div>
+                        <div className="buy-ribbon">
+                          {isDelivery ? "DELIVERY" : "BUY"}
+                        </div>
 
-                      {/*  Keep button clickable always.
-                            If missing options, validateDisplayedItems() will show alert. */}
-                      <button
-                        type="button"
-                        className={`bulk-add-btn ${
-                          displayedItems.some((p) => !areAllOptionsSelected(p))
-                            ? "disabled"
-                            : ""
-                        }`}
-                        onClick={addAllDisplayedToCart}
-                      >
-                        Add Selected Items to Cart
-                      </button>
-                    </div>
+                        <div className="item-details">
+                          <div className="title-container">
+                            <h4 className="item-title">{product.name}</h4>
+                          </div>
 
-                    <div className="items-grid">
-                      {displayedItems.map((product) => (
-                        <div key={product.uiId} className="product-card">
-                          <div className="product-image">
-                            <img
-                              src={`data:image/jpeg;base64,${product.pictureBase64}`}
-                              className="item-image"
-                              onError={(e) => {
-                                e.target.src = placeholderSvg;
-                              }}
-                            />
+                          <p className="item-category">
+                            {isDelivery ? "Service" : product.category}
+                          </p>
 
+                          <p className="item-price">${price.toFixed(2)}</p>
+
+                          {Array.isArray(product.options) &&
+                            product.options.map((option, index) => (
+                              <div key={index} className="item-option">
+                                <label>{option.label}:</label>
+                                <select
+                                  className="option-select"
+                                  value={
+                                    itemOptions[product.uiId]?.[option.label] ||
+                                    ""
+                                  }
+                                  onChange={(e) =>
+                                    handleOptionChange(
+                                      product.uiId,
+                                      option.label,
+                                      e.target.value,
+                                    )
+                                  }
+                                >
+                                  <option value="">Please select...</option>
+                                  {(Array.isArray(option.choices)
+                                    ? option.choices
+                                    : []
+                                  ).map((choice, idx) => {
+                                    const val =
+                                      typeof choice === "object" && choice
+                                        ? (choice.id ?? choice.value)
+                                        : choice;
+                                    const label =
+                                      typeof choice === "object" && choice
+                                        ? choice.value ||
+                                          choice.size ||
+                                          choice.name ||
+                                          choice.id
+                                        : choice;
+
+                                    return (
+                                      <option key={idx} value={String(val)}>
+                                        {String(label)}
+                                      </option>
+                                    );
+                                  })}
+                                </select>
+                              </div>
+                            ))}
+                        </div>
+                        <div className="item-controls">
+                          <div className="quantity-controls">
                             <button
+                              className="quantity-btn"
                               type="button"
-                              className="remove-icon-btn"
-                              onClick={() => removeDisplayedItem(product.uiId)}
-                              aria-label={`Remove ${product.name}`}
-                              title="Remove"
+                              disabled
                             >
-                              ❌
+                              −
+                            </button>
+                            <span className="quantity">1</span>
+                            <button
+                              className="quantity-btn"
+                              type="button"
+                              disabled
+                            >
+                              +
                             </button>
                           </div>
 
-                          <div className="product-info">
-                            <span className="item-category">
-                              {product.category}
-                            </span>
-
-                            <h4
-                              className="product-name item-title clickable"
-                              onClick={() => openDialog(product)}
-                              onMouseEnter={() => setShowTooltip(true)}
-                              onMouseLeave={() => setShowTooltip(false)}
-                            >
-                              {product.name}
-                            </h4>
-
-                            {product.options && product.options.length > 0 && (
-                              <div className="product-options">
-                                {product.options.map((option, index) => (
-                                  <div key={index} className="option-group">
-                                    <label className="option-label">
-                                      {option.label}:
-                                    </label>
-                                    <select
-                                      className="option-select"
-                                      value={
-                                        itemOptions[product.uiId]?.[
-                                          option.label
-                                        ] || ""
-                                      }
-                                      onChange={(e) =>
-                                        handleOptionChange(
-                                          product.uiId,
-                                          option.label,
-                                          e.target.value,
-                                        )
-                                      }
-                                    >
-                                      <option value="">Please select...</option>
-                                      {option.choices.map((choice, idx) => (
-                                        <option
-                                          key={idx}
-                                          value={
-                                            typeof choice === "object"
-                                              ? choice.id
-                                              : choice
-                                          }
-                                        >
-                                          {typeof choice === "object"
-                                            ? choice.value ||
-                                              choice.name ||
-                                              JSON.stringify(choice)
-                                            : choice}
-                                        </option>
-                                      ))}
-                                    </select>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
-                            <div className="product-footer">
-                              <span className="product-price">
-                                ${Number(product.buyPrice ?? 0).toFixed(2)}
-                              </span>
-                            </div>
-                          </div>
+                          <button
+                            type="button"
+                            className="remove-btn"
+                            onClick={() => removeDisplayedItem(product.uiId)}
+                          >
+                            Remove
+                          </button>
                         </div>
-                      ))}
-
-                      <div
-                        className="add-more-card"
-                        role="button"
-                        tabIndex={0}
-                        onClick={handleAddMoreItems}
-                        onKeyDown={(e) =>
-                          e.key === "Enter" && handleAddMoreItems()
-                        }
-                      >
-                        <div className="add-more-icon">+</div>
-
-                        <h4 className="add-more-title">Add more items</h4>
-
-                        <p className="add-more-subtitle">
-                          Choose another regalia item to add
-                        </p>
                       </div>
                     </div>
+                  );
+                })}
+
+                {/* ✅ Add more items ONLY for individuals */}
+                {hasAnyIndividual && (
+                  <div
+                    className="add-more-card"
+                    role="button"
+                    tabIndex={0}
+                    onClick={handleAddMoreItems}
+                    onKeyDown={(e) => e.key === "Enter" && handleAddMoreItems()}
+                  >
+                    <div className="add-more-icon">+</div>
+                    <h4 className="add-more-title">Add more items</h4>
+                    <p className="add-more-subtitle">
+                      Choose another regalia item to add
+                    </p>
                   </div>
                 )}
               </div>
             </div>
           )}
         </div>
-        {/* </div> */}
       </div>
 
       {/* Dialog */}

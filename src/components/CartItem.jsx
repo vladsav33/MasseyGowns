@@ -42,8 +42,8 @@ function CartItem({
   // const total = subtotal + tax;
 
   const orderType = parseInt(
-      JSON.parse(localStorage.getItem("orderType")) || 0,
-    );
+    JSON.parse(localStorage.getItem("orderType")) || 0,
+  );
 
   return (
     <>
@@ -90,10 +90,19 @@ function CartItem({
                       value={item.selectedOptions?.[option.label] || ""} // bind selected value
                       onChange={(e) => {
                         const selectedId = e.target.value;
-                        const selectedChoice = option.choices.find(
-                          (c) => String(c.id || c.value) === selectedId,
+                        const choices = Array.isArray(option.choices)
+                          ? option.choices
+                          : [];
+                        const selectedChoice = choices.find(
+                          (c) =>
+                            String(
+                              typeof c === "object" && c !== null
+                                ? (c.id ?? c.value)
+                                : c,
+                            ) === String(selectedId),
                         );
-                        setSelectedOption(selectedChoice);
+
+                        setSelectedOption(selectedChoice || null);
                         onOptionChange(item.id, option.label, selectedId);
                       }}
                       required
@@ -129,22 +138,44 @@ function CartItem({
               </p>
 
               {/* Display selected options */}
+              {/* Display selected options */}
               {item.options && item.options.length > 0 && (
                 <div className="item-options">
-                  {item.options.map((option, index) => (
-                    <div key={index} className="option-row">
-                      <span className="option-label">{option.label}:</span>
-                      <span className="option-value">
-                        {
-                          option.choices.find(
-                            (c) =>
-                              String(c.id) ===
-                              item.selectedOptions[option.label],
-                          )["value"]
-                        }
-                      </span>
-                    </div>
-                  ))}
+                  {item.options.map((option, index) => {
+                    const selectedId = item.selectedOptions?.[option.label];
+
+                    const choices = Array.isArray(option.choices)
+                      ? option.choices
+                      : [];
+
+                    const selectedChoice = choices.find((c) => {
+                      const choiceId =
+                        typeof c === "object" && c !== null
+                          ? String(c.id ?? c.value ?? "")
+                          : String(c);
+                      return String(selectedId ?? "") === choiceId;
+                    });
+
+                    const displayText =
+                      typeof selectedChoice === "object" &&
+                      selectedChoice !== null
+                        ? (selectedChoice.value ??
+                          selectedChoice.name ??
+                          selectedChoice.size ??
+                          String(selectedChoice.id ?? ""))
+                        : (selectedChoice ?? "");
+
+                    return (
+                      <div key={index} className="option-row">
+                        <span className="option-label">{option.label}:</span>
+                        <span className="option-value">
+                          {selectedId
+                            ? displayText || "Selected"
+                            : "Not selected"}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
 
@@ -228,28 +259,32 @@ function CartItem({
           )}
         </div>
 
-        <div></div>
+        <div></div> {/* Don't Remove */}
+
         {/* Purchase this item - moved outside the card */}
-        {item.category !== "Delivery" && item.name !== "Donation" && orderType == "1" && step === 1 && (
-          <div className="purchase-box">
-            <span className="purchase-label">Purchase this item</span>
+        {item.category !== "Delivery" &&
+          item.name !== "Donation" &&
+          orderType !== 2 &&
+          step === 1 && (
+            <div className="purchase-box">
+              <span className="purchase-label">Purchase this item</span>
 
-            <button
-              type="button"
-              className={`purchase-btn ${item.isHiring ? "btn-buy" : "btn-hire"}`}
-              onClick={() => onTogglePurchaseType(item.id, !item.isHiring)}
-            >
-              {item.isHiring ? "Buy" : "Hire"}
-            </button>
+              <button
+                type="button"
+                className={`purchase-btn ${item.isHiring ? "btn-buy" : "btn-hire"}`}
+                onClick={() => onTogglePurchaseType(item.id, !item.isHiring)}
+              >
+                {item.isHiring ? "Buy" : "Hire"}
+              </button>
 
-            <div className="purchase-price">
-              $
-              {parseFloat(
-                (item.isHiring ? item.buyPrice : item.hirePrice) ?? 0,
-              ).toFixed(2)}
+              <div className="purchase-price">
+                $
+                {parseFloat(
+                  (item.isHiring ? item.buyPrice : item.hirePrice) ?? 0,
+                ).toFixed(2)}
+              </div>
             </div>
-          </div>
-        )}
+          )}
       </div>
     </>
   );

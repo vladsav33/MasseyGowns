@@ -28,7 +28,7 @@ export default function CustomerDetailsPage() {
       <div className="content">
         <ProgressBar step={step} steps={steps} />
 
-        <ProgressButtons step={step} steps={steps} prevPath="/cart" />
+        {/* <ProgressButtons step={step} steps={steps} prevPath="/cart" /> */}
 
         <CustomerDetail
           item={item}

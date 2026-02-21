@@ -21,9 +21,6 @@ function BuyRegalia() {
 
   const paymentMethod = localStorage.getItem("paymentMethod");
 
-  // const [step, setStep] = useState(() => {
-  //   return Number(localStorage.getItem("step")) || 1;
-  // });
   const location = useLocation();
 
   const [loading, setLoading] = useState(false);
@@ -46,6 +43,9 @@ function BuyRegalia() {
     return saved ? JSON.parse(saved) : [];
   });
 
+  // ✅ Track whether step 1 options are fully complete (fed from BuySelectRegalia)
+  const [buyStep1Complete, setBuyStep1Complete] = useState(false);
+
   const steps = [
     "Select Regalia",
     "Place Order",
@@ -66,21 +66,23 @@ function BuyRegalia() {
         <div className="content">
           <div className="body-content">
             <ProgressBar step={step} steps={steps} />
-            <ProgressButtons step={step} setStep={setStep} steps={steps} />
+            {/* <ProgressButtons
+              step={step}
+              setStep={setStep}
+              steps={steps}
+              cardOptionsComplete={buyStep1Complete}
+            /> */}
 
             {step === 1 && (
               <>
-                <BuySelectRegalia setItems={setItems} />
-                <h2 className="cart-label">Shopping Cart</h2>
-                <CartList
-                  step={step}
-                  item={item}
-                  items={items}
-                  setItem={setItem}
+                {/* ✅ Pass callback so BuySelectRegalia can report options completeness */}
+                <BuySelectRegalia
                   setItems={setItems}
+                  onOptionsComplete={setBuyStep1Complete}
                 />
               </>
             )}
+
             {step === 2 && (
               <div>
                 <h2 className="cart-label">Shopping Cart</h2>
@@ -102,7 +104,7 @@ function BuyRegalia() {
                   step={step}
                   setStep={setStep}
                   steps={steps}
-                ></CustomerDetail>
+                />
               </div>
             )}
 
@@ -120,7 +122,13 @@ function BuyRegalia() {
                 )}
               </>
             )}
-            <ProgressButtons step={step} setStep={setStep} steps={steps} />
+
+            <ProgressButtons
+              step={step}
+              setStep={setStep}
+              steps={steps}
+              cardOptionsComplete={buyStep1Complete}
+            />
             <Contact />
           </div>
         </div>

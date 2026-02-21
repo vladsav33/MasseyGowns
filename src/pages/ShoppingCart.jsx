@@ -73,12 +73,12 @@ export default function ShoppingCart() {
       <div className="content">
         <ProgressBar step={step} steps={steps} />
 
-        <ProgressButtons
+        {/* <ProgressButtons
           step={step}
           steps={steps}
           nextPath="/customerdetails"
           areAllOptionsSelected={areAllOptionsSelected}
-        />
+        /> */}
 
         <h2 className="cart-label">Shopping Cart</h2>
 
