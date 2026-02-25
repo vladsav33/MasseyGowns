@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import "./CartItem.css";
+import { FaRegEdit } from "react-icons/fa";
+import { MdOutlineCancel } from "react-icons/md";
+import { IoSaveOutline } from "react-icons/io5";
 
 function CartItem({
   item,
@@ -11,6 +14,10 @@ function CartItem({
   onOptionChange,
   onDeliveryChange,
   onTogglePurchaseType,
+  isEditing,
+  onEdit,
+  onSave,
+  onCancel,
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -19,31 +26,101 @@ function CartItem({
   const [selectedOption, setSelectedOption] = useState(null);
 
   useEffect(() => {
-    if (item.category === "Delivery") {
-      const selectedChoice = item.options[0].choices.find(
-        (c) =>
-          String(c.id || c.value) === item.selectedOptions["Delivery Type"],
-      );
-      setUnitPrice(parseFloat(selectedChoice?.["price"] ?? 0));
-      item.hirePrice = parseFloat(selectedChoice?.["price"] ?? 0);
-      onDeliveryChange(item.id, item.hirePrice);
-    } else if (item.name === "Donation" || item.isDonation) {
+    // Donation
+    if (item.name === "Donation" || item.isDonation) {
       setUnitPrice(parseFloat(item.hirePrice ?? 0));
-    } else {
-      // Update price based on current hiring status
-      const price = parseFloat(
-        (item.isHiring ? item.hirePrice : item.buyPrice) ?? 0,
-      );
-      setUnitPrice(price);
+      return;
     }
-  }, [selectedOption, item.isHiring, item.hirePrice, item.buyPrice]);
 
-  // const tax = subtotal * 0.1;
-  // const total = subtotal + tax;
+    // Delivery item - price depends on selected "Delivery Type"
+    if (item.category === "Delivery") {
+      const selectedId = item.selectedOptions?.["Delivery Type"];
+      const choices = Array.isArray(item.options?.[0]?.choices)
+        ? item.options[0].choices
+        : [];
+
+      const selectedChoice = choices.find(
+        (c) => String(c?.id ?? c?.value ?? "") === String(selectedId ?? ""),
+      );
+
+      const price = parseFloat(selectedChoice?.price ?? 0);
+      setUnitPrice(price);
+
+      onDeliveryChange(item.id, price);
+      return;
+    }
+
+    // Normal items (Hire/Buy)
+    const price = parseFloat(
+      (item.isHiring ? item.hirePrice : item.buyPrice) ?? 0,
+    );
+    setUnitPrice(price);
+  }, [
+    selectedOption,
+    item.isHiring,
+    item.hirePrice,
+    item.buyPrice,
+    item.category,
+    item.isDonation,
+    item.name,
+    item.selectedOptions,
+    item.options,
+    item.id,
+    onDeliveryChange,
+  ]);
 
   const orderType = parseInt(
     JSON.parse(localStorage.getItem("orderType")) || 0,
   );
+
+  const renderOptionDropdowns = () => {
+    if (!item.options || item.options.length === 0) return null;
+
+    return item.options.map((option, index) => (
+      <div key={index} className="item-option">
+        <label>{option.label}:</label>
+        <select
+          className="option-select"
+          value={item.selectedOptions?.[option.label] || ""}
+          onChange={(e) => {
+            const selectedId = e.target.value;
+
+            const choices = Array.isArray(option.choices) ? option.choices : [];
+            const selectedChoice = choices.find(
+              (c) =>
+                String(
+                  typeof c === "object" && c !== null ? (c.id ?? c.value) : c,
+                ) === String(selectedId),
+            );
+
+            setSelectedOption(selectedChoice || null);
+            onOptionChange(item.id, option.label, selectedId);
+          }}
+          required
+          // - step 1 always editable
+          // - step 2 only editable if isEditing
+          disabled={step === 2 && !isEditing}
+        >
+          <option value="">Please select...</option>
+          {(option.choices || []).map((choice, idx) => (
+            <option
+              key={idx}
+              value={
+                typeof choice === "object" ? choice.id || choice.value : choice
+              }
+            >
+              {typeof choice === "object"
+                ? choice.value ||
+                  choice.size ||
+                  choice.name ||
+                  JSON.stringify(choice)
+                : choice}
+            </option>
+          ))}
+        </select>
+      </div>
+    ));
+  };
 
   return (
     <>
@@ -57,6 +134,7 @@ function CartItem({
                 "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0zNSA0MEg2NVY0NEgzNVY0MFpNMzUgNTBINjVWNTRIMzVWNTBaTTM1IDYwSDU1VjY0SDM1VjYwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K";
             }}
           />
+
           {item.name !== "Donation" &&
             (item.isHiring === true ? (
               <div className="hire-ribbon">Hire</div>
@@ -65,7 +143,7 @@ function CartItem({
             ))}
 
           {step === 1 ? (
-            // Step 1 view (with options and editable fields)
+            // Step 1 view (editable)
             <div className="item-details">
               <div className="title-container">
                 <h4
@@ -80,103 +158,104 @@ function CartItem({
               <p className="item-category">{item.category}</p>
               <p className="item-price">${unitPrice.toFixed(2)}</p>
 
-              {/* Dynamic Options */}
-              {item.options &&
-                item.options.map((option, index) => (
-                  <div key={index} className="item-option">
-                    <label>{option.label}:</label>
-                    <select
-                      className="option-select"
-                      value={item.selectedOptions?.[option.label] || ""} // bind selected value
-                      onChange={(e) => {
-                        const selectedId = e.target.value;
-                        const choices = Array.isArray(option.choices)
-                          ? option.choices
-                          : [];
-                        const selectedChoice = choices.find(
-                          (c) =>
-                            String(
-                              typeof c === "object" && c !== null
-                                ? (c.id ?? c.value)
-                                : c,
-                            ) === String(selectedId),
-                        );
-
-                        setSelectedOption(selectedChoice || null);
-                        onOptionChange(item.id, option.label, selectedId);
-                      }}
-                      required
-                    >
-                      <option value="">Please select...</option>
-                      {option.choices.map((choice, idx) => (
-                        <option
-                          key={idx}
-                          value={
-                            typeof choice === "object"
-                              ? choice.id || choice.value
-                              : choice
-                          }
-                        >
-                          {typeof choice === "object"
-                            ? choice.value ||
-                              choice.size ||
-                              choice.name ||
-                              JSON.stringify(choice)
-                            : choice}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                ))}
+              {renderOptionDropdowns()}
             </div>
           ) : (
-            // Step 2 view (summary)
+            // Step 2 view
             <div className="item-details">
               <p>
                 <span className="item-title">{item.name} </span>
                 <span className="item-category">({item.category})</span>
               </p>
 
-              {/* Display selected options */}
-              {/* Display selected options */}
-              {item.options && item.options.length > 0 && (
-                <div className="item-options">
-                  {item.options.map((option, index) => {
-                    const selectedId = item.selectedOptions?.[option.label];
-
-                    const choices = Array.isArray(option.choices)
-                      ? option.choices
-                      : [];
-
-                    const selectedChoice = choices.find((c) => {
-                      const choiceId =
-                        typeof c === "object" && c !== null
-                          ? String(c.id ?? c.value ?? "")
-                          : String(c);
-                      return String(selectedId ?? "") === choiceId;
-                    });
-
-                    const displayText =
-                      typeof selectedChoice === "object" &&
-                      selectedChoice !== null
-                        ? (selectedChoice.value ??
-                          selectedChoice.name ??
-                          selectedChoice.size ??
-                          String(selectedChoice.id ?? ""))
-                        : (selectedChoice ?? "");
-
-                    return (
-                      <div key={index} className="option-row">
-                        <span className="option-label">{option.label}:</span>
-                        <span className="option-value">
-                          {selectedId
-                            ? displayText || "Selected"
-                            : "Not selected"}
-                        </span>
-                      </div>
-                    );
-                  })}
+              {/* Edit controls for step 2 (not for donation) */}
+              {step === 2 && !item.isDonation && item.name !== "Donation" && (
+                <div className="cart-edit-actions">
+                  {!isEditing ? (
+                    <button
+                      type="button"
+                      className="icon-btn"
+                      onClick={onEdit}
+                      aria-label="Edit item"
+                      title="Edit"
+                    >
+                      <FaRegEdit size={14} />
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        className="icon-btn"
+                        onClick={onSave}
+                        aria-label="Save changes"
+                        title="Save"
+                      >
+                        <IoSaveOutline size={16} />
+                      </button>
+                      {/* <button
+                        type="button"
+                        className="icon-btn"
+                        onClick={onCancel}
+                        aria-label="Cancel editing"
+                        title="Cancel"
+                      >
+                        <MdOutlineCancel size={16} />
+                      </button> */}
+                    </>
+                  )}
                 </div>
+              )}
+
+              {/* When NOT editing: show summary (your current UI) */}
+              {(!isEditing || item.isDonation || item.name === "Donation") && (
+                <>
+                  {item.options && item.options.length > 0 && (
+                    <div className="item-options">
+                      {item.options.map((option, index) => {
+                        const selectedId = item.selectedOptions?.[option.label];
+
+                        const choices = Array.isArray(option.choices)
+                          ? option.choices
+                          : [];
+
+                        const selectedChoice = choices.find((c) => {
+                          const choiceId =
+                            typeof c === "object" && c !== null
+                              ? String(c.id ?? c.value ?? "")
+                              : String(c);
+                          return String(selectedId ?? "") === choiceId;
+                        });
+
+                        const displayText =
+                          typeof selectedChoice === "object" &&
+                          selectedChoice !== null
+                            ? (selectedChoice.value ??
+                              selectedChoice.name ??
+                              selectedChoice.size ??
+                              String(selectedChoice.id ?? ""))
+                            : (selectedChoice ?? "");
+
+                        return (
+                          <div key={index} className="option-row">
+                            <span className="option-label">
+                              {option.label}:
+                            </span>
+                            <span className="option-value">
+                              {selectedId
+                                ? displayText || "Selected"
+                                : "Not selected"}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* When editing: show dropdowns (enabled) */}
+              {isEditing && !item.isDonation && item.name !== "Donation" && (
+                <div style={{ marginTop: 8 }}>{renderOptionDropdowns()}</div>
               )}
 
               {/* Pricing */}
@@ -189,14 +268,6 @@ function CartItem({
                   <span>Quantity:</span>
                   <span>{quantity}</span>
                 </div>
-                {/* <div className="price-row">
-              <span>Subtotal:</span>
-              <span>${subtotal.toFixed(2)}</span>
-            </div> */}
-                {/* <div className="price-row">
-              <span>Tax (10%):</span>
-              <span>${tax.toFixed(2)}</span>
-            </div> */}
                 <div className="price-row total-row">
                   <span>Total (Including GST):</span>
                   <span>${total.toFixed(2)}</span>
@@ -258,9 +329,7 @@ function CartItem({
             </div>
           )}
         </div>
-
         <div></div> {/* Don't Remove */}
-
         {/* Purchase this item - moved outside the card */}
         {item.category !== "Delivery" &&
           item.name !== "Donation" &&

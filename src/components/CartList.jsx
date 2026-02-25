@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import CartItem from "./CartItem.jsx";
 import "./CartList.css";
 
 function CartList({ step, items, setItems }) {
   const [donationQuantity, setDonationQuantity] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const [editingItemId, setEditingItemId] = useState(null);
+  const [backupItems, setBackupItems] = useState(null);
 
   // Centralized cart updater
   const updateCart = (next) => {
@@ -28,39 +31,28 @@ function CartList({ step, items, setItems }) {
       name: "Donation",
       category: "Graduate Women Manawatu Charitable Trust Inc.",
       hirePrice: 2,
-      // buyPrice: 2,
       quantity: donationQuantity,
       isDonation: true,
     };
 
     setDonationQuantity(1);
-    updateCart([...items, donationItem]);
+    updateCart((prev) => [...prev, donationItem]);
     setIsDialogOpen(false);
   };
 
-  // const handleAddItemToCart = (itemData) => {
-  //   const newItem = {
-  //     ...itemData,
-  //     selectedOptions: {}, // initialize empty object
-  //     quantity: 1,
-  //   };
-
-  //   updateCart([...items, newItem]);
-  // };
-
   const handleIncrease = (id) => {
-    updateCart(
-      items.map((item) =>
+    updateCart((prev) =>
+      prev.map((item) =>
         item.id === id ? { ...item, quantity: (item.quantity || 1) + 1 } : item,
       ),
     );
   };
 
   const handleDecrease = (id) => {
-    updateCart(
-      items.map((item) =>
+    updateCart((prev) =>
+      prev.map((item) =>
         item.id === id && (item.quantity || 1) > 1
-          ? { ...item, quantity: item.quantity - 1 }
+          ? { ...item, quantity: (item.quantity || 1) - 1 }
           : item,
       ),
     );
@@ -68,45 +60,63 @@ function CartList({ step, items, setItems }) {
 
   const handleRemove = (id) => {
     updateCart((prev) => prev.filter((it) => it.id !== id));
+    if (editingItemId === id) {
+      setEditingItemId(null);
+      setBackupItems(null);
+    }
   };
+
   const handleOptionChange = (itemId, optionLabel, newValue) => {
-    const updatedItems = items.map((item) => {
-      if (item.id === itemId) {
+    if (editingItemId !== itemId) return;
+
+    updateCart((prev) =>
+      prev.map((item) => {
+        if (item.id !== itemId) return item;
         return {
           ...item,
           selectedOptions: {
-            ...item.selectedOptions, // preserve other options
-            [optionLabel]: newValue, // save the selected value
+            ...(item.selectedOptions || {}),
+            [optionLabel]: newValue,
           },
         };
-      }
-      return item;
-    });
-    setItems(updatedItems);
-    localStorage.setItem("cart", JSON.stringify(updatedItems));
-    window.dispatchEvent(new Event("cartUpdated"));
+      }),
+    );
   };
 
   const handleDeliveryChange = (itemId, newPrice) => {
-    const updatedItems = items.map((item) => {
-      if (item.id === itemId) {
-        item.hirePrice = newPrice;
-      }
-      return item;
-    });
-    setItems(updatedItems, grandTotal);
-    localStorage.setItem("cart", JSON.stringify(updatedItems, grandTotal));
+    if (editingItemId !== itemId) return;
+
+    updateCart((prev) =>
+      prev.map((item) =>
+        item.id === itemId ? { ...item, hirePrice: newPrice } : item,
+      ),
+    );
+  };
+
+  // edit controls
+  const startEdit = (id) => {
+    // allow one item at a time
+    if (editingItemId && editingItemId !== id) return;
+
+    setBackupItems(items); // snapshot for cancel
+    setEditingItemId(id);
+  };
+
+  const saveEdit = () => {
+    setEditingItemId(null);
+    setBackupItems(null);
+  };
+
+  const cancelEdit = () => {
+    if (backupItems) updateCart(backupItems);
+    setEditingItemId(null);
+    setBackupItems(null);
   };
 
   // --- Price utilities ---
   const getNumericPrice = (priceString) =>
     parseFloat(String(priceString || 0).replace("$", "")) || 0;
 
-  const totalItems = items
-    .filter((item) => !item.isDonation)
-    .reduce((acc, item) => acc + (item.quantity || 1), 0);
-
-  // Add delivery price - use buyPrice or hirePrice based on item mode
   const totalPrice = items
     .filter((item) => !item.isDonation)
     .reduce((acc, item) => {
@@ -125,21 +135,17 @@ function CartList({ step, items, setItems }) {
     .filter((item) => item.isDonation)
     .reduce((acc, item) => acc + (item.quantity || 1), 0);
 
-  // const taxOnItems = totalPrice * 0.1;
-  // const taxOnDonations = totalDonationPrice * 0.1;
-
   const grandTotal = totalPrice + totalDonationPrice;
-  localStorage.setItem("grandTotal", grandTotal);
+  localStorage.setItem("grandTotal", String(grandTotal));
 
   const onTogglePurchaseType = (itemId, newIsHiring) => {
-    setItems((prev) =>
+    updateCart((prev) =>
       prev.map((it) =>
         it.id === itemId ? { ...it, isHiring: newIsHiring } : it,
       ),
     );
   };
 
-  // Check if donation already exists in cart
   const hasDonation = items.some((item) => item.isDonation);
 
   return (
@@ -147,20 +153,29 @@ function CartList({ step, items, setItems }) {
       {items.length > 0 ? (
         <>
           <h4>You have {items.length} items in your cart</h4>
-          {items?.map((item) => (
-            <CartItem
-              key={item.id}
-              item={item}
-              step={step}
-              quantity={item.quantity || 1}
-              onIncrease={() => handleIncrease(item.id)}
-              onDecrease={() => handleDecrease(item.id)}
-              onRemove={() => handleRemove(item.id)}
-              onOptionChange={handleOptionChange}
-              onDeliveryChange={handleDeliveryChange}
-              onTogglePurchaseType={onTogglePurchaseType}
-            />
-          ))}
+
+          {items.map((item) => {
+            const isEditing = editingItemId === item.id;
+
+            return (
+              <CartItem
+                key={item.id}
+                item={item}
+                step={step}
+                quantity={item.quantity || 1}
+                onIncrease={() => handleIncrease(item.id)}
+                onDecrease={() => handleDecrease(item.id)}
+                onRemove={() => handleRemove(item.id)}
+                onOptionChange={handleOptionChange}
+                onDeliveryChange={handleDeliveryChange}
+                onTogglePurchaseType={onTogglePurchaseType}
+                isEditing={editingItemId === item.id}
+                onEdit={() => startEdit(item.id)}
+                onSave={saveEdit}
+                onCancel={cancelEdit}
+              />
+            );
+          })}
 
           {step === 2 && (
             <div>
@@ -184,6 +199,7 @@ function CartList({ step, items, setItems }) {
               {/* Order Summary */}
               <div className="cart-summary">
                 <h3>Order Summary</h3>
+
                 <div className="summary-row">
                   <span>Total Items:</span>
                   <span>{items.length}</span>
@@ -194,20 +210,10 @@ function CartList({ step, items, setItems }) {
                   <span>${totalPrice.toFixed(2)}</span>
                 </div>
 
-                {/* <div className="summary-row">
-                  <span>Tax on Items (10%):</span>
-                  <span>${taxOnItems.toFixed(2)}</span>
-                </div> */}
-
                 <div className="summary-row">
                   <span>Total Donation ({totalDonationCount} * $2):</span>
                   <span>${totalDonationPrice.toFixed(2)}</span>
                 </div>
-
-                {/* <div className="summary-row">
-                  <span>Tax on Donations (10%):</span>
-                  <span>${taxOnDonations.toFixed(2)}</span>
-                </div> */}
 
                 <div className="summary-row total">
                   <span>Total Amount (Including GST):</span>
@@ -239,6 +245,7 @@ function CartList({ step, items, setItems }) {
                     We are a not-for-profit Charitable Trust registered with the
                     Charities Commission (CC31226).
                   </p>
+
                   <div className="mission-section">
                     <h3>Our Mission</h3>
                     <ul

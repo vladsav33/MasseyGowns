@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import CartList from "../components/CartList";
 import Contact from "../components/Contact";
@@ -19,6 +19,9 @@ export default function ShoppingCart() {
     return saved ? JSON.parse(saved) : [];
   });
 
+  // NEW: which cart item is currently in edit mode
+  const [editingKey, setEditingKey] = useState(null);
+
   const steps = [
     "Select Regalia",
     "Place Order",
@@ -28,7 +31,6 @@ export default function ShoppingCart() {
 
   const step = 2;
 
-  // same validation you used in HireRegalia
   const areAllOptionsSelected = () => {
     return items.every((it) => {
       if (it.isDonation) return true;
@@ -41,7 +43,6 @@ export default function ShoppingCart() {
     });
   };
 
-  // persist
   useEffect(() => localStorage.setItem("item", JSON.stringify(item)), [item]);
 
   useEffect(() => {
@@ -55,14 +56,13 @@ export default function ShoppingCart() {
       alert("Your cart is empty. Please add items first.");
       return;
     }
-    if (!areAllOptionsSelected) {
+
+    if (!areAllOptionsSelected()) {
       alert("Please select all required options for your items.");
       return;
     }
 
-    // optional: store step
     localStorage.setItem("step", "3");
-
     navigate("/customerdetails");
   };
 
@@ -73,13 +73,6 @@ export default function ShoppingCart() {
       <div className="content">
         <ProgressBar step={step} steps={steps} />
 
-        {/* <ProgressButtons
-          step={step}
-          steps={steps}
-          nextPath="/customerdetails"
-          areAllOptionsSelected={areAllOptionsSelected}
-        /> */}
-
         <h2 className="cart-label">Shopping Cart</h2>
 
         <CartList
@@ -88,6 +81,8 @@ export default function ShoppingCart() {
           items={items}
           setItem={setItem}
           setItems={setItems}
+          editingKey={editingKey}
+          setEditingKey={setEditingKey}
         />
 
         <ProgressButtons
@@ -95,6 +90,7 @@ export default function ShoppingCart() {
           steps={steps}
           nextPath="/customerdetails"
           areAllOptionsSelected={areAllOptionsSelected}
+          onNext={onNext}
         />
 
         <Contact />

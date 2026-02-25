@@ -473,3 +473,40 @@
     max-width: 100%;
   }
 }
+
+/* Ensure card is the positioning context */
+.cart-item {
+  position: relative;
+}
+
+/* Top-left corner */
+.cart-edit-actions {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  display: flex;
+  gap: 6px;
+  z-index: 5;
+}
+
+/* All icon buttons look the same */
+.cart-edit-actions .icon-btn {
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Subtle hover only */
+.cart-edit-actions .icon-btn:hover {
+  opacity: 0.75;
+}
+
+/* Active press feedback */
+.cart-edit-actions .icon-btn:active {
+  transform: scale(0.95);
+}
