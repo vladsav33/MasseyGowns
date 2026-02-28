@@ -8,21 +8,21 @@
 }
 
 .btn {
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 12px 28px;              
+  border-radius: 10px;            
   border: none;
   background-color: #117832;
   color: #fff;
-  font-size: 14px;
+  font-size: 15px;                 
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: x-small;
+  transition: all 0.25s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 40px;
-  height: 32px;
-  box-shadow: 0 2px 4px rgba(17, 120, 50, 0.2);
+  min-width: 80px;          
+  height: 40px;               
+  box-shadow: 0 4px 10px rgba(17, 120, 50, 0.25);
 }
 
 .btn:hover:not(.disabled) {

@@ -213,6 +213,20 @@ function ProgressButtons({
     }
   };
 
+  const getBuyStep1HasItems = () => {
+  try {
+    const temp = JSON.parse(localStorage.getItem("buyStep1Temp") || "{}");
+    const displayed = Array.isArray(temp.displayedItems) ? temp.displayedItems : [];
+
+    // Count only real products (ignore delivery)
+    return displayed.some((x) => x && x.__kind !== "delivery");
+  } catch {
+    return false;
+  }
+};
+
+const buyStep1HasItems = getBuyStep1HasItems();
+
   // --- Config per orderType ---
   const cfg = useMemo(() => {
     const isHireLike = orderType === 1 || orderType === 3;
@@ -226,7 +240,7 @@ function ProgressButtons({
         ? "Please add items and select all required options before proceeding."
         : "Please select all required options for your items before proceeding...",
 
-      showEditButton: isHireLike, // keep same behavior you have now
+      // showEditButton: isHireLike, 
 
       disableNext: () => {
         if (step === steps.length || step === 3) return true;
@@ -239,7 +253,7 @@ function ProgressButtons({
           );
         }
 
-        if (isBuy && step === 1) return !cardOptionsComplete;
+        if (isBuy && step === 1) return !buyStep1HasItems || !cardOptionsComplete;
         if (isBuy && step >= 2 && cartCount === 0) return true;
         if (isBuy && step >= 2 && cartCount > 0 && !buyOptionsComplete)
           return true;
@@ -288,92 +302,92 @@ function ProgressButtons({
     }
   };
 
-  const handleEdit = () => {
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+  // const handleEdit = () => {
+  //   const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-    // --- HIRE / CASUAL: rebuild hireStep1Temp from cart ---
-    if (orderType === 1 || orderType === 3) {
-      const hireItems = cart.filter((i) => i.isDonation || i.isHiring === true);
+  //   // --- HIRE / CASUAL: rebuild hireStep1Temp from cart ---
+  //   if (orderType === 1 || orderType === 3) {
+  //     const hireItems = cart.filter((i) => i.isDonation || i.isHiring === true);
 
-      const itemOptions = {};
-      const purchaseTypeByUiId = {};
+  //     const itemOptions = {};
+  //     const purchaseTypeByUiId = {};
 
-      hireItems.forEach((i) => {
-        // donation doesn't have course/item id relationship, skip if needed
-        if (i.isDonation) return;
+  //     hireItems.forEach((i) => {
+  //       // donation doesn't have course/item id relationship, skip if needed
+  //       if (i.isDonation) return;
 
-        // must match how you created uiId during commitHireStep1ToCart
-        const uiId = `${i.courseId}-${i.id}`;
-        itemOptions[uiId] = i.selectedOptions || {};
-        purchaseTypeByUiId[uiId] = i.isHiring ?? true;
-      });
+  //       // must match how you created uiId during commitHireStep1ToCart
+  //       const uiId = `${i.courseId}-${i.id}`;
+  //       itemOptions[uiId] = i.selectedOptions || {};
+  //       purchaseTypeByUiId[uiId] = i.isHiring ?? true;
+  //     });
 
-      localStorage.setItem(
-        "hireStep1Temp",
-        JSON.stringify({ itemOptions, purchaseTypeByUiId }),
-      );
+  //     localStorage.setItem(
+  //       "hireStep1Temp",
+  //       JSON.stringify({ itemOptions, purchaseTypeByUiId }),
+  //     );
 
-      // set dropdown selections too (so ceremony/course shows selected)
-      const firstRealHire = hireItems.find((i) => !i.isDonation);
-      if (firstRealHire) {
-        localStorage.setItem(
-          "selectedCourseId",
-          String(firstRealHire.courseId),
-        );
-        if (firstRealHire.ceremonyId) {
-          localStorage.setItem(
-            "selectedCeremonyId",
-            String(firstRealHire.ceremonyId),
-          );
-        }
-      }
+  //     // set dropdown selections too (so ceremony/course shows selected)
+  //     const firstRealHire = hireItems.find((i) => !i.isDonation);
+  //     if (firstRealHire) {
+  //       localStorage.setItem(
+  //         "selectedCourseId",
+  //         String(firstRealHire.courseId),
+  //       );
+  //       if (firstRealHire.ceremonyId) {
+  //         localStorage.setItem(
+  //           "selectedCeremonyId",
+  //           String(firstRealHire.ceremonyId),
+  //         );
+  //       }
+  //     }
 
-      // tell step-1 to load from temp (you'll implement listener in step-1 page)
-      window.dispatchEvent(new Event("hireStep1LoadFromCart"));
-    }
+  //     // tell step-1 to load from temp (you'll implement listener in step-1 page)
+  //     window.dispatchEvent(new Event("hireStep1LoadFromCart"));
+  //   }
 
-    // --- BUY: rebuild buyStep1Temp from cart ---
-    if (orderType === 2) {
-      const buyItems = cart.filter((i) => !i.isDonation);
+  //   // --- BUY: rebuild buyStep1Temp from cart ---
+  //   if (orderType === 2) {
+  //     const buyItems = cart.filter((i) => !i.isDonation);
 
-      const itemOptions = {};
-      const displayedItems = buyItems.map((i) => {
-        const uiId = i.uiId || `buy-${i.id}`;
-        itemOptions[uiId] = i.selectedOptions || {};
+  //     const itemOptions = {};
+  //     const displayedItems = buyItems.map((i) => {
+  //       const uiId = i.uiId || `buy-${i.id}`;
+  //       itemOptions[uiId] = i.selectedOptions || {};
 
-        return {
-          ...i,
-          uiId,
-          __kind:
-            i.__kind ||
-            (i.isDelivery
-              ? "delivery"
-              : i.type === "set"
-                ? "set"
-                : "individual"),
-        };
-      });
+  //       return {
+  //         ...i,
+  //         uiId,
+  //         __kind:
+  //           i.__kind ||
+  //           (i.isDelivery
+  //             ? "delivery"
+  //             : i.type === "set"
+  //               ? "set"
+  //               : "individual"),
+  //       };
+  //     });
 
-      localStorage.setItem(
-        "buyStep1Temp",
-        JSON.stringify({ displayedItems, itemOptions }),
-      );
+  //     localStorage.setItem(
+  //       "buyStep1Temp",
+  //       JSON.stringify({ displayedItems, itemOptions }),
+  //     );
 
-      window.dispatchEvent(new Event("buyStep1LoadFromCart"));
-    }
+  //     window.dispatchEvent(new Event("buyStep1LoadFromCart"));
+  //   }
 
-    // move to step 1
-    if (prevPath) {
-      // if you have a dedicated route for step 1, navigate to that route
-      localStorage.setItem("step", "1");
-      navigate(prevPath); // ONLY if prevPath is actually step-1 route
-    } else {
-      setStep?.(1);
-      localStorage.setItem("step", "1");
-    }
+  //   // move to step 1
+  //   if (prevPath) {
+  //     // if you have a dedicated route for step 1, navigate to that route
+  //     localStorage.setItem("step", "1");
+  //     navigate(prevPath); // ONLY if prevPath is actually step-1 route
+  //   } else {
+  //     setStep?.(1);
+  //     localStorage.setItem("step", "1");
+  //   }
 
-    scrollTop();
-  };
+  //   scrollTop();
+  // };
 
   const disableNext = cfg.disableNext();
 
@@ -387,21 +401,9 @@ function ProgressButtons({
         <div className="dropDownLabel">{cfg.step1Hint}</div>
       )}
 
-      {/* Step 2 edit (hire + casual only) */}
-      {step === 2 && typeof onEditItems === "function" ? (
-        <div
-          className="btns"
-          style={{ justifyContent: "center", marginBottom: 10 }}
-        >
-          <button type="button" className="btn prev" onClick={handleEdit}>
-            Edit
-          </button>
-        </div>
-      ) : null}
-
       {/* Shared prev/next buttons */}
       <div className="btns">
-        {step > 1 && step < 4 && (
+        {step === 3 && (
           <button className="btn prev" onClick={goPrev} disabled={step === 1}>
             Back
           </button>

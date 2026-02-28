@@ -43,7 +43,7 @@ function BuyRegalia() {
     return saved ? JSON.parse(saved) : [];
   });
 
-  // ✅ Track whether step 1 options are fully complete (fed from BuySelectRegalia)
+  //  Track whether step 1 options are fully complete (fed from BuySelectRegalia)
   const [buyStep1Complete, setBuyStep1Complete] = useState(false);
 
   const steps = [
@@ -75,7 +75,7 @@ function BuyRegalia() {
 
             {step === 1 && (
               <>
-                {/* ✅ Pass callback so BuySelectRegalia can report options completeness */}
+                {/*  Pass callback so BuySelectRegalia can report options completeness */}
                 <BuySelectRegalia
                   setItems={setItems}
                   onOptionsComplete={setBuyStep1Complete}

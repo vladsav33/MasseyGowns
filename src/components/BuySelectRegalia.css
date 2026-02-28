@@ -252,8 +252,9 @@
 }
 
 .add-more-card {
+  margin: 0 auto 16px auto;
   width: 100%;
-  max-width: 320px;
+  max-width: 1100px;
   height: 100%;
 
   background: linear-gradient(
@@ -281,14 +282,11 @@
 }
 
 .add-more-card:hover {
-  background: #e8f5e9;
-  border-color: #2e7d32;
   transform: translateY(-4px);
   box-shadow: 0 12px 30px rgba(76, 175, 80, 0.25);
 }
 
 .add-more-card:focus {
-  outline: 3px solid #81c784;
   outline-offset: 2px;
 }
 

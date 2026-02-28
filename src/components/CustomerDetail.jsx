@@ -138,6 +138,12 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       // Get the current cart
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
+      if (!Array.isArray(cart) || cart.length === 0) {
+        alert("Your cart is empty. Please add items before placing an order.");
+        navigate("/home");
+        return;
+      }
+
       localStorage.setItem("paymentMethod", parseInt(formData.paymentMethod));
 
       // Submit order details

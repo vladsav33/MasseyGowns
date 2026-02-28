@@ -9,17 +9,17 @@ export default function Contact() {
   // CMS based fields (only what you need)
   const [sectionTitle, setSectionTitle] = useState("CONTACT US");
   const [emailIntro, setEmailIntro] = useState(
-    "You can click here to Contact Us, and then send us your queries."
+    "You can click here to Contact Us, and then send us your queries.",
   );
   const [address, setAddress] = useState(
-    "3 Refectory Road, University Avenue\nMassey University\nPalmerston North"
+    "3 Refectory Road, University Avenue\nMassey University\nPalmerston North",
   );
   const [phone, setPhone] = useState("06 350 4166");
   const [openingMain, setOpeningMain] = useState(
-    "Our normal hours are 9:00am – 2.30pm, Mon – Thurs."
+    "Our normal hours are 9:00am – 2.30pm, Mon – Thurs.",
   );
   const [openingNote, setOpeningNote] = useState(
-    "We operate extended hours during the graduation week."
+    "We operate extended hours during the graduation week.",
   );
 
   useEffect(() => {
@@ -66,10 +66,9 @@ export default function Contact() {
 
   return (
     <section className="contact">
-      <h2 className="h2">{sectionTitle}</h2>
-
       <div className="contact_inner">
         <div className="contact_left">
+          <h2 className="sectionTitle">{sectionTitle}</h2>
           <h2 className="contact_email">Email Contact</h2>
 
           <p className="clickhere">

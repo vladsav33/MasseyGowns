@@ -1,4 +1,4 @@
-// BuySelectRegalia.jsx ✅ TEMP CARDS UNDER (NO CART) + DELIVERY CARD + ADD MORE ONLY FOR INDIVIDUAL
+// BuySelectRegalia.jsx  TEMP CARDS UNDER (NO CART) + DELIVERY CARD + ADD MORE ONLY FOR INDIVIDUAL
 import "./BuySelectRegalia.css";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -53,7 +53,7 @@ const BuySelectRegalia = ({ onOptionsComplete }) => {
     saved.selectedDegree || "",
   );
 
-  // ✅ TEMP cards shown under selection (includes sets, individuals, delivery)
+  //  TEMP cards shown under selection (includes sets, individuals, delivery)
   const [displayedItems, setDisplayedItems] = useState(
     saved.displayedItems || [],
   );
@@ -137,30 +137,31 @@ const BuySelectRegalia = ({ onOptionsComplete }) => {
     itemOptions,
   ]);
 
-// ✅ if there are NO items, don't show any "incomplete" message
-const areAllCardOptionsSelected = useMemo(() => {
-  // no items -> treat as complete (prevents showing warning msg in step 1)
-  if (!Array.isArray(displayedItems) || displayedItems.length === 0) return true;
+  //  if there are NO items, don't show any "incomplete" message
+  const areAllCardOptionsSelected = useMemo(() => {
+    // no items -> treat as complete (prevents showing warning msg in step 1)
+    if (!Array.isArray(displayedItems) || displayedItems.length === 0)
+      return true;
 
-  return displayedItems.every((product) => {
-    const opts = Array.isArray(product?.options) ? product.options : [];
-    if (opts.length === 0) return true;
+    return displayedItems.every((product) => {
+      const opts = Array.isArray(product?.options) ? product.options : [];
+      if (opts.length === 0) return true;
 
-    const selected = itemOptions?.[product.uiId] || {};
-    return opts.every((opt) => {
-      const label = opt?.label;
-      const val = label ? selected[label] : "";
-      return val !== undefined && val !== null && String(val).trim() !== "";
+      const selected = itemOptions?.[product.uiId] || {};
+      return opts.every((opt) => {
+        const label = opt?.label;
+        const val = label ? selected[label] : "";
+        return val !== undefined && val !== null && String(val).trim() !== "";
+      });
     });
-  });
-}, [displayedItems, itemOptions]);
+  }, [displayedItems, itemOptions]);
 
-useEffect(() => {
-  // ✅ if parent passes onOptionsComplete, keep it updated like CeremonyCourseSelection
-  if (typeof onOptionsComplete === "function") {
-    onOptionsComplete(areAllCardOptionsSelected);
-  }
-}, [areAllCardOptionsSelected, onOptionsComplete]);
+  useEffect(() => {
+    //  if parent passes onOptionsComplete, keep it updated like CeremonyCourseSelection
+    if (typeof onOptionsComplete === "function") {
+      onOptionsComplete(areAllCardOptionsSelected);
+    }
+  }, [areAllCardOptionsSelected, onOptionsComplete]);
 
   // item types
   const itemTypes = useMemo(() => {
@@ -223,7 +224,7 @@ useEffect(() => {
     );
   }, [items, selectedItemType, selectedDegree]);
 
-  // ✅ show individual items as TEMP cards under selection when selection changes
+  //  show individual items as TEMP cards under selection when selection changes
   useEffect(() => {
     if (!selectedItemType || !selectedDegree) return;
 
@@ -268,30 +269,30 @@ useEffect(() => {
     );
   };
 
-const addSetToTemp = (setItem) => {
-  const uiId = `set-${setItem.id}`;
-  const tempSet = { ...setItem, uiId, __kind: "set" };
+  const addSetToTemp = (setItem) => {
+    const uiId = `set-${setItem.id}`;
+    const tempSet = { ...setItem, uiId, __kind: "set" };
 
-  // validate ONLY this set’s options
-  const opts = Array.isArray(tempSet?.options) ? tempSet.options : [];
-  if (opts.length > 0) {
-    const selected = itemOptions?.[uiId] || {};
-    const missing = opts.find((opt) => {
-      const val = selected?.[opt.label];
-      return val === undefined || val === null || String(val).trim() === "";
-    });
-    if (missing) {
-      alert(`Please select "${missing.label}" for "${tempSet.name}".`);
-      return;
+    // validate ONLY this set’s options
+    const opts = Array.isArray(tempSet?.options) ? tempSet.options : [];
+    if (opts.length > 0) {
+      const selected = itemOptions?.[uiId] || {};
+      const missing = opts.find((opt) => {
+        const val = selected?.[opt.label];
+        return val === undefined || val === null || String(val).trim() === "";
+      });
+      if (missing) {
+        alert(`Please select "${missing.label}" for "${tempSet.name}".`);
+        return;
+      }
     }
-  }
 
-  setDisplayedItems((prev) => {
-    const map = new Map(prev.map((p) => [p.uiId, p]));
-    map.set(uiId, tempSet);
-    return Array.from(map.values());
-  });
-};
+    setDisplayedItems((prev) => {
+      const map = new Map(prev.map((p) => [p.uiId, p]));
+      map.set(uiId, tempSet);
+      return Array.from(map.values());
+    });
+  };
 
   // -------------------- DELIVERY TEMP CARD --------------------
   // delivery should exist when there is at least one non-delivery item
@@ -344,7 +345,7 @@ const addSetToTemp = (setItem) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasNonDelivery]);
 
-  // ✅ “Add more items” should be ONLY for individual items
+  //  “Add more items” should be ONLY for individual items
   const hasAnyIndividual = useMemo(
     () => displayedItems.some((x) => x.__kind === "individual"),
     [displayedItems],
@@ -595,7 +596,7 @@ const addSetToTemp = (setItem) => {
             </div>
           )}
 
-          {/* ✅✅✅ TEMP CARDS UNDER (sets + individuals + delivery) */}
+          {/*  TEMP CARDS UNDER (sets + individuals + delivery) */}
           {displayedItems.length > 0 && (
             <div className="filtered-items" style={{ marginTop: 24 }}>
               <div className="items-header">
@@ -718,11 +719,11 @@ const addSetToTemp = (setItem) => {
                           </button>
                         </div>
                       </div>
+                      <div></div>
                     </div>
                   );
                 })}
-
-                {/* ✅ Add more items ONLY for individuals */}
+                {/*  Add more items ONLY for individuals */}
                 {hasAnyIndividual && (
                   <div
                     className="add-more-card"

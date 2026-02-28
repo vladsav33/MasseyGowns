@@ -1,5 +1,5 @@
 // HireRegalia.jsx (only the parts you MUST add/change)
-// ✅ Add these new state + handler + pass onEditItems to ProgressButtons
+//  Add these new state + handler + pass onEditItems to ProgressButtons
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import "./HireRegalia.css";
@@ -100,7 +100,7 @@ function HireRegalia() {
     fetchCourses();
   }, [selectedCeremonyId, showCeremony]);
 
-  // ✅ Edit button handler (Step 2 -> Step 1 restore selections)
+  //  Edit button handler (Step 2 -> Step 1 restore selections)
   const handleEditItems = () => {
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
     const items = cart.filter((x) => !x.isDonation);

@@ -28,7 +28,7 @@ function CeremonyCourseSelection({
   const [purchaseTypeByUiId, setPurchaseTypeByUiId] = useState({});
   const isHiringFor = (uiId) => purchaseTypeByUiId[uiId] ?? true;
 
-  // ✅ restore dropdowns + temp selections (when coming from Edit)
+  //  restore dropdowns + temp selections (when coming from Edit)
   useEffect(() => {
     const savedCeremonyId = showCeremony
       ? localStorage.getItem("selectedCeremonyId")
@@ -43,10 +43,11 @@ function CeremonyCourseSelection({
 
     const temp = JSON.parse(localStorage.getItem("hireStep1Temp") || "{}");
     if (temp?.itemOptions) setItemOptions(temp.itemOptions);
-    if (temp?.purchaseTypeByUiId) setPurchaseTypeByUiId(temp.purchaseTypeByUiId);
+    if (temp?.purchaseTypeByUiId)
+      setPurchaseTypeByUiId(temp.purchaseTypeByUiId);
   }, [showCeremony, setCeremony, setCourse]);
 
-  // ✅ listen for reset from ProgressButtons (after Next)
+  //  listen for reset from ProgressButtons (after Next)
   useEffect(() => {
     const onReset = () => {
       setDisplayedItems([]);
@@ -75,10 +76,12 @@ function CeremonyCourseSelection({
     setItemOptions({});
     setPurchaseTypeByUiId({});
 
-    if (id !== null && showCeremony) localStorage.setItem("selectedCeremonyId", String(id));
+    if (id !== null && showCeremony)
+      localStorage.setItem("selectedCeremonyId", String(id));
     else localStorage.removeItem("selectedCeremonyId");
 
-    if (id !== null && !showCeremony) localStorage.setItem("selectedPhotoCeremonyId", String(id));
+    if (id !== null && !showCeremony)
+      localStorage.setItem("selectedPhotoCeremonyId", String(id));
     else localStorage.removeItem("selectedPhotoCeremonyId");
   };
 
@@ -95,7 +98,8 @@ function CeremonyCourseSelection({
       if (id !== null) localStorage.setItem("selectedCourseId", String(id));
       else localStorage.removeItem("selectedCourseId");
     } else {
-      if (id !== null) localStorage.setItem("selectedPhotoCourseId", String(id));
+      if (id !== null)
+        localStorage.setItem("selectedPhotoCourseId", String(id));
       else localStorage.removeItem("selectedPhotoCourseId");
     }
   };
@@ -131,7 +135,9 @@ function CeremonyCourseSelection({
           }
         }
 
-        unique.sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
+        unique.sort((a, b) =>
+          String(a.name || "").localeCompare(String(b.name || "")),
+        );
         setDisplayedItems(unique);
 
         setTimeout(() => {
@@ -158,7 +164,7 @@ function CeremonyCourseSelection({
         },
       };
 
-      // ✅ persist temp to localStorage for Next click
+      //  persist temp to localStorage for Next click
       const temp = JSON.parse(localStorage.getItem("hireStep1Temp") || "{}");
       localStorage.setItem(
         "hireStep1Temp",
@@ -166,7 +172,7 @@ function CeremonyCourseSelection({
           ...temp,
           itemOptions: next,
           purchaseTypeByUiId,
-        })
+        }),
       );
 
       return next;
@@ -177,7 +183,7 @@ function CeremonyCourseSelection({
     setPurchaseTypeByUiId((prev) => {
       const next = { ...prev, [uiId]: !(prev[uiId] ?? true) };
 
-      // ✅ persist temp to localStorage for Next click
+      //  persist temp to localStorage for Next click
       const temp = JSON.parse(localStorage.getItem("hireStep1Temp") || "{}");
       localStorage.setItem(
         "hireStep1Temp",
@@ -185,7 +191,7 @@ function CeremonyCourseSelection({
           ...temp,
           itemOptions,
           purchaseTypeByUiId: next,
-        })
+        }),
       );
 
       return next;
@@ -193,49 +199,52 @@ function CeremonyCourseSelection({
   };
 
   const removeDisplayedItem = (uiId) => {
-    setDisplayedItems((prev) => prev.filter((p) => p.uiId !== uiId));
-    setItemOptions((prev) => {
-      const next = { ...prev };
-      delete next[uiId];
+    const nextItems = displayedItems.filter((p) => p.uiId !== uiId);
 
-      const temp = JSON.parse(localStorage.getItem("hireStep1Temp") || "{}");
-      localStorage.setItem(
-        "hireStep1Temp",
-        JSON.stringify({
-          ...temp,
-          itemOptions: next,
-          purchaseTypeByUiId,
-        })
-      );
+    setDisplayedItems(nextItems);
 
-      return next;
-    });
-    setPurchaseTypeByUiId((prev) => {
-      const next = { ...prev };
-      delete next[uiId];
+    const nextItemOptions = { ...itemOptions };
+    delete nextItemOptions[uiId];
+    setItemOptions(nextItemOptions);
 
-      const temp = JSON.parse(localStorage.getItem("hireStep1Temp") || "{}");
-      localStorage.setItem(
-        "hireStep1Temp",
-        JSON.stringify({
-          ...temp,
-          itemOptions,
-          purchaseTypeByUiId: next,
-        })
-      );
+    const nextPurchase = { ...purchaseTypeByUiId };
+    delete nextPurchase[uiId];
+    setPurchaseTypeByUiId(nextPurchase);
 
-      return next;
-    });
+    // persist temp
+    const temp = JSON.parse(localStorage.getItem("hireStep1Temp") || "{}");
+    localStorage.setItem(
+      "hireStep1Temp",
+      JSON.stringify({
+        ...temp,
+        itemOptions: nextItemOptions,
+        purchaseTypeByUiId: nextPurchase,
+      }),
+    );
+
+    // if no items left, clear dropdown localStorage too
+    if (nextItems.length === 0) {
+      setCeremony(null);
+      setCourse(null);
+
+      localStorage.removeItem("selectedCeremonyId");
+      localStorage.removeItem("selectedCourseId");
+      localStorage.removeItem("selectedPhotoCeremonyId");
+      localStorage.removeItem("selectedPhotoCourseId");
+      localStorage.removeItem("hireStep1Temp");
+    }
   };
 
-  // ✅ card options complete for Step 1 Next button
+  //  card options complete for Step 1 Next button
   const areAllCardOptionsSelected = useMemo(() => {
     if (!displayedItems || displayedItems.length === 0) return true;
 
     return displayedItems.every((product) => {
       if (!product.options || product.options.length === 0) return true;
       const selected = itemOptions[product.uiId] || {};
-      return product.options.every((opt) => selected[opt.label] && selected[opt.label] !== "");
+      return product.options.every(
+        (opt) => selected[opt.label] && selected[opt.label] !== "",
+      );
     });
   }, [displayedItems, itemOptions]);
 
@@ -258,7 +267,10 @@ function CeremonyCourseSelection({
             <option value="">Please select a ceremony...</option>
             {Array.isArray(ceremonies) &&
               ceremonies.map((ceremonyOption) => (
-                <option key={ceremonyOption.id} value={String(ceremonyOption.id)}>
+                <option
+                  key={ceremonyOption.id}
+                  value={String(ceremonyOption.id)}
+                >
                   {ceremonyOption.name}
                 </option>
               ))}
@@ -284,7 +296,10 @@ function CeremonyCourseSelection({
         <option value="">Please select a qualification...</option>
         {Array.isArray(courses) &&
           courses.map((courseOption) => (
-            <option key={courseOption.degreeId} value={String(courseOption.degreeId)}>
+            <option
+              key={courseOption.degreeId}
+              value={String(courseOption.degreeId)}
+            >
               {courseOption.degreeName}
             </option>
           ))}
@@ -294,9 +309,14 @@ function CeremonyCourseSelection({
         {loadingItems && <p className="muted">Loading items…</p>}
         {itemsError && <p className="error-text">{itemsError}</p>}
 
-        {!loadingItems && !itemsError && course && displayedItems.length === 0 && (
-          <p className="muted">No items available for the selected qualification.</p>
-        )}
+        {!loadingItems &&
+          !itemsError &&
+          course &&
+          displayedItems.length === 0 && (
+            <p className="muted">
+              No items available for the selected qualification.
+            </p>
+          )}
 
         {!loadingItems && !itemsError && displayedItems.length > 0 && (
           <div className="filtered-items">
@@ -305,11 +325,15 @@ function CeremonyCourseSelection({
                 const hiring = isHiringFor(product.uiId);
 
                 const unitPrice = parseFloat(
-                  (hiring ? product.hirePrice ?? product.price : product.buyPrice) ?? 0
+                  (hiring
+                    ? (product.hirePrice ?? product.price)
+                    : product.buyPrice) ?? 0,
                 );
 
                 const altPrice = parseFloat(
-                  (hiring ? product.buyPrice : product.hirePrice ?? product.price) ?? 0
+                  (hiring
+                    ? product.buyPrice
+                    : (product.hirePrice ?? product.price)) ?? 0,
                 );
 
                 return (
@@ -344,32 +368,45 @@ function CeremonyCourseSelection({
                               <label>{option.label}:</label>
                               <select
                                 className="option-select"
-                                value={itemOptions[product.uiId]?.[option.label] || ""}
+                                value={
+                                  itemOptions[product.uiId]?.[option.label] ||
+                                  ""
+                                }
                                 onChange={(e) =>
-                                  handleOptionChange(product.uiId, option.label, e.target.value)
+                                  handleOptionChange(
+                                    product.uiId,
+                                    option.label,
+                                    e.target.value,
+                                  )
                                 }
                                 required
                               >
                                 <option value="">Please select...</option>
-                                {(Array.isArray(option.choices) ? option.choices : []).map(
-                                  (choice, idx) => {
-                                    const val =
-                                      typeof choice === "object" && choice !== null
-                                        ? choice.id ?? choice.value
-                                        : choice;
+                                {(Array.isArray(option.choices)
+                                  ? option.choices
+                                  : []
+                                ).map((choice, idx) => {
+                                  const val =
+                                    typeof choice === "object" &&
+                                    choice !== null
+                                      ? (choice.id ?? choice.value)
+                                      : choice;
 
-                                    const label =
-                                      typeof choice === "object" && choice !== null
-                                        ? choice.value || choice.size || choice.name || choice.id
-                                        : choice;
+                                  const label =
+                                    typeof choice === "object" &&
+                                    choice !== null
+                                      ? choice.value ||
+                                        choice.size ||
+                                        choice.name ||
+                                        choice.id
+                                      : choice;
 
-                                    return (
-                                      <option key={idx} value={String(val)}>
-                                        {String(label)}
-                                      </option>
-                                    );
-                                  }
-                                )}
+                                  return (
+                                    <option key={idx} value={String(val)}>
+                                      {String(label)}
+                                    </option>
+                                  );
+                                })}
                               </select>
                             </div>
                           ))}
@@ -377,11 +414,19 @@ function CeremonyCourseSelection({
 
                       <div className="item-controls">
                         <div className="quantity-controls">
-                          <button className="quantity-btn" type="button" disabled>
+                          <button
+                            className="quantity-btn"
+                            type="button"
+                            disabled
+                          >
                             −
                           </button>
                           <span className="quantity">1</span>
-                          <button className="quantity-btn" type="button" disabled>
+                          <button
+                            className="quantity-btn"
+                            type="button"
+                            disabled
+                          >
                             +
                           </button>
                         </div>
@@ -396,7 +441,7 @@ function CeremonyCourseSelection({
                       </div>
                     </div>
 
-                    {/* ✅ purchase box visible */}
+                    {/*  purchase box visible */}
                     <div className="purchase-box">
                       <span className="purchase-label">Purchase this item</span>
 
@@ -408,7 +453,9 @@ function CeremonyCourseSelection({
                         {hiring ? "Buy" : "Hire"}
                       </button>
 
-                      <div className="purchase-price">${altPrice.toFixed(2)}</div>
+                      <div className="purchase-price">
+                        ${altPrice.toFixed(2)}
+                      </div>
                     </div>
                   </div>
                 );
