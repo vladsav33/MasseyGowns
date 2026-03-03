@@ -14,7 +14,6 @@ function ProgressButtons({
   selectedCeremonyId,
   showCeremony,
   cardOptionsComplete = true,
-  onEditItems,
 }) {
   const navigate = useNavigate();
 

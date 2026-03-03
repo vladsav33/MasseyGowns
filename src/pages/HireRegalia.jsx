@@ -101,46 +101,46 @@ function HireRegalia() {
   }, [selectedCeremonyId, showCeremony]);
 
   //  Edit button handler (Step 2 -> Step 1 restore selections)
-  const handleEditItems = () => {
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    const items = cart.filter((x) => !x.isDonation);
+  // const handleEditItems = () => {
+  //   const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+  //   const items = cart.filter((x) => !x.isDonation);
 
-    if (items.length === 0) return;
+  //   if (items.length === 0) return;
 
-    const ceremonyId = items[0].ceremonyId ?? null;
-    const courseId = items[0].courseId ?? null;
+  //   const ceremonyId = items[0].ceremonyId ?? null;
+  //   const courseId = items[0].courseId ?? null;
 
-    const itemOptions = {};
-    const purchaseTypeByUiId = {};
+  //   const itemOptions = {};
+  //   const purchaseTypeByUiId = {};
 
-    items.forEach((it) => {
-      const uiId = `${courseId}-${it.id}`;
-      itemOptions[uiId] = it.selectedOptions || {};
-      purchaseTypeByUiId[uiId] = it.isHiring ?? true;
-    });
+  //   items.forEach((it) => {
+  //     const uiId = `${courseId}-${it.id}`;
+  //     itemOptions[uiId] = it.selectedOptions || {};
+  //     purchaseTypeByUiId[uiId] = it.isHiring ?? true;
+  //   });
 
-    localStorage.setItem(
-      "hireStep1Temp",
-      JSON.stringify({ ceremonyId, courseId, itemOptions, purchaseTypeByUiId })
-    );
+  //   localStorage.setItem(
+  //     "hireStep1Temp",
+  //     JSON.stringify({ ceremonyId, courseId, itemOptions, purchaseTypeByUiId })
+  //   );
 
-    // restore dropdown localStorage (both modes safe)
-    if (ceremonyId != null) {
-      localStorage.setItem("selectedCeremonyId", String(ceremonyId));
-      localStorage.setItem("selectedPhotoCeremonyId", String(ceremonyId));
-    }
-    if (courseId != null) {
-      localStorage.setItem("selectedCourseId", String(courseId));
-      localStorage.setItem("selectedPhotoCourseId", String(courseId));
-    }
+  //   // restore dropdown localStorage (both modes safe)
+  //   if (ceremonyId != null) {
+  //     localStorage.setItem("selectedCeremonyId", String(ceremonyId));
+  //     localStorage.setItem("selectedPhotoCeremonyId", String(ceremonyId));
+  //   }
+  //   if (courseId != null) {
+  //     localStorage.setItem("selectedCourseId", String(courseId));
+  //     localStorage.setItem("selectedPhotoCourseId", String(courseId));
+  //   }
 
-    // set state
-    setSelectedCeremonyId(ceremonyId);
-    setSelectedCourseId(courseId);
+  //   // set state
+  //   setSelectedCeremonyId(ceremonyId);
+  //   setSelectedCourseId(courseId);
 
-    setStep(1);
-    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-  };
+  //   setStep(1);
+  //   window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  // };
 
   useEffect(() => {
     if (step === 2) {
@@ -153,17 +153,6 @@ function HireRegalia() {
       <Navbar />
       <div className="content">
         <ProgressBar step={step} steps={steps} className="progressbar" />
-
-        {/* <ProgressButtons
-          step={step}
-          setStep={setStep}
-          steps={steps}
-          selectedCeremonyId={selectedCeremonyId}
-          selectedCourseId={selectedCourseId}
-          showCeremony={showCeremony}
-          cardOptionsComplete={cardOptionsComplete}
-          onEditItems={handleEditItems}
-        /> */}
 
         {step === 1 && (
           <>
@@ -208,7 +197,6 @@ function HireRegalia() {
           selectedCourseId={selectedCourseId}
           showCeremony={showCeremony}
           cardOptionsComplete={cardOptionsComplete}
-          onEditItems={handleEditItems}
         />
 
         <Contact />

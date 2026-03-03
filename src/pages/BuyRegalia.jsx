@@ -66,12 +66,6 @@ function BuyRegalia() {
         <div className="content">
           <div className="body-content">
             <ProgressBar step={step} steps={steps} />
-            {/* <ProgressButtons
-              step={step}
-              setStep={setStep}
-              steps={steps}
-              cardOptionsComplete={buyStep1Complete}
-            /> */}
 
             {step === 1 && (
               <>
@@ -82,47 +76,7 @@ function BuyRegalia() {
                 />
               </>
             )}
-
-            {step === 2 && (
-              <div>
-                <h2 className="cart-label">Shopping Cart</h2>
-                <CartList
-                  step={step}
-                  item={item}
-                  items={items}
-                  setItem={setItem}
-                  setItems={setItems}
-                />
-              </div>
-            )}
-
-            {step === 3 && (
-              <div>
-                <CustomerDetail
-                  item={item}
-                  quantity={item.quantity || 1}
-                  step={step}
-                  setStep={setStep}
-                  steps={steps}
-                />
-              </div>
-            )}
-
-            {step === 4 && (
-              <>
-                {paymentMethod == 1 && (
-                  <div>
-                    <Payment />
-                  </div>
-                )}
-                {paymentMethod == 3 && (
-                  <div>
-                    <PaymentCompleted />
-                  </div>
-                )}
-              </>
-            )}
-
+            
             <ProgressButtons
               step={step}
               setStep={setStep}

@@ -21,7 +21,7 @@ export default function App() {
       <Route path="/hireregalia" element={<HireRegalia />} />
       <Route path="/buyregalia" element={<BuyRegalia />} />
       <Route path="/cart" element={<ShoppingCart />} />
-      <Route path="/customerdetails" element={<CustomerDetailsPage />} />
+      <Route path="/customerdetailsPage" element={<CustomerDetailsPage />} />
       <Route path="/contactus" element={<ContactUS />} />
       <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
       <Route path="/hireregalia/:degree" element={<HireprocessWrapper />} />

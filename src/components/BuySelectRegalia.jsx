@@ -245,10 +245,34 @@ const BuySelectRegalia = ({ onOptionsComplete }) => {
   }, [selectedItemType]);
 
   const handleOptionChange = (itemId, optionLabel, value) => {
-    setItemOptions((prev) => ({
-      ...prev,
-      [itemId]: { ...(prev[itemId] || {}), [optionLabel]: value },
-    }));
+    setItemOptions((prev) => {
+      const updated = {
+        ...prev,
+        [itemId]: { ...(prev[itemId] || {}), [optionLabel]: value },
+      };
+
+      // If this is delivery item, update price
+      setDisplayedItems((prevItems) =>
+        prevItems.map((item) => {
+          if (item.uiId !== itemId) return item;
+          if (item.__kind !== "delivery") return item;
+
+          const option = item.options?.find((o) => o.label === optionLabel);
+          const choice = option?.choices?.find(
+            (c) => String(c.id) === String(value),
+          );
+
+          if (!choice) return item;
+
+          return {
+            ...item,
+            price: Number(choice.price || 0),
+          };
+        }),
+      );
+
+      return updated;
+    });
   };
 
   const removeDisplayedItem = (uiId) => {
@@ -613,7 +637,9 @@ const BuySelectRegalia = ({ onOptionsComplete }) => {
                 {displayedItems.map((product) => {
                   const isDelivery = product.__kind === "delivery";
                   const isSet = product.__kind === "set";
-                  const price = isDelivery ? 0 : Number(product.buyPrice ?? 0);
+                  const price = isDelivery
+                    ? Number(product.price ?? 0)
+                    : Number(product.buyPrice ?? 0);
 
                   return (
                     <div key={product.uiId} className="cart-item-wrapper">

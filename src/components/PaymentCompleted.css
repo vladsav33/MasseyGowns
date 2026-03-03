@@ -822,3 +822,38 @@
     text-decoration: none !important;
   }
 }
+
+/* PaymentCompleted.css */
+.receipt-page {
+  background: #f9fafb;
+  padding: 24px 16px 60px;
+  min-height: calc(100vh - 80px);
+}
+
+.receipt-html {
+  max-width: 900px;
+  margin: 16px auto 0;
+  background: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.receipt-html table {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+@media print {
+  .nav-wrap, .navbar, button {
+    display: none !important;
+  }
+  .receipt-page {
+    padding: 0;
+    background: #fff;
+  }
+  .receipt-html {
+    box-shadow: none;
+    padding: 0;
+  }
+}

@@ -46,7 +46,7 @@ function CartItem({
       const price = parseFloat(selectedChoice?.price ?? 0);
       setUnitPrice(price);
 
-      onDeliveryChange(item.id, price);
+      // onDeliveryChange(item.id, price);
       return;
     }
 
@@ -94,7 +94,19 @@ function CartItem({
             );
 
             setSelectedOption(selectedChoice || null);
+
+            // always save selected option
             onOptionChange(item.id, option.label, selectedId);
+
+            // if delivery type changed, update delivery price
+            if (
+              item.category === "Delivery" &&
+              option.label === "Delivery Type"
+            ) {
+              const newPrice = Number(selectedChoice?.price ?? 0);
+              setUnitPrice(newPrice); // update UI immediately
+              onDeliveryChange(item.id, newPrice); // update cart item hirePrice
+            }
           }}
           required
           // - step 1 always editable

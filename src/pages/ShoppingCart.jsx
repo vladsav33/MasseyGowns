@@ -63,7 +63,7 @@ export default function ShoppingCart() {
     }
 
     localStorage.setItem("step", "3");
-    navigate("/customerdetails");
+    navigate("/customerdetailsPage");
   };
 
   return (
@@ -88,7 +88,7 @@ export default function ShoppingCart() {
         <ProgressButtons
           step={step}
           steps={steps}
-          nextPath="/customerdetails"
+          nextPath="/customerdetailsPage"
           areAllOptionsSelected={areAllOptionsSelected}
           onNext={onNext}
         />
