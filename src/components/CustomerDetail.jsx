@@ -141,6 +141,9 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       localStorage.setItem("paymentMethod", parseInt(formData.paymentMethod));
 
       // Submit order details
+
+      console.log("Order=", formData)
+
       const [result] = await Promise.all([submitCustomerDetails(formData)]);
       if (parseInt(formData.paymentMethod) == 3) {
         orderCompletionEmail();

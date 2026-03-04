@@ -124,6 +124,8 @@ export const submitCustomerDetails = async (formData) => {
       // status: 0,
     };
 
+    console.log('CustomerPayload=', customerPayload);
+    
     const response = await axios.post(`${API_URL}/orders`, customerPayload);
     if (response.data) {
       localStorage.setItem("orderResponse", JSON.stringify(response.data));
