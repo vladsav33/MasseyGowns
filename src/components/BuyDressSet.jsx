@@ -68,17 +68,17 @@ export default function BuyDressSet() {
     <section>
       <h2 className="BuyDressSetTitle">{title}</h2>
       <div className="BuyDressSetGrid">
-        <Link to="/buyregalia" className="regaliaCard">
+        <Link to="/buyregalia" state={{ step: 1 }} className="regaliaCard">
           <img src={bachelorImage} alt={bachelorLabel} className="regaliaImg" />
           <span>{bachelorLabel}</span>
         </Link>
 
-        <Link to="/buyregalia" className="regaliaCard">
+        <Link to="/buyregalia" state={{ step: 1 }} className="regaliaCard">
           <img src={mastersImage} alt={mastersLabel} className="regaliaImg" />
           <span>{mastersLabel}</span>
         </Link>
 
-        <Link to="/buyregalia" className="regaliaCard">
+        <Link to="/buyregalia" state={{ step: 1 }} className="regaliaCard">
           <img src={phdImage} alt={phdLabel} className="regaliaImg" />
           <span>{phdLabel}</span>
         </Link>

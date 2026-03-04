@@ -69,6 +69,7 @@ const renderTextWithLinks = (text, query) => {
         <Link
           key={i}
           to="/hireregalia"
+          state={{ step: 1 }}
           className="text-sky-700 underline font-semibold hover:text-sky-900"
         >
           <Highlighter query={query}>Hire Regalia</Highlighter>
@@ -81,6 +82,7 @@ const renderTextWithLinks = (text, query) => {
         <Link
           key={i}
           to="/buyregalia"
+          state={{ step: 1 }}
           className="text-sky-700 underline font-semibold hover:text-sky-900"
         >
           <Highlighter query={query}>Buy Regalia</Highlighter>
