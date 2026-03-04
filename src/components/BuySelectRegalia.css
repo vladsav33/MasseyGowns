@@ -252,8 +252,9 @@
 }
 
 .add-more-card {
+  margin: 0 auto 16px auto;
   width: 100%;
-  max-width: 320px;
+  max-width: 1100px;
   height: 100%;
 
   background: linear-gradient(
@@ -281,14 +282,11 @@
 }
 
 .add-more-card:hover {
-  background: #e8f5e9;
-  border-color: #2e7d32;
   transform: translateY(-4px);
   box-shadow: 0 12px 30px rgba(76, 175, 80, 0.25);
 }
 
 .add-more-card:focus {
-  outline: 3px solid #81c784;
   outline-offset: 2px;
 }
 
@@ -347,7 +345,7 @@
 
 .item-category {
   background: #4caf50;
-  color: white;
+  color: rgb(255, 255, 255);
   padding: 4px 12px;
   border-radius: 16px;
   font-size: 0.75rem;
@@ -398,36 +396,6 @@
   background: #2d984f;
   transform: translateY(-1px);
   box-shadow: 0 4px 15px #93c0a1;
-}
-
-.remove-icon-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-
-  background: transparent;
-  border: none;
-  padding: 0;
-  margin: 0;
-
-  color: #ef4444; /* red cross */
-  font-size: 10px; /* adjust size here */
-  line-height: 1;
-
-  cursor: pointer;
-}
-
-.remove-icon-btn:hover {
-  color: #dc2626; /* slightly darker red on hover */
-  transform: scale(1.1);
-}
-
-.remove-icon-btn:focus {
-  outline: none;
-}
-
-.remove-icon-btn:active {
-  transform: translateY(0);
 }
 
 /* Cart sidebar */
@@ -509,13 +477,7 @@
   color: #f44336;
   cursor: pointer;
   padding: 4px;
-  border-radius: 4px;
   transition: all 0.3s ease;
-}
-
-.remove-btn:hover {
-  background: #ffebee;
-  color: #d32f2f;
 }
 
 .cart-item-footer {

@@ -1,6 +1,5 @@
 .content {
     color: rgb(33, 33, 33);
-    padding-top: 90px;
 }
 
 .cart-label {
@@ -10,9 +9,3 @@
     margin: 0;
     text-align: center;
   }
-
-  /* .nav-bar {
-  position: fixed;
-  top: 0;
-  width: 100%;
-} */

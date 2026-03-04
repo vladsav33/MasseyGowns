@@ -15,7 +15,7 @@ export function EmailTemplate(payload = {}, template) {
     postcode = "",
     country = "",
     cart = [],
-    total = 0
+    total = 0,
   } = payload;
 
   // ----------------------------
@@ -27,19 +27,24 @@ export function EmailTemplate(payload = {}, template) {
           .map((item) => {
             const name = item.name ?? "";
             const qty = Number(item.quantity ?? 1);
-            const price = Number(item.hirePrice ?? 0)-Number(item.gst ?? price * 0.15);
-            const gst = Number(item.gst ?? price * 0.15);
-            const rowTotal = Number(item.hirePrice ?? 0);
+
+            const lineTotalIncl = Number(item.hirePrice ?? 0); // inclusive per item
+            const gst =
+              item.gst != null
+                ? Number(item.gst)
+                : (lineTotalIncl * 0.15) / 1.15;
+
+            const priceExcl = lineTotalIncl - gst;
 
             return `
-              <tr style="border-bottom:1px solid #e5e5e5;">
-                <td style="padding:10px;">${escapeHtml(name)}</td>
-                <td align="center" style="padding:10px;">${qty}</td>
-                <td align="right" style="padding:10px;">$${price.toFixed(2)}</td>
-                <td align="right" style="padding:10px;">$${gst.toFixed(2)}</td>
-                <td align="right" style="padding:10px; font-weight:bold;">$${rowTotal.toFixed(2)}</td>
-              </tr>
-            `;
+    <tr style="border-bottom:1px solid #e5e5e5;">
+      <td style="padding:10px;">${escapeHtml(name)}</td>
+      <td align="center" style="padding:10px;">${qty}</td>
+      <td align="right" style="padding:10px;">$${priceExcl.toFixed(2)}</td>
+      <td align="right" style="padding:10px;">$${gst.toFixed(2)}</td>
+      <td align="right" style="padding:10px; font-weight:bold;">$${lineTotalIncl.toFixed(2)}</td>
+    </tr>
+  `;
           })
           .join("")
       : `
@@ -68,7 +73,7 @@ export function EmailTemplate(payload = {}, template) {
     postcode,
     country,
     cartRows,
-    total: `$${Number(total).toFixed(2)}`
+    total: `$${Number(total).toFixed(2)}`,
   });
 }
 

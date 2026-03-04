@@ -131,34 +131,31 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Store customer details
-    localStorage.setItem("customerDetails", JSON.stringify(formData));
-
     try {
-      // Get the current cart
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-      localStorage.setItem("paymentMethod", parseInt(formData.paymentMethod));
-
-      // Submit order details
-
-      console.log("Order=", formData)
-
-      const [result] = await Promise.all([submitCustomerDetails(formData)]);
-      if (parseInt(formData.paymentMethod) == 3) {
-        orderCompletionEmail();
+      if (!Array.isArray(cart) || cart.length === 0) {
+        alert("Your cart is empty. Please add items before placing an order.");
+        navigate("/home");
+        return;
       }
 
-      localStorage.setItem("orderNo", result.referenceNo);
+      const [result] = await Promise.all([submitCustomerDetails(formData)]);
+      const orderNo = result.referenceNo;
 
-      // Clear the cart after successful submission
+      // save snapshot first (PaymentCompleted will use this)
+      const snapshot = { orderNo, customerDetails: formData, cart };
+      localStorage.setItem("orderSnapshot", JSON.stringify(snapshot));
+      localStorage.setItem("orderNo", orderNo);
+
+      // send email using SAME snapshot (so it matches what you display)
+      await orderCompletionEmail(snapshot);
+
+      // now clear cart
       localStorage.removeItem("cart");
       localStorage.removeItem("item");
       localStorage.removeItem("selectedCeremonyId");
       localStorage.removeItem("selectedCourseId");
-      // localStorage.removeItem("grandTotal");
-
-      // Dispatch cart update event to notify other components (like Navbar)
       window.dispatchEvent(new Event("cartUpdated"));
 
       if (parseInt(formData.paymentMethod) === 1) {
@@ -166,61 +163,34 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       } else {
         navigate("/paymentcompleted"); // page that renders <PaymentCompleted />
       }
-
-      // Proceed to next step
-      // if (step < steps.length) {
-      //   const newStep = step + 1;
-      //   setStep(newStep);
-      //   localStorage.setItem("step", newStep);
-
-      //   // Scroll to top for better UX
-      //   window.scrollTo({
-      //     top: 0,
-      //     left: 0,
-      //     behavior: "smooth",
-      //   });
-      // }
     } catch (error) {
-      console.error("Error during order submission:", error);
+      console.error(error);
       alert("There was an error submitting your order. Please try again.");
     }
   };
 
-  const orderCompletionEmail = async () => {
+  const orderCompletionEmail = async (snapshot) => {
+    const { customerDetails, cart, orderNo } = snapshot;
+
     const emailPayload = {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      gstNumber: 0,
-      invoiceNumber: 0,
-      invoiceDate: 0,
-      studentId: formData.studentId,
-      mobile: formData.mobile,
-      phone: formData.phone,
-      address: formData.address,
-      city: formData.city,
-      postcode: formData.postcode,
-      country: formData.country,
-      cart: cart,
+      ...customerDetails,
+      orderNo,
+      cart,
       grandTotal: 0,
       amountPaid: 0,
       balanceOwing: 0,
     };
 
     const data = await getEmailTemplateByName("OrderCompleted");
-
     const template = data.taxReceiptHtml;
+
     const emailHtml = EmailTemplate(emailPayload, template);
 
-    try {
-      await sendOrderEmail({
-        to: formData.email,
-        subject: data.subjectTemplate,
-        htmlBody: emailHtml,
-      });
-    } catch (err) {
-      console.error("Email sending failed:", err);
-    }
+    await sendOrderEmail({
+      to: customerDetails.email,
+      subject: data.subjectTemplate,
+      htmlBody: emailHtml,
+    });
   };
 
   useEffect(() => {

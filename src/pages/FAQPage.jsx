@@ -395,7 +395,7 @@ export default function FAQPage() {
     <div className="bg-white">
       <Navbar />
 
-      <div id="faq-top" className="mx-auto w-full max-w-4xl px-6 pt-40" />
+      <div id="faq-top" className="mx-auto w-full max-w-4xl px-6 pt-10" />
       <div className="mx-auto w-full max-w-4xl px-6 pb-12">
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900">
           Frequently Asked Questions
