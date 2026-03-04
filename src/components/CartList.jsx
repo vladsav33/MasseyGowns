@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import CartItem from "./CartItem.jsx";
 import "./CartList.css";
 
 function CartList({ step, items, setItems }) {
-  console.log("items in cart list: ", items);
-
   const [donationQuantity, setDonationQuantity] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // console.log("Items List", items);
+  const [editingItemId, setEditingItemId] = useState(null);
+  const [backupItems, setBackupItems] = useState(null);
 
   // Centralized cart updater
   const updateCart = (next) => {
@@ -21,25 +20,9 @@ function CartList({ step, items, setItems }) {
       }
       window.dispatchEvent(new Event("cartUpdated"));
 
-      console.log("Updated cart: ", updated);
       return updated;
     });
   };
-
-  // Load cart from localStorage on mount
-  // useEffect(() => {
-  //   const saved = localStorage.getItem("cart");
-  //
-  //   console.log("From saved cart: ", saved);
-  //
-  //   if (saved) {
-  //     try {
-  //       setItems(JSON.parse(saved));
-  //     } catch {
-  //       console.error("Failed to parse cart from localStorage");
-  //     }
-  //   }
-  // }, [setItems]);
 
   // --- Cart actions ---
   const handleAddDonationToCart = () => {
@@ -53,88 +36,96 @@ function CartList({ step, items, setItems }) {
     };
 
     setDonationQuantity(1);
-    updateCart([...items, donationItem]);
+    updateCart((prev) => [...prev, donationItem]);
     setIsDialogOpen(false);
   };
 
-  // const handleAddItemToCart = (itemData) => {
-  //   const newItem = {
-  //     ...itemData,
-  //     selectedOptions: {}, // initialize empty object
-  //     quantity: 1,
-  //   };
-
-  //   updateCart([...items, newItem]);
-  // };
-
   const handleIncrease = (id) => {
-    updateCart(
-      items.map((item) =>
-        item.id === id ? { ...item, quantity: (item.quantity || 1) + 1 } : item
-      )
+    updateCart((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, quantity: (item.quantity || 1) + 1 } : item,
+      ),
     );
   };
 
   const handleDecrease = (id) => {
-    updateCart(
-      items.map((item) =>
+    updateCart((prev) =>
+      prev.map((item) =>
         item.id === id && (item.quantity || 1) > 1
-          ? { ...item, quantity: item.quantity - 1 }
-          : item
-      )
+          ? { ...item, quantity: (item.quantity || 1) - 1 }
+          : item,
+      ),
     );
   };
 
   const handleRemove = (id) => {
     updateCart((prev) => prev.filter((it) => it.id !== id));
+    if (editingItemId === id) {
+      setEditingItemId(null);
+      setBackupItems(null);
+    }
   };
+
   const handleOptionChange = (itemId, optionLabel, newValue) => {
-    const updatedItems = items.map((item) => {
-      if (item.id === itemId) {
+    if (editingItemId !== itemId) return;
+
+    updateCart((prev) =>
+      prev.map((item) => {
+        if (item.id !== itemId) return item;
         return {
           ...item,
           selectedOptions: {
-            ...item.selectedOptions, // preserve other options
-            [optionLabel]: newValue, // save the selected value
+            ...(item.selectedOptions || {}),
+            [optionLabel]: newValue,
           },
         };
-      }
-      return item;
-    });
-    setItems(updatedItems, grandTotal);
-    localStorage.setItem("cart", JSON.stringify(updatedItems, grandTotal)); // persist to localStorage
-    // console.log(localStorage.getItem("cart"), grandTotal);
-    
+      }),
+    );
   };
 
   const handleDeliveryChange = (itemId, newPrice) => {
-    const updatedItems = items.map((item) => {
-      if (item.id === itemId) {
-        item.hirePrice = newPrice;
-      }
-      return item;
-    });
-    // console.log("Updated Items=", updatedItems);
-    setItems(updatedItems, grandTotal);
-    localStorage.setItem("cart", JSON.stringify(updatedItems, grandTotal));
-  }
+    if (editingItemId !== itemId) return;
+
+    updateCart((prev) =>
+      prev.map((item) =>
+        item.id === itemId ? { ...item, hirePrice: newPrice } : item,
+      ),
+    );
+  };
+
+  // edit controls
+  const startEdit = (id) => {
+    // allow one item at a time
+    if (editingItemId && editingItemId !== id) return;
+
+    setBackupItems(items); // snapshot for cancel
+    setEditingItemId(id);
+  };
+
+  const saveEdit = () => {
+    setEditingItemId(null);
+    setBackupItems(null);
+  };
+
+  const cancelEdit = () => {
+    if (backupItems) updateCart(backupItems);
+    setEditingItemId(null);
+    setBackupItems(null);
+  };
 
   // --- Price utilities ---
   const getNumericPrice = (priceString) =>
     parseFloat(String(priceString || 0).replace("$", "")) || 0;
 
-  const totalItems = items
-    .filter((item) => !item.isDonation)
-    .reduce((acc, item) => acc + (item.quantity || 1), 0);
-
-  // Add delivery price
   const totalPrice = items
     .filter((item) => !item.isDonation)
-    .reduce(
-      (acc, item) =>
-        acc + getNumericPrice(item.hirePrice) * (item.quantity || 1),
-      0
-    );
+    .reduce((acc, item) => {
+      const price =
+        item.isHiring === false
+          ? getNumericPrice(item.buyPrice)
+          : getNumericPrice(item.hirePrice);
+      return acc + price * (item.quantity || 1);
+    }, 0);
 
   const totalDonationPrice = items
     .filter((item) => item.isDonation)
@@ -144,31 +135,47 @@ function CartList({ step, items, setItems }) {
     .filter((item) => item.isDonation)
     .reduce((acc, item) => acc + (item.quantity || 1), 0);
 
-  // const taxOnItems = totalPrice * 0.1;
-  // const taxOnDonations = totalDonationPrice * 0.1;
-
   const grandTotal = totalPrice + totalDonationPrice;
-  localStorage.setItem("grandTotal", grandTotal);
+  localStorage.setItem("grandTotal", String(grandTotal));
+
+  const onTogglePurchaseType = (itemId, newIsHiring) => {
+    updateCart((prev) =>
+      prev.map((it) =>
+        it.id === itemId ? { ...it, isHiring: newIsHiring } : it,
+      ),
+    );
+  };
+
+  const hasDonation = items.some((item) => item.isDonation);
 
   return (
     <div className="cart">
       {items.length > 0 ? (
         <>
           <h4>You have {items.length} items in your cart</h4>
-          {items?.map((item) => (
-            <CartItem
-              key={item.id}
-              item={item}
-              step={step}
-              quantity={item.quantity || 1}
-              onIncrease={() => handleIncrease(item.id)}
-              onDecrease={() => handleDecrease(item.id)}
-              onRemove={() => handleRemove(item.id)}
-              onOptionChange={handleOptionChange}
-              onDeliveryChange={handleDeliveryChange}
-            />
-          ))}
-          <div></div>
+
+          {items.map((item) => {
+            const isEditing = editingItemId === item.id;
+
+            return (
+              <CartItem
+                key={item.id}
+                item={item}
+                step={step}
+                quantity={item.quantity || 1}
+                onIncrease={() => handleIncrease(item.id)}
+                onDecrease={() => handleDecrease(item.id)}
+                onRemove={() => handleRemove(item.id)}
+                onOptionChange={handleOptionChange}
+                onDeliveryChange={handleDeliveryChange}
+                onTogglePurchaseType={onTogglePurchaseType}
+                isEditing={editingItemId === item.id}
+                onEdit={() => startEdit(item.id)}
+                onSave={saveEdit}
+                onCancel={cancelEdit}
+              />
+            );
+          })}
 
           {step === 2 && (
             <div>
@@ -183,6 +190,7 @@ function CartList({ step, items, setItems }) {
                 <button
                   className="donate-btn"
                   onClick={() => setIsDialogOpen(true)}
+                  disabled={hasDonation}
                 >
                   Donate
                 </button>
@@ -191,6 +199,7 @@ function CartList({ step, items, setItems }) {
               {/* Order Summary */}
               <div className="cart-summary">
                 <h3>Order Summary</h3>
+
                 <div className="summary-row">
                   <span>Total Items:</span>
                   <span>{items.length}</span>
@@ -201,20 +210,10 @@ function CartList({ step, items, setItems }) {
                   <span>${totalPrice.toFixed(2)}</span>
                 </div>
 
-                {/* <div className="summary-row">
-                  <span>Tax on Items (10%):</span>
-                  <span>${taxOnItems.toFixed(2)}</span>
-                </div> */}
-
                 <div className="summary-row">
-                  <span>Total Donation ({totalDonationCount} × $2):</span>
+                  <span>Total Donation ({totalDonationCount} * $2):</span>
                   <span>${totalDonationPrice.toFixed(2)}</span>
                 </div>
-
-                {/* <div className="summary-row">
-                  <span>Tax on Donations (10%):</span>
-                  <span>${taxOnDonations.toFixed(2)}</span>
-                </div> */}
 
                 <div className="summary-row total">
                   <span>Total Amount (Including GST):</span>
@@ -246,16 +245,22 @@ function CartList({ step, items, setItems }) {
                     We are a not-for-profit Charitable Trust registered with the
                     Charities Commission (CC31226).
                   </p>
+
                   <div className="mission-section">
                     <h3>Our Mission</h3>
                     <ul
                       style={{ listStyleType: "disc", paddingLeft: "1.5rem" }}
                     >
                       <li>
-                        <p>To provide a robe hire service of the highest quality</p>
+                        <p>
+                          To provide a robe hire service of the highest quality
+                        </p>
                       </li>
                       <li>
-                        <p>To disburse funds raised by robe hire for the advancement of education</p>
+                        <p>
+                          To disburse funds raised by robe hire for the
+                          advancement of education
+                        </p>
                       </li>
                     </ul>
                   </div>
@@ -284,7 +289,7 @@ function CartList({ step, items, setItems }) {
                       value={donationQuantity}
                       onChange={(e) =>
                         setDonationQuantity(
-                          Math.max(1, parseInt(e.target.value) || 1)
+                          Math.max(1, parseInt(e.target.value) || 1),
                         )
                       }
                       className="quantity-input"
@@ -299,7 +304,7 @@ function CartList({ step, items, setItems }) {
 
               <div className="dialog-footer">
                 <button
-                  className="donate-btn"
+                  className="donate-add-btn"
                   onClick={handleAddDonationToCart}
                 >
                   Add to Cart

@@ -6,7 +6,7 @@
   margin: 0;
   background: white;
   justify-content: center;
-  padding-top: 130px;
+  padding-top: 5%;
   padding-bottom: 50px;
 }
 
@@ -96,7 +96,7 @@
   font-weight: bold;
   font-size: larger;
   background-color: black;
-  border-radius: 10%;
+  border-radius: 10px;
 }
 
 .hero p {

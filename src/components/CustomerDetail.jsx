@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import "./CustomerDetail.css";
-import { Link } from "react-router-dom";
 import { submitCustomerDetails } from "./../services/HireBuyRegaliaService.js";
 import DatePicker from "react-datepicker";
 import { format } from "date-fns";
@@ -8,6 +7,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { sendOrderEmail } from "../api/EmailApi";
 import { EmailTemplate } from "../components/EmailTemplate.jsx";
 import { getEmailTemplateByName } from "../api/EmailApi";
+import { Link, useNavigate } from "react-router-dom";
 
 function CustomerDetail({ item, items = [], step, setStep, steps }) {
   const [countries, setCountries] = useState([]);
@@ -30,16 +30,25 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
     message: "",
   });
 
+  const navigate = useNavigate();
+
   // Use props if provided, otherwise load from localStorage
   const cart =
     items.length > 0 ? items : JSON.parse(localStorage.getItem("cart") || "[]");
   localStorage.setItem("customerDetails", JSON.stringify(formData));
 
-  // Calculate total
-  const total = cart.reduce(
-    (sum, item) => sum + (item.hirePrice || 0) * (item.quantity || 1),
-    0
-  );
+  // Calculate total - use buyPrice or hirePrice based on item mode
+  const total = cart.reduce((sum, item) => {
+    // Use buyPrice if item is in buy mode (isHiring === false), otherwise use hirePrice
+    const price =
+      item.isHiring === false ? item.buyPrice || 0 : item.hirePrice || 0;
+    return sum + price * (item.quantity || 1);
+  }, 0);
+
+  // Helper function to get item price based on hire/buy mode
+  const getItemPrice = (item) => {
+    return item.isHiring === false ? item.buyPrice || 0 : item.hirePrice || 0;
+  };
 
   const handleDateChange = (date) => {
     setFormData({ ...formData, eventDate: date });
@@ -48,7 +57,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
   const today = new Date().toISOString().split("T")[0];
 
   const selectedCeremonyId = JSON.parse(
-    localStorage.getItem("selectedCeremonyId") || 0
+    localStorage.getItem("selectedCeremonyId") || 0,
   );
 
   const handleChange = (e) => {
@@ -122,95 +131,66 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Store customer details
-    localStorage.setItem("customerDetails", JSON.stringify(formData));
-
     try {
-      // Get the current cart
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      console.log("Cart before submission:", cart);
 
-      localStorage.setItem("paymentMethod", parseInt(formData.paymentMethod));
-
-      // Submit order details
-      const [result] = await Promise.all([submitCustomerDetails(formData)]);
-      if (parseInt(formData.paymentMethod) == 3) {
-        orderCompletionEmail();
+      if (!Array.isArray(cart) || cart.length === 0) {
+        alert("Your cart is empty. Please add items before placing an order.");
+        navigate("/home");
+        return;
       }
 
-      console.log("Order received=", result);
-      localStorage.setItem("orderNo", result.referenceNo);
-      debugger;
+      const [result] = await Promise.all([submitCustomerDetails(formData)]);
+      const orderNo = result.referenceNo;
 
-      console.log("Order submission completed successfully");
-      // setTimeout(() => { debugger; }, 0);
-      // debugger;
+      // save snapshot first (PaymentCompleted will use this)
+      const snapshot = { orderNo, customerDetails: formData, cart };
+      localStorage.setItem("orderSnapshot", JSON.stringify(snapshot));
+      localStorage.setItem("orderNo", orderNo);
 
-      // Clear the cart after successful submission
+      // send email using SAME snapshot (so it matches what you display)
+      await orderCompletionEmail(snapshot);
+
+      // now clear cart
       localStorage.removeItem("cart");
       localStorage.removeItem("item");
       localStorage.removeItem("selectedCeremonyId");
       localStorage.removeItem("selectedCourseId");
-      // localStorage.removeItem("grandTotal");
-
-      // Dispatch cart update event to notify other components (like Navbar)
       window.dispatchEvent(new Event("cartUpdated"));
 
-      // Proceed to next step
-      if (step < steps.length) {
-        const newStep = step + 1;
-        setStep(newStep);
-        localStorage.setItem("step", newStep);
-
-        // Scroll to top for better UX
-        window.scrollTo({
-          top: 0,
-          left: 0,
-          behavior: "smooth",
-        });
+      if (parseInt(formData.paymentMethod) === 1) {
+        navigate("/payment"); // page that renders <Payment />
+      } else {
+        navigate("/paymentcompleted"); // page that renders <PaymentCompleted />
       }
     } catch (error) {
-      console.error("Error during order submission:", error);
+      console.error(error);
       alert("There was an error submitting your order. Please try again.");
     }
   };
 
-  const orderCompletionEmail = async () => {
+  const orderCompletionEmail = async (snapshot) => {
+    const { customerDetails, cart, orderNo } = snapshot;
+
     const emailPayload = {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      gstNumber: 0,
-      invoiceNumber: 0,
-      invoiceDate: 0,
-      studentId: formData.studentId,
-      mobile: formData.mobile,
-      phone: formData.phone,
-      address: formData.address,
-      city: formData.city,
-      postcode: formData.postcode,
-      country: formData.country,
-      cart: cart,
+      ...customerDetails,
+      orderNo,
+      cart,
       grandTotal: 0,
       amountPaid: 0,
       balanceOwing: 0,
     };
 
     const data = await getEmailTemplateByName("OrderCompleted");
-    console.log(data);
-    
     const template = data.taxReceiptHtml;
+
     const emailHtml = EmailTemplate(emailPayload, template);
 
-    try {
-      await sendOrderEmail({
-        to: formData.email,
-        subject: data.subjectTemplate,
-        htmlBody: emailHtml,
-      });
-    } catch (err) {
-      console.error("Email sending failed:", err);
-    }
+    await sendOrderEmail({
+      to: customerDetails.email,
+      subject: data.subjectTemplate,
+      htmlBody: emailHtml,
+    });
   };
 
   useEffect(() => {
@@ -220,7 +200,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       // Try REST Countries (preferred)
       try {
         const res = await fetch(
-          "https://restcountries.com/v3.1/all?fields=name,cca2,flags"
+          "https://restcountries.com/v3.1/all?fields=name,cca2,flags",
         );
         if (!res.ok) throw new Error(`REST Countries HTTP ${res.status}`);
         const data = await res.json();
@@ -266,13 +246,13 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       const staticList = [
         { label: "New Zealand", value: "NZ", flag: "" },
         { label: "Australia", value: "AU", flag: "" },
-        { label: "United States", value: "US", flag: "" },
         { label: "United Kingdom", value: "UK", flag: "" },
+        { label: "United States", value: "US", flag: "" },
       ];
       if (!cancelled) {
         setCountries(staticList);
         setCountriesError(
-          "Could not load countries from network; using a shortened fallback list."
+          "Could not load countries from network; using a shortened fallback list.",
         );
       }
     };
@@ -546,6 +526,9 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
         {cart.length > 0 ? (
           <>
             {cart.map((item) => {
+              const itemPrice = getItemPrice(item);
+              const itemTotal = itemPrice * (item.quantity || 1);
+
               return (
                 <div
                   key={item.id}
@@ -563,25 +546,34 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
                   <div className="summary-info">
                     <p className="summary-name">{item.name}</p>
 
-                    {item.selectedOptions &&
-                      Object.entries(item.selectedOptions).map(
-                        ([label, value]) => (
-                          <p key={label} className="summary-option">
-                            {label}: <strong>{value}</strong>
+                    {item.options &&
+                      item.options.map((option) => {
+                        const selectedId = item.selectedOptions?.[option.label];
+                        if (!selectedId) return null;
+
+                        const selectedChoice = option.choices.find(
+                          (c) => String(c.id || c.value) === String(selectedId),
+                        );
+
+                        const displayValue = selectedChoice
+                          ? selectedChoice.value ||
+                            selectedChoice.size ||
+                            selectedChoice.name ||
+                            selectedChoice
+                          : selectedId;
+
+                        return (
+                          <p key={option.label} className="summary-option">
+                            {option.label}: <strong>{displayValue}</strong>
                           </p>
-                        )
-                      )}
+                        );
+                      })}
                   </div>
 
                   <div className="summary-price">
-                    ${(item.hirePrice || 0).toFixed(2)} * {item.quantity || 1}
+                    ${itemPrice.toFixed(2)} * {item.quantity || 1}
                     <br />
-                    <strong>
-                      $
-                      {((item.hirePrice || 0) * (item.quantity || 1)).toFixed(
-                        2
-                      )}
-                    </strong>
+                    <strong>${itemTotal.toFixed(2)}</strong>
                   </div>
                 </div>
               );

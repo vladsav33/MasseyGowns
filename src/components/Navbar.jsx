@@ -1,87 +1,52 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./Navbar.css";
 import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
 
 function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
+
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const cartRef = useRef(null);
 
-  // Get the selected ceremony ID from localStorage
+  //  localStorage ceremony id (keeping your logic)
   const [selectedCeremonyId, setSelectedCeremonyId] = useState(null);
-
   useEffect(() => {
     const ceremonyId = localStorage.getItem("selectedCeremonyId");
-    setSelectedCeremonyId(ceremonyId ? parseInt(ceremonyId) : null);
+    setSelectedCeremonyId(ceremonyId ? parseInt(ceremonyId, 10) : null);
   }, [location]);
 
-  /*const isActive = (path, ceremonyId = null) => {
-    if (location.pathname !== path) return false;
-
-    // If a ceremony ID is specified, check if it matches
-    if (ceremonyId !== null) {
-      const storedCeremonyId = localStorage.getItem("selectedCeremonyId");
-      return storedCeremonyId && parseInt(storedCeremonyId) === ceremonyId;
-    }
-
-    return true;
-  };*/
-
-  /*const handleHireClick = (ceremonyId) => {
-    // Store the ceremony ID in localStorage
-    // localStorage.setItem("selectedCeremonyId", ceremonyId);
-    // setSelectedCeremonyId(ceremonyId);
-  };*/
-
-  // Load cart items from localStorage
+  //  Load cart
   useEffect(() => {
     const loadCartItems = () => {
       const saved = localStorage.getItem("cart");
-      if (saved) {
-        try {
-          const items = JSON.parse(saved);
-          setCartItems(Array.isArray(items) ? items : []);
-        } catch (error) {
-          console.error("Failed to parse cart from localStorage:", error);
-          setCartItems([]);
-        }
-      } else {
+      if (!saved) return setCartItems([]);
+      try {
+        const parsed = JSON.parse(saved);
+        setCartItems(Array.isArray(parsed) ? parsed : []);
+      } catch (e) {
+        console.error("Failed to parse cart:", e);
         setCartItems([]);
       }
     };
 
     loadCartItems();
 
-    const safeLoad = () => {
-      if (typeof startTransition === "function") {
-        startTransition(() => loadCartItems());
-      } else {
-        setTimeout(loadCartItems, 0);
-      }
-    };
-
-    safeLoad();
-
-    // Listen for localStorage changes (when cart is updated in other components)
     const handleStorageChange = (e) => {
-      if (e.key === "cart") safeLoad();
+      if (e.key === "cart") loadCartItems();
       if (e.key === "selectedCeremonyId") {
         const ceremonyId = localStorage.getItem("selectedCeremonyId");
-        setSelectedCeremonyId(ceremonyId ? parseInt(ceremonyId) : null);
+        setSelectedCeremonyId(ceremonyId ? parseInt(ceremonyId, 10) : null);
       }
     };
 
-    // Listen for custom cart update events
-    const handleCartUpdate = () => {
-      safeLoad();
-    };
+    const handleCartUpdate = () => loadCartItems();
 
     window.addEventListener("storage", handleStorageChange);
     window.addEventListener("cartUpdated", handleCartUpdate);
-
-    loadCartItems();
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
@@ -89,282 +54,254 @@ function Navbar() {
     };
   }, [location]);
 
-  // Close cart dropdown when clicking outside
+  //  Close cart dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (cartRef.current && !cartRef.current.contains(event.target)) {
         setIsCartOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Calculate cart totals
+  //  Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname, location.search]);
+
   const getNumericPrice = (priceString) =>
     parseFloat(String(priceString || 0).replace("$", "")) || 0;
 
-  const totalItems = cartItems
-    .filter(Boolean)
-    .reduce((acc, item) => acc + (item.quantity || 1), 0);
+  const totalItems = useMemo(
+    () =>
+      cartItems
+        .filter(Boolean)
+        .reduce((acc, item) => acc + (item.quantity || 1), 0),
+    [cartItems],
+  );
 
-  const totalPrice = cartItems
-    .filter(Boolean)
-    .reduce(
-      (acc, item) =>
-        acc + getNumericPrice(item.hirePrice) * (item.quantity || 1),
-      0
-    );
+  const totalPrice = useMemo(
+    () =>
+      cartItems.filter(Boolean).reduce((acc, item) => {
+        const unit =
+          item.isHiring === false
+            ? getNumericPrice(item.buyPrice)
+            : getNumericPrice(item.hirePrice);
+        return acc + unit * (item.quantity || 1);
+      }, 0),
+    [cartItems],
+  );
 
-  const handleCartIconClick = () => {
-    setIsCartOpen(!isCartOpen);
-  };
-
-  // Analyze cart contents to determine item types
-  const analyzeCartContents = () => {
-    const analysis = {
-      hasBuyItems: false,
-      hasHireItems: false,
-      hasOnlyDonations: false,
-    };
-
-    // Filter out donations first
-    const nonDonationItems = cartItems.filter((item) => !item.isDonation);
-
-    if (nonDonationItems.length === 0) {
-      analysis.hasOnlyDonations = true;
-      return analysis;
-    }
-
-    // Check for buy items (items where isHiring is false or type indicates buying)
-    analysis.hasBuyItems = nonDonationItems.some(
-      (item) =>
-        item.isHiring === false ||
-        (item.type === "individual" && item.isHiring !== true) ||
-        (item.type === "set" && item.isHiring !== true)
-    );
-
-    // Check for hire items (items where isHiring is true or undefined/null - old hire items)
-    analysis.hasHireItems = nonDonationItems.some(
-      (item) =>
-        item.isHiring === true ||
-        item.isHiring === undefined ||
-        item.isHiring === null
-    );
-
-    return analysis;
+  const getItemPrice = (item) => {
+    const unit =
+      item.isHiring === false
+        ? getNumericPrice(item.buyPrice)
+        : getNumericPrice(item.hirePrice);
+    return unit * (item.quantity || 1);
   };
 
   const handleViewCart = () => {
     setIsCartOpen(false);
-
-    const { hasBuyItems, hasHireItems, hasOnlyDonations } =
-      analyzeCartContents();
-
-    // If cart is empty or only has donations, default behavior
-    if (cartItems.length === 0 || hasOnlyDonations) {
-      if (location.pathname === "/hireregalia") {
-        navigate("/hireregalia", { state: { step: 2 } });
-      } else if (location.pathname === "/buyregalia") {
-        navigate("/buyregalia", { state: { step: 2 } });
-      } else {
-        navigate("/buyregalia", { state: { step: 2 } });
-      }
-      return;
-    }
-
-    // Only buy items in cart → go to step 2 in buyRegalia
-    if (hasBuyItems && !hasHireItems) {
-      navigate("/buyregalia", { state: { step: 2 } });
-      return;
-    }
-
-    // Only hire items in cart → go to step 2 in hireRegalia
-    if (hasHireItems && !hasBuyItems) {
-      navigate("/hireregalia", { state: { step: 2 } });
-      return;
-    }
-
-    // Both hire and buy items in cart
-    if (hasBuyItems && hasHireItems) {
-      if (location.pathname === "/hireregalia") {
-        // Already on hire page → go to step 2 in hireRegalia
-        navigate("/hireregalia", { state: { step: 2 } });
-      } else if (location.pathname === "/buyregalia") {
-        // Already on buy page → go to step 2 in buyRegalia
-        navigate("/buyregalia", { state: { step: 2 } });
-      } else {
-        // Not on hire or buy pages → go to step 2 in hireRegalia
-        navigate("/hireregalia", { state: { step: 2 } });
-      }
-      return;
-    }
-
-    // Fallback
-    navigate("/buyregalia", { state: { step: 2 } });
+    setIsMobileMenuOpen(false);
+    navigate("/cart");
   };
 
   const removeFromCart = (itemId) => {
-    const updatedItems = cartItems.filter((item) => item.id !== itemId);
-    setCartItems(updatedItems);
+    const updated = cartItems.filter((item) => item.id !== itemId);
+    setCartItems(updated);
 
-    if (updatedItems.length > 0) {
-      localStorage.setItem("cart", JSON.stringify(updatedItems));
-    } else {
-      localStorage.removeItem("cart");
-    }
+    if (updated.length > 0) localStorage.setItem("cart", JSON.stringify(updated));
+    else localStorage.removeItem("cart");
 
-    // Dispatch custom event to notify other components
     window.dispatchEvent(new Event("cartUpdated"));
   };
 
+  const MenuLinks = ({ onClickLink }) => (
+    <>
+      <NavLink
+        to="/hireregalia"
+        state={{ step: 1 }}
+        onClick={onClickLink}
+        className={({ isActive }) => {
+          const isPhoto = new URLSearchParams(location.search).get("mode") === "photo";
+          return isActive && !isPhoto ? "nav-link active" : "nav-link";
+        }}
+      >
+        HIRE REGALIA
+      </NavLink>
+
+      <NavLink
+        to="/buyregalia"
+        state={{ step: 1 }}
+        onClick={onClickLink}
+        className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+      >
+        BUY REGALIA
+      </NavLink>
+
+      <NavLink
+        to="/hireregalia?mode=photo"
+        state={{ step: 1 }}
+        onClick={onClickLink}
+        className={({ isActive }) => {
+          const isPhoto = new URLSearchParams(location.search).get("mode") === "photo";
+          return isActive && isPhoto ? "nav-link active" : "nav-link";
+        }}
+      >
+        CASUAL HIRE PHOTO
+      </NavLink>
+
+      <NavLink
+        to="/faqs"
+        onClick={onClickLink}
+        className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+      >
+        FAQs
+      </NavLink>
+
+      <NavLink
+        to="/contactus"
+        onClick={onClickLink}
+        className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+      >
+        CONTACT US
+      </NavLink>
+    </>
+  );
+
   return (
-    <nav className="navbar">
-      <div className="navbar-left">
-        <Link to="/">
-          <img src="/logo.jpg" alt="MasseyGowns" className="logo" />
+    <header className="nav-wrap">
+      <nav className="nav">
+        <Link to="/" className="brand" aria-label="Go to home">
+          <img src="/logo.jpg" alt="MasseyGowns" className="brand-logo" />
         </Link>
-      </div>
-      <ul className="navbar-menu">
-        <li className="has-dropdown">
-          <NavLink
-            to="/hireregalia"
-            state={{ step: 1 }}
-            className={({ isActive }) => {
-              const isPhoto =
-                new URLSearchParams(location.search).get("mode") === "photo";
-              return isActive && !isPhoto ? "menu-link active" : "menu-link";
-            }}
-          >
-            HIRE REGALIA
-          </NavLink>
-        </li>
-        <li className="has-dropdown">
-          <NavLink to="/buyregalia" state={{ step: 1 }}>
-            BUY REGALIA
-          </NavLink>
-        </li>
 
-        <li className="has-dropdown">
-          <NavLink
-            to="/hireregalia?mode=photo"
-            state={{ step: 1 }}
-            className={({ isActive }) => {
-              const isPhoto =
-                new URLSearchParams(location.search).get("mode") === "photo";
-              return isActive && isPhoto ? "menu-link active" : "menu-link";
-            }}
-          >
-            CASUAL HIRE FOR PHOTOS
-          </NavLink>
-        </li>
+        {/* Desktop menu */}
+        <div className="nav-links desktop-only">
+          <MenuLinks />
+        </div>
 
-        <li>
-          <NavLink to="/faqs">FAQs</NavLink>
-        </li>
-        <li>
-          <NavLink to="/contactus">CONTACT US</NavLink>
-        </li>
-      </ul>
-      <div className="navbar-icons">
-        <div className="cart-icon-container" ref={cartRef}>
-          <div className="cart-icon" onClick={handleCartIconClick}>
-            <i className="fa fa-shopping-bag"></i>
-            {totalItems > 0 && <span className="cart-badge">{totalItems}</span>}
+        <div className="nav-actions">
+          {/* Cart */}
+          <div className="cart-icon-container" ref={cartRef}>
+            <button
+              type="button"
+              className="icon-btn"
+              aria-label="Open cart"
+              aria-expanded={isCartOpen}
+              onClick={() => setIsCartOpen((v) => !v)}
+            >
+              <i className="fa fa-shopping-bag" />
+              {totalItems > 0 && <span className="cart-badge">{totalItems}</span>}
+            </button>
+
+            {isCartOpen && (
+              <div className="cart-dropdown" role="dialog" aria-label="Shopping cart">
+                <div className="cart-dropdown-header">
+                  <h3>Shopping Cart</h3>
+                </div>
+
+                <div className="cart-dropdown-content">
+                  {cartItems.length > 0 ? (
+                    <>
+                      <div className="cart-items-list">
+                        {cartItems.map((item) => (
+                          <div key={item.id} className="cart-dropdown-item">
+                            <div className="cart-item-info">
+                              <div className="cart-item-name">{item.name}</div>
+
+                              <div className="cart-item-details">
+                                <span className="cart-item-category">{item.category}</span>
+                                <span className="cart-item-quantity">Qty: {item.quantity || 1}</span>
+                              </div>
+
+                              {item.selectedOptions &&
+                                Object.keys(item.selectedOptions).length > 0 && (
+                                  <div className="cart-item-options">
+                                    {(item.options || []).map((option) => {
+                                      const selectedId = item.selectedOptions?.[option.label];
+                                      if (!selectedId) return null;
+
+                                      const selectedChoice = (option.choices || []).find(
+                                        (c) =>
+                                          String(c.id || c.value) === String(selectedId),
+                                      );
+
+                                      const displayValue = selectedChoice
+                                        ? selectedChoice.value ||
+                                          selectedChoice.size ||
+                                          selectedChoice.name ||
+                                          String(selectedChoice)
+                                        : String(selectedId);
+
+                                      return (
+                                        <div key={option.label} className="cart-option">
+                                          <span className="option-label">{option.label}:</span>
+                                          <span className="option-value">{displayValue}</span>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                            </div>
+
+                            <div className="cart-item-actions">
+                              <div className="cart-item-price">
+                                ${getItemPrice(item).toFixed(2)}
+                              </div>
+                              <button
+                                className="remove-item-btn"
+                                onClick={() => removeFromCart(item.id)}
+                                aria-label="Remove item"
+                                type="button"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="cart-dropdown-footer">
+                        <div className="cart-total">
+                          <strong>Total: ${totalPrice.toFixed(2)}</strong>
+                        </div>
+                        <button className="view-cart-btn" onClick={handleViewCart} type="button">
+                          View Cart
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="empty-cart-message">
+                      <p>Your cart is empty</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Cart Dropdown */}
-          {isCartOpen && (
-            <div className="cart-dropdown">
-              <div className="cart-dropdown-header">
-                <h3>Shopping Cart</h3>
-              </div>
-
-              <div className="cart-dropdown-content">
-                {cartItems.length > 0 ? (
-                  <>
-                    <div className="cart-items-list">
-                      {cartItems.map((item) => (
-                        <div key={item.id} className="cart-dropdown-item">
-                          <div className="cart-item-info">
-                            <div className="cart-item-name">{item.name}</div>
-                            <div className="cart-item-details">
-                              <span className="cart-item-category">
-                                {item.category}
-                              </span>
-                              <span className="cart-item-quantity">
-                                Qty: {item.quantity || 1}
-                              </span>
-                            </div>
-                            {/* Show selected options if available */}
-                            {item.selectedOptions &&
-                              Object.keys(item.selectedOptions).length > 0 && (
-                                <div className="cart-item-options">
-                                  {Object.entries(item.selectedOptions).map(
-                                    ([label, value]) => (
-                                      <div key={label} className="cart-option">
-                                        <span className="option-label">
-                                          {label}:
-                                        </span>
-                                        <span className="option-value">
-                                          {value}
-                                        </span>
-                                      </div>
-                                    )
-                                  )}
-                                </div>
-                              )}
-                          </div>
-                          <div className="cart-item-actions">
-                            <div className="cart-item-price">
-                              $
-                              {(
-                                getNumericPrice(item.hirePrice) *
-                                (item.quantity || 1)
-                              ).toFixed(2)}
-                            </div>
-                            <button
-                              className="remove-item-btn"
-                              onClick={() => removeFromCart(item.id)}
-                              aria-label="Remove item"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="cart-dropdown-footer">
-                      <div className="cart-total">
-                        <strong>Total: ${totalPrice.toFixed(2)}</strong>
-                      </div>
-                      <button
-                        className="view-cart-btn"
-                        onClick={handleViewCart}
-                      >
-                        View Cart
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <div className="empty-cart-message">
-                    <p>Your cart is empty</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+          {/* Mobile hamburger */}
+          <button
+            type="button"
+            className="icon-btn mobile-only"
+            aria-label="Open menu"
+            aria-expanded={isMobileMenuOpen}
+            onClick={() => setIsMobileMenuOpen((v) => !v)}
+          >
+            <i className={`fa ${isMobileMenuOpen ? "fa-times" : "fa-bars"}`} />
+          </button>
         </div>
-        {/*<i className="fa fa-search"></i>*/}
-        {/*<Link to={"/payment"}>*/}
-        {/*  <i className="fa fa-user"></i>*/}
-        {/*</Link>*/}
-      </div>
-    </nav>
+      </nav>
+
+      {/* Mobile menu panel */}
+      {isMobileMenuOpen && (
+        <div className="mobile-menu mobile-only">
+          <MenuLinks onClickLink={() => setIsMobileMenuOpen(false)} />
+        </div>
+      )}
+    </header>
   );
 }
 
