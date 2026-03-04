@@ -147,20 +147,19 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       const snapshot = { orderNo, customerDetails: formData, cart };
       localStorage.setItem("orderSnapshot", JSON.stringify(snapshot));
       localStorage.setItem("orderNo", orderNo);
-
-      // send email using SAME snapshot (so it matches what you display)
-      await orderCompletionEmail(snapshot);
-
-      // now clear cart
+      
+      // clear cart
       localStorage.removeItem("cart");
       localStorage.removeItem("item");
       localStorage.removeItem("selectedCeremonyId");
       localStorage.removeItem("selectedCourseId");
       window.dispatchEvent(new Event("cartUpdated"));
-
+      
       if (parseInt(formData.paymentMethod) === 1) {
         navigate("/payment"); // page that renders <Payment />
       } else {
+        // send email using SAME snapshot (so it matches what you display)
+        await orderCompletionEmail(snapshot);
         navigate("/paymentcompleted"); // page that renders <PaymentCompleted />
       }
     } catch (error) {
