@@ -58,14 +58,14 @@ export default function HomePage() {
                 </div>
                 <p>{heroIntro}</p>
                 <div className="options">
-                  <Link to="/hireregalia" className="HireRegalia">
+                  <Link to="/hireregalia" state={{ step: 1 }} className="HireRegalia">
                     Hire Regalia
                   </Link>
-                  <Link to="/buyregalia" className="BuyRegalia">
+                  <Link to="/buyregalia" state={{ step: 1 }} className="BuyRegalia">
                     Buy Regalia
                   </Link>
                   <Link
-                    to={{ pathname: "/hireregalia", search: "?mode=photo" }}
+                    to={{ pathname: "/hireregalia", search: "?mode=photo" }} state={{ step: 1 }}
                     className="HireRegalia"
                   >
                     Casual Hire for Photos
