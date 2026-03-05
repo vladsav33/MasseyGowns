@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./CustomerDetail.css";
 import { submitCustomerDetails } from "./../services/HireBuyRegaliaService.js";
-import DatePicker from "react-datepicker";
-import { format } from "date-fns";
 import "react-datepicker/dist/react-datepicker.css";
-import { sendOrderEmail } from "../api/EmailApi";
-import { EmailTemplate } from "../components/EmailTemplate.jsx";
-import { getEmailTemplateByName } from "../api/EmailApi";
 import { Link, useNavigate } from "react-router-dom";
 
 function CustomerDetail({ item, items = [], step, setStep, steps }) {
@@ -147,49 +142,23 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       const snapshot = { orderNo, customerDetails: formData, cart };
       localStorage.setItem("orderSnapshot", JSON.stringify(snapshot));
       localStorage.setItem("orderNo", orderNo);
-      
+
       // clear cart
       localStorage.removeItem("cart");
       localStorage.removeItem("item");
       localStorage.removeItem("selectedCeremonyId");
       localStorage.removeItem("selectedCourseId");
       window.dispatchEvent(new Event("cartUpdated"));
-      
+
       if (parseInt(formData.paymentMethod) === 1) {
         navigate("/payment"); // page that renders <Payment />
       } else {
-        // send email using SAME snapshot (so it matches what you display)
-        await orderCompletionEmail(snapshot);
         navigate("/paymentcompleted"); // page that renders <PaymentCompleted />
       }
     } catch (error) {
       console.error(error);
       alert("There was an error submitting your order. Please try again.");
     }
-  };
-
-  const orderCompletionEmail = async (snapshot) => {
-    const { customerDetails, cart, orderNo } = snapshot;
-
-    const emailPayload = {
-      ...customerDetails,
-      orderNo,
-      cart,
-      grandTotal: 0,
-      amountPaid: 0,
-      balanceOwing: 0,
-    };
-
-    const data = await getEmailTemplateByName("OrderCompleted");
-    const template = data.taxReceiptHtml;
-
-    const emailHtml = EmailTemplate(emailPayload, template);
-
-    await sendOrderEmail({
-      to: customerDetails.email,
-      subject: data.subjectTemplate,
-      htmlBody: emailHtml,
-    });
   };
 
   useEffect(() => {
@@ -442,7 +411,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
               required
             />
             <label htmlFor="termsAccepted" className="checkbox-label">
-              I've read and agree to all{" "}
+              I&apos;ve read and agree to all{" "}
               <Link
                 to="/terms-and-conditions"
                 target="_blank"

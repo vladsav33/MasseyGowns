@@ -1,18 +1,5 @@
 const API_BASE = import.meta.env.VITE_GOWN_API_BASE;
 
-/**
- * Send a website email using the backend /api/email/send endpoint.
- *
- * Expected payload shape:
- * {
- *   email: string,
- *   firstName: string,
- *   lastName: string,
- *   subject: string,
- *   enquiry: string
- *   toEmail?: string      // optional: override recipient
- * }
- */
 export async function sendWebsiteEmail(payload) {
   const res = await fetch(`${API_BASE}/api/email/send`, {
     method: "POST",
@@ -35,7 +22,7 @@ export async function sendWebsiteEmail(payload) {
 }
 
 export async function sendOrderEmail(payload) {
-  const res = await fetch(`${API_BASE}/api/email/sendOrderEmail`, {
+  const res = await fetch(`${API_BASE}/api/email/purchase-completed`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -58,19 +45,4 @@ export async function sendOrderEmail(payload) {
     throw err;
   }
   return data;
-}
-
-export async function getEmailTemplateByName(name) {
-  try {
-    const res = await fetch(`${API_BASE}/api/EmailTemplates/by-name/${name}`);
-
-    const data = await res.json();
-    return data;
-  } catch (err) {
-    console.error(err);
-    setStatus({
-      type: "error",
-      message: "Failed to load email templates.",
-    });
-  }
 }
