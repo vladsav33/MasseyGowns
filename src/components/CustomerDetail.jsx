@@ -137,11 +137,15 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
 
       const [result] = await Promise.all([submitCustomerDetails(formData)]);
       const orderNo = result.referenceNo;
+      const orderId = result.id;
 
       // save snapshot first (PaymentCompleted will use this)
       const snapshot = { orderNo, customerDetails: formData, cart };
       localStorage.setItem("orderSnapshot", JSON.stringify(snapshot));
+      console.log("orderid=", orderId);
+      console.log("orderSnapshot=", JSON.stringify(snapshot));
       localStorage.setItem("orderNo", orderNo);
+      localStorage.setItem("orderId", orderId);
 
       // clear cart
       localStorage.removeItem("cart");

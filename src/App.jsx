@@ -9,9 +9,9 @@ import Payment from "./components/Payment.jsx";
 import Checkout from "./components/Checkout.jsx";
 import TermsAndConditions from "./pages/TermsAndConditions.jsx";
 import HireprocessWrapper from "./components/HireprocessWrapper.jsx";
+import PaymentCompleted from "./components/PaymentCompleted.jsx";
 import ShoppingCart from "./pages/ShoppingCart.jsx";
 import CustomerDetailsPage from "./pages/CustomerDetailsPage.jsx";
-import PaymentCompleted from "./components/PaymentCompleted.jsx";
 
 export default function App() {
   return (

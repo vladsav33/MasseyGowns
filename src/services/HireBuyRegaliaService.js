@@ -124,8 +124,8 @@ export const submitCustomerDetails = async (formData) => {
       // status: 0,
     };
 
-    console.log('CustomerPayload=', customerPayload);
-    
+    console.log("CustomerPayload=", customerPayload);
+
     const response = await axios.post(`${API_URL}/orders`, customerPayload);
     if (response.data) {
       localStorage.setItem("orderResponse", JSON.stringify(response.data));
@@ -133,7 +133,6 @@ export const submitCustomerDetails = async (formData) => {
     return response.data;
   } catch (error) {
     console.error("Error details:", error.response?.data || error.message);
-    console.error("Payload sent:", customerPayload);
     throw error;
   }
 };

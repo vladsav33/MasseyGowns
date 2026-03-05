@@ -7,7 +7,7 @@ import { getItemsByCourseId } from "../services/HireBuyRegaliaService";
 function ProgressButtons({
   step,
   setStep,
-  steps,
+  steps = [],
   prevPath,
   nextPath,
   selectedCourseId,
@@ -18,8 +18,20 @@ function ProgressButtons({
   const navigate = useNavigate();
 
   const orderType = Number(localStorage.getItem("orderType") || 0);
-  const cartData = JSON.parse(localStorage.getItem("cart") || "[]");
-  const cartCount = cartData?.length || 0;
+
+  const cartData = useMemo(() => {
+    try {
+      const raw = localStorage.getItem("cart") || "[]";
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }, []);
+
+  const cartCount = cartData.length;
+
+  const stepsLen = Array.isArray(steps) ? steps.length : 0;
 
   useEffect(() => {
     localStorage.setItem("step", String(step));
@@ -27,7 +39,7 @@ function ProgressButtons({
 
   useEffect(() => {
     const handler = () => {
-      const temp = JSON.parse(localStorage.getItem("hireStep1Temp") || "{}");
+      JSON.parse(localStorage.getItem("hireStep1Temp") || "{}");
     };
 
     window.addEventListener("hireStep1LoadFromCart", handler);
@@ -36,7 +48,7 @@ function ProgressButtons({
 
   useEffect(() => {
     const handler = () => {
-      const temp = JSON.parse(localStorage.getItem("buyStep1Temp") || "{}");
+      JSON.parse(localStorage.getItem("buyStep1Temp") || "{}");
     };
 
     window.addEventListener("buyStep1LoadFromCart", handler);
@@ -76,7 +88,7 @@ function ProgressButtons({
     }
   };
 
-  // --- Step-1 commit handlers (ONLY differences) ---
+  // --- Step-1 commit handlers ---
   const commitHireStep1ToCart = async () => {
     if (showCeremony && !selectedCeremonyId) {
       alert("Please select a ceremony.");
@@ -95,7 +107,9 @@ function ProgressButtons({
 
     try {
       const prev = JSON.parse(localStorage.getItem("cart") || "[]");
-      const preserved = prev.filter((i) => i.isDonation || i.isHiring === true);
+      const preserved = (Array.isArray(prev) ? prev : []).filter(
+        (i) => i.isDonation || i.isHiring === true,
+      );
 
       const temp = JSON.parse(localStorage.getItem("hireStep1Temp") || "{}");
       const tempOptions = temp?.itemOptions || {};
@@ -160,7 +174,9 @@ function ProgressButtons({
 
     try {
       const temp = JSON.parse(localStorage.getItem("buyStep1Temp") || "{}");
-      const displayedItems = temp.displayedItems || [];
+      const displayedItems = Array.isArray(temp.displayedItems)
+        ? temp.displayedItems
+        : [];
       const itemOptions = temp.itemOptions || {};
 
       if (displayedItems.length === 0) {
@@ -169,7 +185,9 @@ function ProgressButtons({
       }
 
       const prev = JSON.parse(localStorage.getItem("cart") || "[]");
-      const preserved = prev.filter((i) => i.isDonation);
+      const preserved = (Array.isArray(prev) ? prev : []).filter(
+        (i) => i.isDonation,
+      );
 
       const buyCartItems = displayedItems.map((product) => {
         const selectedOptions = itemOptions[product.uiId] || {};
@@ -213,18 +231,18 @@ function ProgressButtons({
   };
 
   const getBuyStep1HasItems = () => {
-  try {
-    const temp = JSON.parse(localStorage.getItem("buyStep1Temp") || "{}");
-    const displayed = Array.isArray(temp.displayedItems) ? temp.displayedItems : [];
+    try {
+      const temp = JSON.parse(localStorage.getItem("buyStep1Temp") || "{}");
+      const displayed = Array.isArray(temp.displayedItems)
+        ? temp.displayedItems
+        : [];
+      return displayed.some((x) => x && x.__kind !== "delivery");
+    } catch {
+      return false;
+    }
+  };
 
-    // Count only real products (ignore delivery)
-    return displayed.some((x) => x && x.__kind !== "delivery");
-  } catch {
-    return false;
-  }
-};
-
-const buyStep1HasItems = getBuyStep1HasItems();
+  const buyStep1HasItems = getBuyStep1HasItems();
 
   // --- Config per orderType ---
   const cfg = useMemo(() => {
@@ -239,10 +257,8 @@ const buyStep1HasItems = getBuyStep1HasItems();
         ? "Please add items and select all required options before proceeding."
         : "Please select all required options for your items before proceeding...",
 
-      // showEditButton: isHireLike, 
-
       disableNext: () => {
-        if (step === steps.length || step === 3) return true;
+        if (step === stepsLen || step === 3) return true;
 
         if (isHireLike && step === 1) {
           return (
@@ -252,7 +268,8 @@ const buyStep1HasItems = getBuyStep1HasItems();
           );
         }
 
-        if (isBuy && step === 1) return !buyStep1HasItems || !cardOptionsComplete;
+        if (isBuy && step === 1)
+          return !buyStep1HasItems || !cardOptionsComplete;
         if (isBuy && step >= 2 && cartCount === 0) return true;
         if (isBuy && step >= 2 && cartCount > 0 && !buyOptionsComplete)
           return true;
@@ -270,19 +287,17 @@ const buyStep1HasItems = getBuyStep1HasItems();
   }, [
     orderType,
     step,
-    steps.length,
+    stepsLen,
     showCeremony,
     selectedCeremonyId,
     selectedCourseId,
     cardOptionsComplete,
     cartCount,
     buyOptionsComplete,
+    buyStep1HasItems,
   ]);
 
   const goNext = async () => {
-    // if (step === 1) {
-    //   localStorage.setItem("orderType", String(orderType));
-    // }
     const ok = await cfg.beforeNext();
     if (!ok) return;
 
@@ -293,7 +308,7 @@ const buyStep1HasItems = getBuyStep1HasItems();
       return;
     }
 
-    if (setStep && step < steps.length) {
+    if (setStep && step < stepsLen) {
       const newStep = step + 1;
       setStep(newStep);
       localStorage.setItem("step", String(newStep));
@@ -303,17 +318,14 @@ const buyStep1HasItems = getBuyStep1HasItems();
 
   const disableNext = cfg.disableNext();
 
-  // If orderType is not set, render nothing (optional safety)
   if (![1, 2, 3].includes(orderType)) return null;
 
   return (
     <div>
-      {/* Step 1 hint */}
       {step === 1 && !cardOptionsComplete && (
         <div className="dropDownLabel">{cfg.step1Hint}</div>
       )}
 
-      {/* Shared prev/next buttons */}
       <div className="btns">
         {step === 3 && (
           <button className="btn prev" onClick={goPrev} disabled={step === 1}>

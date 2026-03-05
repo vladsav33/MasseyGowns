@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Navbar from "../components/Navbar";
 import "./PaymentCompleted.css";
-import { getEmailTemplateByName } from "../api/EmailApi";
-import { EmailTemplate } from "../components/EmailTemplate.jsx";
+const API_BASE = import.meta.env.VITE_GOWN_API_BASE;
 
 function PaymentCompleted() {
   const [html, setHtml] = useState("");
@@ -21,20 +20,79 @@ function PaymentCompleted() {
       try {
         setLoading(true);
 
-        const data = await getEmailTemplateByName("OrderCompleted");
-        const template = data.taxReceiptHtml;
+        const orderId =
+          snapshot?.orderId ||
+          snapshot?.id ||
+          localStorage.getItem("orderId") ||
+          "";
 
-        const payload = {
-          ...(snapshot.customerDetails || {}),
-          invoiceNumber: snapshot.orderNo || localStorage.getItem("orderNo") || "-",
-          cart: snapshot.cart || [],
-        };
+        const orderNo =
+          snapshot?.orderNo ||
+          snapshot?.referenceNo ||
+          localStorage.getItem("orderNo") ||
+          "";
 
-        const htmlOut = EmailTemplate(payload, template);
-        setHtml(htmlOut);
+        const email =
+          snapshot?.customerDetails?.email ||
+          snapshot?.email ||
+          localStorage.getItem("receiptEmail") ||
+          localStorage.getItem("email") ||
+          "";
+
+        if (!orderId || !orderNo || !email) {
+          setHtml(
+            "<div style='padding:16px;'>Unable to load receipt. Missing order details.</div>",
+          );
+          return;
+        }
+
+        const url = `${API_BASE}/orders/${orderId}/receipt-html?orderNo=${encodeURIComponent(
+          orderNo,
+        )}&email=${encodeURIComponent(email)}`;
+
+        console.log("snapshot:", snapshot);
+        console.log(
+          "orderId raw:",
+          snapshot?.orderId,
+          snapshot?.id,
+          localStorage.getItem("orderId"),
+        );
+        console.log("orderId final:", orderId);
+        console.log("orderNo final:", orderNo);
+        console.log("email final:", email);
+        console.log("url final:", url);
+
+        const resp = await fetch(url, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+        });
+
+        if (!resp.ok) {
+          let message = "Failed to load receipt.";
+
+          try {
+            const text = await resp.text();
+            if (text) {
+              message = text;
+            }
+          } catch {
+            // ignore response parsing error
+          }
+
+          throw new Error(message);
+        }
+
+        const data = await resp.json();
+        setHtml(
+          data?.html || "<div style='padding:16px;'>No receipt found.</div>",
+        );
       } catch (e) {
-        console.error(e);
-        setHtml("<div>Failed to load receipt template.</div>");
+        console.error("Failed to load receipt:", e);
+        setHtml(
+          "<div style='padding:16px;'>Failed to load receipt. Please contact us if you need a copy.</div>",
+        );
       } finally {
         setLoading(false);
       }
