@@ -69,16 +69,23 @@ export const getDelivery = async () => {
 export const submitCustomerDetails = async (formData) => {
   try {
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    const ceremonyId = parseInt(
-      JSON.parse(localStorage.getItem("selectedCeremonyId")) ||
-        JSON.parse(localStorage.getItem("selectedPhotoCeremonyId")) ||
-        0,
-    );
-    const degreeId = parseInt(
-      JSON.parse(localStorage.getItem("selectedCourseId")) ||
-        JSON.parse(localStorage.getItem("selectedPhotoCourseId")) ||
-        0,
-    );
+
+    const cartItemWithIds = Array.isArray(cart)
+      ? cart.find((item) => item?.courseId || item?.ceremonyId)
+      : null;
+
+    const ceremonyId =
+      parseInt(cartItemWithIds?.ceremonyId) ||
+      parseInt(localStorage.getItem("selectedCeremonyId")) ||
+      parseInt(localStorage.getItem("selectedPhotoCeremonyId")) ||
+      0;
+
+    const degreeId =
+      parseInt(cartItemWithIds?.courseId) ||
+      parseInt(localStorage.getItem("selectedCourseId")) ||
+      parseInt(localStorage.getItem("selectedPhotoCourseId")) ||
+      0;
+
     const orderType = localStorage.getItem("orderType") || "0";
 
     const customerPayload = {
@@ -107,21 +114,10 @@ export const submitCustomerDetails = async (formData) => {
       paid: false,
       paymentMethod: parseInt(formData.paymentMethod) || 1,
       purchaseOrder: formData.purchaseOrder || "",
-      orderDate: new Date().toLocaleDateString("en-CA"), // YYYY-MM-DD
-      ceremonyId: ceremonyId,
-      degreeId: degreeId,
-      orderType: orderType,
-      // note: "",
-      // changes: "",
-      // packNote: "",
-      // amountPaid: 0,
-      // amountOwning: 0,
-      // donation: 0,
-      // freight: 0,
-      // refund: 0,
-      // adminCharges: 0,
-      // payBy: "2026-02-14",
-      // status: 0,
+      orderDate: new Date().toLocaleDateString("en-CA"),
+      ceremonyId,
+      degreeId,
+      orderType,
     };
 
     console.log("CustomerPayload=", customerPayload);
