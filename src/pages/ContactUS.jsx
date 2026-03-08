@@ -4,7 +4,6 @@ import Navbar from "../components/Navbar";
 import Googlemap from "../components/Googlemap";
 import { sendContactForm } from "../api/FormApi";
 import { useCmsContent } from "../api/useCmsContent";
-import { sendWebsiteEmail } from "../api/EmailApi";
 
 export default function ContactUS() {
   const [formData, setFormData] = useState({
@@ -76,16 +75,6 @@ export default function ContactUS() {
       const cmsResult = await sendContactForm(formData);
       console.log("CMS API Response:", cmsResult);
 
-      const emailPayload = {
-        email: formData.email,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        subject: formData.subject,
-        enquiry: formData.query,
-      };
-
-      await sendWebsiteEmail(emailPayload);
-
       alert("Your enquiry has been sent successfully!");
 
       setFormData({
@@ -101,7 +90,7 @@ export default function ContactUS() {
     } catch (error) {
       alert(
         "Your enquiry has been recorded, but there was an issue sending the email. " +
-          "We will still be able to see your message."
+          "We will still be able to see your message.",
       );
       console.error(error);
       setFormData({
