@@ -43,6 +43,12 @@ h3 {
   margin-bottom: 8px;
 }
 
+.ceremony-content {
+  text-align: center;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
 .dropdown-select {
   width: 100%;
   max-width: 400px;
