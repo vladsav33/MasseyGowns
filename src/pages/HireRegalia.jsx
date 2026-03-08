@@ -8,7 +8,10 @@ import ProgressButtons from "../components/ProgressButtons";
 import CeremonyCourseSelection from "../components/CeremonyCourseSelection";
 import Contact from "../components/Contact";
 import { useLocation, useNavigate } from "react-router-dom";
-import { getCoursesByCeremonyId, getCeremonies } from "../services/HireBuyRegaliaService";
+import {
+  getCoursesByCeremonyId,
+  getCeremonies,
+} from "../services/HireBuyRegaliaService";
 
 function HireRegalia() {
   const location = useLocation();
@@ -16,10 +19,12 @@ function HireRegalia() {
   const showCeremony = mode !== "photo";
   const navigate = useNavigate();
 
+  const pageOrderType = mode === "photo" ? 3 : 1;
+  const hireTempKey = `hireStep1Temp_${pageOrderType}`;
+
   useEffect(() => {
-    if (mode === "photo") localStorage.setItem("orderType", "3");
-    else localStorage.setItem("orderType", "1");
-  }, [mode]);
+    localStorage.setItem("orderType", String(pageOrderType));
+  }, [pageOrderType]);
 
   const [step, setStep] = useState(() => {
     if (location.state?.step) return Number(location.state.step);
@@ -47,7 +52,12 @@ function HireRegalia() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const steps = ["Select Regalia", "Place Order", "Customer Details", "Payment Completed"];
+  const steps = [
+    "Select Regalia",
+    "Place Order",
+    "Customer Details",
+    "Payment Completed",
+  ];
 
   useEffect(() => localStorage.setItem("step", String(step)), [step]);
 
@@ -100,48 +110,6 @@ function HireRegalia() {
     fetchCourses();
   }, [selectedCeremonyId, showCeremony]);
 
-  //  Edit button handler (Step 2 -> Step 1 restore selections)
-  // const handleEditItems = () => {
-  //   const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-  //   const items = cart.filter((x) => !x.isDonation);
-
-  //   if (items.length === 0) return;
-
-  //   const ceremonyId = items[0].ceremonyId ?? null;
-  //   const courseId = items[0].courseId ?? null;
-
-  //   const itemOptions = {};
-  //   const purchaseTypeByUiId = {};
-
-  //   items.forEach((it) => {
-  //     const uiId = `${courseId}-${it.id}`;
-  //     itemOptions[uiId] = it.selectedOptions || {};
-  //     purchaseTypeByUiId[uiId] = it.isHiring ?? true;
-  //   });
-
-  //   localStorage.setItem(
-  //     "hireStep1Temp",
-  //     JSON.stringify({ ceremonyId, courseId, itemOptions, purchaseTypeByUiId })
-  //   );
-
-  //   // restore dropdown localStorage (both modes safe)
-  //   if (ceremonyId != null) {
-  //     localStorage.setItem("selectedCeremonyId", String(ceremonyId));
-  //     localStorage.setItem("selectedPhotoCeremonyId", String(ceremonyId));
-  //   }
-  //   if (courseId != null) {
-  //     localStorage.setItem("selectedCourseId", String(courseId));
-  //     localStorage.setItem("selectedPhotoCourseId", String(courseId));
-  //   }
-
-  //   // set state
-  //   setSelectedCeremonyId(ceremonyId);
-  //   setSelectedCourseId(courseId);
-
-  //   setStep(1);
-  //   window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-  // };
-
   useEffect(() => {
     if (step === 2) {
       navigate("/cart", { state: { step: 2 } });
@@ -156,7 +124,11 @@ function HireRegalia() {
 
         {step === 1 && (
           <>
-            {loading && <div style={{ padding: 20, textAlign: "center" }}>Loading data...</div>}
+            {loading && (
+              <div style={{ padding: 20, textAlign: "center" }}>
+                Loading data...
+              </div>
+            )}
 
             {error && (
               <div
@@ -174,6 +146,7 @@ function HireRegalia() {
 
             {!loading && (
               <CeremonyCourseSelection
+                key={pageOrderType}
                 showCeremony={showCeremony}
                 ceremonies={ceremonies}
                 ceremony={selectedCeremonyId}
@@ -184,6 +157,7 @@ function HireRegalia() {
                 onCeremonySelect={(id) => setSelectedCeremonyId(id)}
                 onCourseSelect={(id) => setSelectedCourseId(id)}
                 setCardOptionsComplete={setCardOptionsComplete}
+                tempKey={hireTempKey}
               />
             )}
           </>
@@ -197,6 +171,8 @@ function HireRegalia() {
           selectedCourseId={selectedCourseId}
           showCeremony={showCeremony}
           cardOptionsComplete={cardOptionsComplete}
+          hireTempKey={hireTempKey}
+          orderType={pageOrderType}
         />
 
         <Contact />

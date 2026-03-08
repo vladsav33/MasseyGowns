@@ -1,10 +1,9 @@
-// CeremonyCourseSelection.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./CeremonyCourseSelection.css";
 import { getItemsByCourseId } from "../services/HireBuyRegaliaService";
 
 const placeholderSvg =
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+PHBhdGggZD0iTTM1IDQwSDY1VjQ0SDM1VjQwWk0zNSA1MEg2NVY1NEgzNVY1MFpNMzUgNjBINTVWNjRIMzVWNjBaIiBmaWxsPSIjOUNBM0FGIi8+";
+  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9IiNGM0Y0RjYiLz48cGF0aCBkPSJNMzUgNDBINjVWNDRIMzVWNDBaTTM1IDUwSDY1VjU0SDM1VjUwWk0zNSA2MEg1NVY2NEgzNVY2MFoiIGZpbGw9IiM5Q0EzQUYiLz4=";
 
 function CeremonyCourseSelection({
   showCeremony,
@@ -17,18 +16,38 @@ function CeremonyCourseSelection({
   onCeremonySelect,
   onCourseSelect,
   setCardOptionsComplete,
+  tempKey,
 }) {
   const courseSelectRef = useRef(null);
+  const TEMP_KEY = tempKey;
+  const readTemp = () => {
+    try {
+      return JSON.parse(localStorage.getItem(TEMP_KEY) || "{}");
+    } catch {
+      return {};
+    }
+  };
+  const writeTemp = (patch) => {
+    const prev = readTemp();
+    const next = { ...prev, ...patch };
+    localStorage.setItem(TEMP_KEY, JSON.stringify(next));
+    return next;
+  };
+  const saved = readTemp();
 
   const [loadingItems, setLoadingItems] = useState(false);
   const [itemsError, setItemsError] = useState(null);
 
-  const [displayedItems, setDisplayedItems] = useState([]);
-  const [itemOptions, setItemOptions] = useState({});
-  const [purchaseTypeByUiId, setPurchaseTypeByUiId] = useState({});
+  const [displayedItems, setDisplayedItems] = useState(saved.displayedItems || []);
+  const [itemOptions, setItemOptions] = useState(saved.itemOptions || {});
+  const [purchaseTypeByUiId, setPurchaseTypeByUiId] = useState(
+    saved.purchaseTypeByUiId || {},
+  );
+  
   const isHiringFor = (uiId) => purchaseTypeByUiId[uiId] ?? true;
+  
 
-  //  restore dropdowns + temp selections (when coming from Edit)
+  // restore dropdowns + temp selections
   useEffect(() => {
     const savedCeremonyId = showCeremony
       ? localStorage.getItem("selectedCeremonyId")
@@ -41,13 +60,22 @@ function CeremonyCourseSelection({
     if (savedCeremonyId) setCeremony(Number(savedCeremonyId));
     if (savedCourseId) setCourse(Number(savedCourseId));
 
-    const temp = JSON.parse(localStorage.getItem("hireStep1Temp") || "{}");
+    const temp = readTemp();
+    if (Array.isArray(temp?.displayedItems)) setDisplayedItems(temp.displayedItems);
     if (temp?.itemOptions) setItemOptions(temp.itemOptions);
-    if (temp?.purchaseTypeByUiId)
-      setPurchaseTypeByUiId(temp.purchaseTypeByUiId);
+    if (temp?.purchaseTypeByUiId) setPurchaseTypeByUiId(temp.purchaseTypeByUiId);
   }, [showCeremony, setCeremony, setCourse]);
 
-  //  listen for reset from ProgressButtons (after Next)
+  // persist temp exactly like buy step 1
+  useEffect(() => {
+    writeTemp({
+      displayedItems,
+      itemOptions,
+      purchaseTypeByUiId,
+    });
+  }, [displayedItems, itemOptions, purchaseTypeByUiId]);
+
+  // listen for reset after Add to Cart
   useEffect(() => {
     const onReset = () => {
       setDisplayedItems([]);
@@ -55,9 +83,9 @@ function CeremonyCourseSelection({
       setPurchaseTypeByUiId({});
       setItemsError(null);
       setLoadingItems(false);
-      // optional: visually clear dropdowns too
       setCeremony(null);
       setCourse(null);
+      localStorage.removeItem(TEMP_KEY);
     };
 
     window.addEventListener("hireStep1Reset", onReset);
@@ -75,6 +103,7 @@ function CeremonyCourseSelection({
     setDisplayedItems([]);
     setItemOptions({});
     setPurchaseTypeByUiId({});
+    localStorage.removeItem(TEMP_KEY);
 
     if (id !== null && showCeremony)
       localStorage.setItem("selectedCeremonyId", String(id));
@@ -93,6 +122,9 @@ function CeremonyCourseSelection({
     onCourseSelect?.(id);
 
     setDisplayedItems([]);
+    setItemOptions({});
+    setPurchaseTypeByUiId({});
+    localStorage.removeItem(TEMP_KEY);
 
     if (showCeremony) {
       if (id !== null) localStorage.setItem("selectedCourseId", String(id));
@@ -109,7 +141,7 @@ function CeremonyCourseSelection({
       ? ceremonies.find((c) => c.id === Number(ceremony))
       : null;
 
-  // Fetch items
+  // Fetch items for selected course -> show as TEMP cards only
   useEffect(() => {
     const fetchCourseItems = async () => {
       if (!course) return;
@@ -138,7 +170,14 @@ function CeremonyCourseSelection({
         unique.sort((a, b) =>
           String(a.name || "").localeCompare(String(b.name || "")),
         );
+
         setDisplayedItems(unique);
+
+        writeTemp({
+          displayedItems: unique,
+          itemOptions: {},
+          purchaseTypeByUiId: {},
+        });
 
         setTimeout(() => {
           const el = document.getElementById("course-items-section");
@@ -155,52 +194,24 @@ function CeremonyCourseSelection({
   }, [course]);
 
   const handleOptionChange = (uiId, optionLabel, value) => {
-    setItemOptions((prev) => {
-      const next = {
-        ...prev,
-        [uiId]: {
-          ...prev[uiId],
-          [optionLabel]: value,
-        },
-      };
-
-      //  persist temp to localStorage for Next click
-      const temp = JSON.parse(localStorage.getItem("hireStep1Temp") || "{}");
-      localStorage.setItem(
-        "hireStep1Temp",
-        JSON.stringify({
-          ...temp,
-          itemOptions: next,
-          purchaseTypeByUiId,
-        }),
-      );
-
-      return next;
-    });
+    setItemOptions((prev) => ({
+      ...prev,
+      [uiId]: {
+        ...prev[uiId],
+        [optionLabel]: value,
+      },
+    }));
   };
 
   const togglePurchaseType = (uiId) => {
-    setPurchaseTypeByUiId((prev) => {
-      const next = { ...prev, [uiId]: !(prev[uiId] ?? true) };
-
-      //  persist temp to localStorage for Next click
-      const temp = JSON.parse(localStorage.getItem("hireStep1Temp") || "{}");
-      localStorage.setItem(
-        "hireStep1Temp",
-        JSON.stringify({
-          ...temp,
-          itemOptions,
-          purchaseTypeByUiId: next,
-        }),
-      );
-
-      return next;
-    });
+    setPurchaseTypeByUiId((prev) => ({
+      ...prev,
+      [uiId]: !(prev[uiId] ?? true),
+    }));
   };
 
   const removeDisplayedItem = (uiId) => {
     const nextItems = displayedItems.filter((p) => p.uiId !== uiId);
-
     setDisplayedItems(nextItems);
 
     const nextItemOptions = { ...itemOptions };
@@ -211,18 +222,13 @@ function CeremonyCourseSelection({
     delete nextPurchase[uiId];
     setPurchaseTypeByUiId(nextPurchase);
 
-    // persist temp
-    const temp = JSON.parse(localStorage.getItem("hireStep1Temp") || "{}");
-    localStorage.setItem(
-      "hireStep1Temp",
-      JSON.stringify({
-        ...temp,
-        itemOptions: nextItemOptions,
-        purchaseTypeByUiId: nextPurchase,
-      }),
-    );
+    writeTemp({
+      displayedItems: nextItems,
+      itemOptions: nextItemOptions,
+      purchaseTypeByUiId: nextPurchase,
+    });
 
-    // if no items left, clear dropdown localStorage too
+    // if no items left, clear selections too
     if (nextItems.length === 0) {
       setCeremony(null);
       setCourse(null);
@@ -231,20 +237,20 @@ function CeremonyCourseSelection({
       localStorage.removeItem("selectedCourseId");
       localStorage.removeItem("selectedPhotoCeremonyId");
       localStorage.removeItem("selectedPhotoCourseId");
-      localStorage.removeItem("hireStep1Temp");
+      localStorage.removeItem(TEMP_KEY);
     }
   };
 
-  //  card options complete for Step 1 Next button
   const areAllCardOptionsSelected = useMemo(() => {
     if (!displayedItems || displayedItems.length === 0) return true;
 
     return displayedItems.every((product) => {
       if (!product.options || product.options.length === 0) return true;
       const selected = itemOptions[product.uiId] || {};
-      return product.options.every(
-        (opt) => selected[opt.label] && selected[opt.label] !== "",
-      );
+      return product.options.every((opt) => {
+        const val = selected[opt.label];
+        return val !== undefined && val !== null && String(val).trim() !== "";
+      });
     });
   }, [displayedItems, itemOptions]);
 
@@ -369,8 +375,7 @@ function CeremonyCourseSelection({
                               <select
                                 className="option-select"
                                 value={
-                                  itemOptions[product.uiId]?.[option.label] ||
-                                  ""
+                                  itemOptions[product.uiId]?.[option.label] || ""
                                 }
                                 onChange={(e) =>
                                   handleOptionChange(
@@ -414,19 +419,11 @@ function CeremonyCourseSelection({
 
                       <div className="item-controls">
                         <div className="quantity-controls">
-                          <button
-                            className="quantity-btn"
-                            type="button"
-                            disabled
-                          >
+                          <button className="quantity-btn" type="button" disabled>
                             −
                           </button>
                           <span className="quantity">1</span>
-                          <button
-                            className="quantity-btn"
-                            type="button"
-                            disabled
-                          >
+                          <button className="quantity-btn" type="button" disabled>
                             +
                           </button>
                         </div>
@@ -441,7 +438,6 @@ function CeremonyCourseSelection({
                       </div>
                     </div>
 
-                    {/*  purchase box visible */}
                     <div className="purchase-box">
                       <span className="purchase-label">Purchase this item</span>
 

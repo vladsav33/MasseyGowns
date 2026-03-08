@@ -51,10 +51,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
 
   const today = new Date().toISOString().split("T")[0];
 
-  const selectedCeremonyId = JSON.parse(
-    localStorage.getItem("selectedCeremonyId") || 0,
-  );
-
+  const selectedCeremonyId = localStorage.getItem("selectedCeremonyId") || 0;
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
