@@ -31,7 +31,7 @@ function Highlighter({ children, query, exclude = ["code", "pre"] }) {
           </mark>
         ) : (
           <React.Fragment key={i}>{part}</React.Fragment>
-        )
+        ),
       );
     }
 
@@ -130,6 +130,29 @@ const isQuestionItem = (item) => {
 // "Ordering and Payment.How to order.intro" -> "Ordering and Payment.How to order"
 const getBaseKey = (key) => (key || "").split(".").slice(0, -1).join(".");
 
+const getInternalWhatToWearRoute = (label) => {
+  const text = String(label || "")
+    .replace(/^[>\s]+/, "")
+    .trim()
+    .toLowerCase();
+
+  const routeMap = {
+    "choose your institutions regalia guide":
+      "/what-to-wear/choose-your-institutions-regalia-guide",
+    "conjoint degree regalia": "/what-to-wear/conjoint-degree-regalia",
+    "general regalia guide": "/what-to-wear/general-regalia-guide",
+    gowns: "/what-to-wear/gowns",
+    "head wear": "/what-to-wear/head-wear",
+    "hoods, stoles and sash": "/what-to-wear/hoods-stoles-and-sash",
+    korowai: "/what-to-wear/korowai",
+    "regalia from overseas and other new zealand universities":
+      "/what-to-wear/regalia-from-overseas-and-other-new-zealand-universities",
+    "sizes and fitting": "/what-to-wear/sizes-and-fitting",
+  };
+
+  return routeMap[text] || null;
+};
+
 // Render a single content block (no title, no BACK TO TOP)
 const renderFaqContent = (item, query) => {
   const value = String(item.value || "");
@@ -153,8 +176,25 @@ const renderFaqContent = (item, query) => {
 
   if (item.type === "link") {
     const link = item.parsedLink;
-    if (!link || !link.url) return null;
+    if (!link) return null;
+
     const label = link.name || item.label || "More information";
+    const internalRoute = getInternalWhatToWearRoute(label);
+
+    if (internalRoute) {
+      return (
+        <Link
+          to={internalRoute}
+          className="inline-flex items-center gap-1 text-sky-700 hover:underline"
+        >
+          <span>&gt;</span>
+          <Highlighter query={query}>{label}</Highlighter>
+        </Link>
+      );
+    }
+
+    if (!link.url) return null;
+
     return (
       <a
         href={link.url}
@@ -162,6 +202,7 @@ const renderFaqContent = (item, query) => {
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1 text-sky-700 hover:underline"
       >
+        <span>&gt;</span>
         <Highlighter query={query}>{label}</Highlighter>
       </a>
     );
@@ -255,6 +296,20 @@ export default function FAQPage() {
 
         const normalized = array.map((x) => {
           let parsedLink = null;
+          let parsedTable = null;
+          let parsedAnswer = null;
+
+          // Parse legacy / special answer JSON if present
+          if (typeof x.answer === "string") {
+            try {
+              parsedAnswer = JSON.parse(x.answer);
+            } catch (e) {
+              console.error("Failed to parse FAQ answer JSON:", e);
+            }
+          } else if (x.answer && typeof x.answer === "object") {
+            parsedAnswer = x.answer;
+          }
+
           if (x.type === "link" && typeof x.value === "string") {
             try {
               parsedLink = JSON.parse(x.value);
@@ -263,8 +318,6 @@ export default function FAQPage() {
             }
           }
 
-          // Try to parse table JSON
-          let parsedTable = null;
           if (x.type === "table" && typeof x.value === "string") {
             try {
               parsedTable = JSON.parse(x.value);
@@ -278,26 +331,40 @@ export default function FAQPage() {
             page: x.page,
             section: x.section || "Other",
             key: x.key || "",
-            type: x.type || "text",
-            label: x.label || "",
+            type: x.type || parsedAnswer?.type || "text",
+            label: x.label || x.question || "",
             value: x.value || "",
+            answer: x.answer || "",
             parsedLink,
             parsedTable,
+            parsedAnswer,
           };
         });
 
         const grouped = Object.values(
           normalized.reduce((acc, item) => {
             const sec = item.section || "Other";
+
+            // Hide nested What to Wear content pages from top-level FAQ sections
+            if (sec.startsWith("What to Wear.")) {
+              return acc;
+            }
+
             if (!acc[sec]) {
               acc[sec] = { section: sec, items: [] };
             }
             acc[sec].items.push(item);
             return acc;
-          }, {})
+          }, {}),
         );
 
+        const whatToWearGroup = grouped.find(
+          (g) => g.section === "What to Wear",
+        );
+        console.log("What to Wear group:", whatToWearGroup);
+
         if (!cancelled) {
+          console.log("normalized faq data:", normalized);
           setGroups(grouped);
           // Start with everything collapsed
           setOpenSections(new Set());
@@ -345,7 +412,7 @@ export default function FAQPage() {
           return { ...item, __search: searchText };
         }),
       })),
-    [groups]
+    [groups],
   );
 
   const filteredGroups = useMemo(() => {
@@ -361,7 +428,7 @@ export default function FAQPage() {
 
   const resultsCount = useMemo(
     () => filteredGroups.reduce((n, g) => n + g.items.length, 0),
-    [filteredGroups]
+    [filteredGroups],
   );
 
   const toggleSection = (sec) =>
