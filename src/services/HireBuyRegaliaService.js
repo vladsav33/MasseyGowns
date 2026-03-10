@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_GOWN_API_BASE;
+// const API_URL = import.meta.env.VITE_GOWN_API_BASE;
+const API_URL = "http://localhost:5144"
 
 export const getCeremonies = async () => {
   try {
@@ -125,7 +126,7 @@ export const submitCustomerDetails = async (formData) => {
     };
 
     console.log('CustomerPayload=', customerPayload);
-    
+
     const response = await axios.post(`${API_URL}/orders`, customerPayload);
     if (response.data) {
       localStorage.setItem("orderResponse", JSON.stringify(response.data));

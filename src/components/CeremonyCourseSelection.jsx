@@ -83,6 +83,8 @@ function CeremonyCourseSelection({
     if (id !== null && !showCeremony)
       localStorage.setItem("selectedPhotoCeremonyId", String(id));
     else localStorage.removeItem("selectedPhotoCeremonyId");
+
+    console.log("Id=", id, " ShowCeremony=", showCeremony );
   };
 
   const handleCourseChange = (e) => {

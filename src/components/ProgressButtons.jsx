@@ -134,12 +134,16 @@ function ProgressButtons({
       localStorage.setItem("cart", JSON.stringify(updated));
       window.dispatchEvent(new Event("cartUpdated"));
 
-      localStorage.removeItem("selectedCeremonyId");
-      localStorage.removeItem("selectedCourseId");
-      localStorage.removeItem("selectedPhotoCeremonyId");
-      localStorage.removeItem("selectedPhotoCourseId");
+      console.log("Selected Ceremony=", localStorage.getItem('selectedCeremonyId'));
+
+      // localStorage.removeItem("selectedCeremonyId");
+      // localStorage.removeItem("selectedCourseId");
+      // localStorage.removeItem("selectedPhotoCeremonyId");
+      // localStorage.removeItem("selectedPhotoCourseId");
       localStorage.removeItem("hireStep1Temp");
       window.dispatchEvent(new Event("hireStep1Reset"));
+
+      console.log("Selected Ceremony=", localStorage.getItem('selectedCeremonyId'));
 
       return true;
     } catch (e) {
