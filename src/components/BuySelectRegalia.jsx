@@ -1,4 +1,3 @@
-// BuySelectRegalia.jsx  TEMP CARDS UNDER (NO CART) + DELIVERY CARD + ADD MORE ONLY FOR INDIVIDUAL
 import "./BuySelectRegalia.css";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {

@@ -1,25 +1,67 @@
 // ProgressButtons.jsx
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./ProgressButtons.css";
 import { useNavigate } from "react-router-dom";
-import { getItemsByCourseId } from "../services/HireBuyRegaliaService";
 
 function ProgressButtons({
   step,
   setStep,
-  steps,
+  steps = [],
   prevPath,
   nextPath,
   selectedCourseId,
   selectedCeremonyId,
   showCeremony,
   cardOptionsComplete = true,
+  hireTempKey,
 }) {
   const navigate = useNavigate();
 
   const orderType = Number(localStorage.getItem("orderType") || 0);
-  const cartData = JSON.parse(localStorage.getItem("cart") || "[]");
-  const cartCount = cartData?.length || 0;
+  const HIRE_TEMP_KEY = hireTempKey;
+
+  const [replaceDialogOpen, setReplaceDialogOpen] = useState(false);
+  const [pendingResolve, setPendingResolve] = useState(null);
+
+  const handleConfirmReplace = () => {
+    if (pendingResolve) pendingResolve(true);
+    setPendingResolve(null);
+    setReplaceDialogOpen(false);
+  };
+
+  const handleCancelReplace = () => {
+    if (pendingResolve) pendingResolve(false);
+    setPendingResolve(null);
+    setReplaceDialogOpen(false);
+  };
+
+  const readCart = () => {
+    try {
+      const raw = localStorage.getItem("cart") || "[]";
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const [cartData, setCartData] = useState(readCart);
+
+  useEffect(() => {
+    const syncCart = () => setCartData(readCart());
+
+    window.addEventListener("cartUpdated", syncCart);
+    window.addEventListener("storage", syncCart);
+
+    return () => {
+      window.removeEventListener("cartUpdated", syncCart);
+      window.removeEventListener("storage", syncCart);
+    };
+  }, []);
+
+  const cartCount = cartData.length;
+
+  const stepsLen = Array.isArray(steps) ? steps.length : 0;
 
   useEffect(() => {
     localStorage.setItem("step", String(step));
@@ -27,16 +69,16 @@ function ProgressButtons({
 
   useEffect(() => {
     const handler = () => {
-      const temp = JSON.parse(localStorage.getItem("hireStep1Temp") || "{}");
+      JSON.parse(localStorage.getItem(HIRE_TEMP_KEY) || "{}");
     };
 
     window.addEventListener("hireStep1LoadFromCart", handler);
     return () => window.removeEventListener("hireStep1LoadFromCart", handler);
-  }, []);
+  }, [HIRE_TEMP_KEY]);
 
   useEffect(() => {
     const handler = () => {
-      const temp = JSON.parse(localStorage.getItem("buyStep1Temp") || "{}");
+      JSON.parse(localStorage.getItem("buyStep1Temp") || "{}");
     };
 
     window.addEventListener("buyStep1LoadFromCart", handler);
@@ -59,7 +101,7 @@ function ProgressButtons({
       });
     });
 
-  const buyOptionsComplete = isCartOptionsComplete(cartData);
+  const cartOptionsComplete = isCartOptionsComplete(cartData);
 
   const goPrev = () => {
     if (prevPath) {
@@ -76,16 +118,43 @@ function ProgressButtons({
     }
   };
 
-  // --- Step-1 commit handlers (ONLY differences) ---
+  const confirmReplaceCartItems = () => {
+    try {
+      const prev = JSON.parse(localStorage.getItem("cart") || "[]");
+
+      const existingItems = (Array.isArray(prev) ? prev : []).filter(
+        (i) => !i.isDonation,
+      );
+
+      if (existingItems.length === 0) return Promise.resolve(true);
+
+      const hasDifferentOrderType = existingItems.some(
+        (item) => Number(item.orderType) !== orderType,
+      );
+
+      if (!hasDifferentOrderType) return Promise.resolve(true);
+
+      return new Promise((resolve) => {
+        setPendingResolve(() => resolve);
+        setReplaceDialogOpen(true);
+      });
+    } catch {
+      return Promise.resolve(true);
+    }
+  };
+
+  // --- Step-1 commit handlers ---
   const commitHireStep1ToCart = async () => {
     if (showCeremony && !selectedCeremonyId) {
       alert("Please select a ceremony.");
       return false;
     }
+
     if (!selectedCourseId) {
       alert("Please select a qualification.");
       return false;
     }
+
     if (!cardOptionsComplete) {
       alert(
         "Please select all required options for your items before proceeding.",
@@ -94,18 +163,29 @@ function ProgressButtons({
     }
 
     try {
-      const prev = JSON.parse(localStorage.getItem("cart") || "[]");
-      const preserved = prev.filter((i) => i.isDonation || i.isHiring === true);
+      if (!(await confirmReplaceCartItems())) {
+        return false;
+      }
 
-      const temp = JSON.parse(localStorage.getItem("hireStep1Temp") || "{}");
+      const prev = JSON.parse(localStorage.getItem("cart") || "[]");
+      const preserved = (Array.isArray(prev) ? prev : []).filter(
+        (i) => i.isDonation || Number(i.orderType) === orderType,
+      );
+
+      const temp = JSON.parse(localStorage.getItem(HIRE_TEMP_KEY) || "{}");
+      const displayedItems = Array.isArray(temp.displayedItems)
+        ? temp.displayedItems
+        : [];
       const tempOptions = temp?.itemOptions || {};
       const tempPurchase = temp?.purchaseTypeByUiId || {};
 
-      const data = await getItemsByCourseId(selectedCourseId);
-      const hireList = Array.isArray(data) ? data : [];
+      if (displayedItems.length === 0) {
+        alert("Please add at least one item before proceeding.");
+        return false;
+      }
 
-      const hireCartItems = hireList.map((p) => {
-        const uiId = `${selectedCourseId}-${p.id}`;
+      const hireCartItems = displayedItems.map((p) => {
+        const uiId = p.uiId || `${selectedCourseId}-${p.id}`;
         const selectedOptions = tempOptions[uiId] || {};
         const isHiring = tempPurchase[uiId] ?? true;
 
@@ -125,8 +205,11 @@ function ProgressButtons({
 
           type: "individual",
           isHiring,
+          isDonation: false,
           courseId: selectedCourseId,
           ceremonyId: selectedCeremonyId ?? null,
+          uiId,
+          orderType,
         };
       });
 
@@ -134,22 +217,16 @@ function ProgressButtons({
       localStorage.setItem("cart", JSON.stringify(updated));
       window.dispatchEvent(new Event("cartUpdated"));
 
-      console.log("Selected Ceremony=", localStorage.getItem('selectedCeremonyId'));
-
-      // localStorage.removeItem("selectedCeremonyId");
-      // localStorage.removeItem("selectedCourseId");
-      // localStorage.removeItem("selectedPhotoCeremonyId");
-      // localStorage.removeItem("selectedPhotoCourseId");
-      localStorage.removeItem("hireStep1Temp");
+      localStorage.removeItem("selectedCeremonyId");
+      localStorage.removeItem("selectedCourseId");
+      localStorage.removeItem("selectedPhotoCeremonyId");
+      localStorage.removeItem("selectedPhotoCourseId");
+      localStorage.removeItem(HIRE_TEMP_KEY);
       window.dispatchEvent(new Event("hireStep1Reset"));
-
-      console.log("Selected Ceremony=", localStorage.getItem('selectedCeremonyId'));
 
       return true;
     } catch (e) {
-      alert(
-        e?.message || "Failed to load items for the selected qualification.",
-      );
+      alert(e?.message || "Failed to process your selected items.");
       return false;
     }
   };
@@ -163,8 +240,14 @@ function ProgressButtons({
     }
 
     try {
+      if (!(await confirmReplaceCartItems())) {
+        return false;
+      }
+
       const temp = JSON.parse(localStorage.getItem("buyStep1Temp") || "{}");
-      const displayedItems = temp.displayedItems || [];
+      const displayedItems = Array.isArray(temp.displayedItems)
+        ? temp.displayedItems
+        : [];
       const itemOptions = temp.itemOptions || {};
 
       if (displayedItems.length === 0) {
@@ -173,7 +256,9 @@ function ProgressButtons({
       }
 
       const prev = JSON.parse(localStorage.getItem("cart") || "[]");
-      const preserved = prev.filter((i) => i.isDonation);
+      const preserved = (Array.isArray(prev) ? prev : []).filter(
+        (i) => i.isDonation || Number(i.orderType) === orderType,
+      );
 
       const buyCartItems = displayedItems.map((product) => {
         const selectedOptions = itemOptions[product.uiId] || {};
@@ -201,6 +286,7 @@ function ProgressButtons({
 
           uiId: product.uiId,
           __kind: product.__kind,
+          orderType,
         };
       });
 
@@ -217,18 +303,18 @@ function ProgressButtons({
   };
 
   const getBuyStep1HasItems = () => {
-  try {
-    const temp = JSON.parse(localStorage.getItem("buyStep1Temp") || "{}");
-    const displayed = Array.isArray(temp.displayedItems) ? temp.displayedItems : [];
+    try {
+      const temp = JSON.parse(localStorage.getItem("buyStep1Temp") || "{}");
+      const displayed = Array.isArray(temp.displayedItems)
+        ? temp.displayedItems
+        : [];
+      return displayed.some((x) => x && x.__kind !== "delivery");
+    } catch {
+      return false;
+    }
+  };
 
-    // Count only real products (ignore delivery)
-    return displayed.some((x) => x && x.__kind !== "delivery");
-  } catch {
-    return false;
-  }
-};
-
-const buyStep1HasItems = getBuyStep1HasItems();
+  const buyStep1HasItems = getBuyStep1HasItems();
 
   // --- Config per orderType ---
   const cfg = useMemo(() => {
@@ -243,10 +329,11 @@ const buyStep1HasItems = getBuyStep1HasItems();
         ? "Please add items and select all required options before proceeding."
         : "Please select all required options for your items before proceeding...",
 
-      // showEditButton: isHireLike, 
+      cartHint:
+        "Please select all required options for your cart items before proceeding.",
 
       disableNext: () => {
-        if (step === steps.length || step === 3) return true;
+        if (step === stepsLen || step === 3) return true;
 
         if (isHireLike && step === 1) {
           return (
@@ -256,10 +343,22 @@ const buyStep1HasItems = getBuyStep1HasItems();
           );
         }
 
-        if (isBuy && step === 1) return !buyStep1HasItems || !cardOptionsComplete;
-        if (isBuy && step >= 2 && cartCount === 0) return true;
-        if (isBuy && step >= 2 && cartCount > 0 && !buyOptionsComplete)
+        if (isBuy && step === 1) {
+          return !buyStep1HasItems || !cardOptionsComplete;
+        }
+
+        if ((isHireLike || isBuy) && step >= 2 && cartCount === 0) {
           return true;
+        }
+
+        if (
+          (isHireLike || isBuy) &&
+          step >= 2 &&
+          cartCount > 0 &&
+          !cartOptionsComplete
+        ) {
+          return true;
+        }
 
         return false;
       },
@@ -274,19 +373,17 @@ const buyStep1HasItems = getBuyStep1HasItems();
   }, [
     orderType,
     step,
-    steps.length,
+    stepsLen,
     showCeremony,
     selectedCeremonyId,
     selectedCourseId,
     cardOptionsComplete,
     cartCount,
-    buyOptionsComplete,
+    cartOptionsComplete,
+    buyStep1HasItems,
   ]);
 
   const goNext = async () => {
-    // if (step === 1) {
-    //   localStorage.setItem("orderType", String(orderType));
-    // }
     const ok = await cfg.beforeNext();
     if (!ok) return;
 
@@ -297,7 +394,7 @@ const buyStep1HasItems = getBuyStep1HasItems();
       return;
     }
 
-    if (setStep && step < steps.length) {
+    if (setStep && step < stepsLen) {
       const newStep = step + 1;
       setStep(newStep);
       localStorage.setItem("step", String(newStep));
@@ -305,106 +402,20 @@ const buyStep1HasItems = getBuyStep1HasItems();
     }
   };
 
-  // const handleEdit = () => {
-  //   const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-
-  //   // --- HIRE / CASUAL: rebuild hireStep1Temp from cart ---
-  //   if (orderType === 1 || orderType === 3) {
-  //     const hireItems = cart.filter((i) => i.isDonation || i.isHiring === true);
-
-  //     const itemOptions = {};
-  //     const purchaseTypeByUiId = {};
-
-  //     hireItems.forEach((i) => {
-  //       // donation doesn't have course/item id relationship, skip if needed
-  //       if (i.isDonation) return;
-
-  //       // must match how you created uiId during commitHireStep1ToCart
-  //       const uiId = `${i.courseId}-${i.id}`;
-  //       itemOptions[uiId] = i.selectedOptions || {};
-  //       purchaseTypeByUiId[uiId] = i.isHiring ?? true;
-  //     });
-
-  //     localStorage.setItem(
-  //       "hireStep1Temp",
-  //       JSON.stringify({ itemOptions, purchaseTypeByUiId }),
-  //     );
-
-  //     // set dropdown selections too (so ceremony/course shows selected)
-  //     const firstRealHire = hireItems.find((i) => !i.isDonation);
-  //     if (firstRealHire) {
-  //       localStorage.setItem(
-  //         "selectedCourseId",
-  //         String(firstRealHire.courseId),
-  //       );
-  //       if (firstRealHire.ceremonyId) {
-  //         localStorage.setItem(
-  //           "selectedCeremonyId",
-  //           String(firstRealHire.ceremonyId),
-  //         );
-  //       }
-  //     }
-
-  //     // tell step-1 to load from temp (you'll implement listener in step-1 page)
-  //     window.dispatchEvent(new Event("hireStep1LoadFromCart"));
-  //   }
-
-  //   // --- BUY: rebuild buyStep1Temp from cart ---
-  //   if (orderType === 2) {
-  //     const buyItems = cart.filter((i) => !i.isDonation);
-
-  //     const itemOptions = {};
-  //     const displayedItems = buyItems.map((i) => {
-  //       const uiId = i.uiId || `buy-${i.id}`;
-  //       itemOptions[uiId] = i.selectedOptions || {};
-
-  //       return {
-  //         ...i,
-  //         uiId,
-  //         __kind:
-  //           i.__kind ||
-  //           (i.isDelivery
-  //             ? "delivery"
-  //             : i.type === "set"
-  //               ? "set"
-  //               : "individual"),
-  //       };
-  //     });
-
-  //     localStorage.setItem(
-  //       "buyStep1Temp",
-  //       JSON.stringify({ displayedItems, itemOptions }),
-  //     );
-
-  //     window.dispatchEvent(new Event("buyStep1LoadFromCart"));
-  //   }
-
-  //   // move to step 1
-  //   if (prevPath) {
-  //     // if you have a dedicated route for step 1, navigate to that route
-  //     localStorage.setItem("step", "1");
-  //     navigate(prevPath); // ONLY if prevPath is actually step-1 route
-  //   } else {
-  //     setStep?.(1);
-  //     localStorage.setItem("step", "1");
-  //   }
-
-  //   scrollTop();
-  // };
-
   const disableNext = cfg.disableNext();
 
-  // If orderType is not set, render nothing (optional safety)
   if (![1, 2, 3].includes(orderType)) return null;
 
   return (
     <div>
-      {/* Step 1 hint */}
       {step === 1 && !cardOptionsComplete && (
         <div className="dropDownLabel">{cfg.step1Hint}</div>
       )}
 
-      {/* Shared prev/next buttons */}
+      {step >= 2 && cartCount > 0 && !cartOptionsComplete && (
+        <div className="dropDownLabel">{cfg.cartHint}</div>
+      )}
+
       <div className="btns">
         {step === 3 && (
           <button className="btn prev" onClick={goPrev} disabled={step === 1}>
@@ -422,6 +433,45 @@ const buyStep1HasItems = getBuyStep1HasItems();
           </button>
         )}
       </div>
+
+      {replaceDialogOpen && (
+        <div className="dialog-overlay" onClick={handleCancelReplace}>
+          <div
+            className="dialog-box replace-cart-dialog"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="dialog-header">
+              <h3 className="dialog-title">Replace cart items?</h3>
+            </div>
+
+            <div className="dialog-content">
+              <p>Your cart already contains items from another order type.</p>
+              <p>
+                Continuing will replace those items and keep only donation
+                items.
+              </p>
+              <p>Do you want to continue?</p>
+            </div>
+
+            <div className="dialog-actions">
+              <button
+                type="button"
+                className="dialog-btn dialog-btn-secondary"
+                onClick={handleCancelReplace}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="dialog-btn dialog-btn-primary"
+                onClick={handleConfirmReplace}
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

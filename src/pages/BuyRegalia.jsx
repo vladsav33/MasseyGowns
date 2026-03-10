@@ -69,7 +69,6 @@ function BuyRegalia() {
 
             {step === 1 && (
               <>
-                {/*  Pass callback so BuySelectRegalia can report options completeness */}
                 <BuySelectRegalia
                   setItems={setItems}
                   onOptionsComplete={setBuyStep1Complete}
