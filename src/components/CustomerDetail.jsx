@@ -23,6 +23,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
     paymentMethod: "1",
     termsAccepted: false,
     message: "",
+    orderAmount: 0,
   });
 
   const navigate = useNavigate();
@@ -39,6 +40,13 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       item.isHiring === false ? item.buyPrice || 0 : item.hirePrice || 0;
     return sum + price * (item.quantity || 1);
   }, 0);
+
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      orderAmount: total,
+    }));
+  }, [total]);
 
   // Helper function to get item price based on hire/buy mode
   const getItemPrice = (item) => {

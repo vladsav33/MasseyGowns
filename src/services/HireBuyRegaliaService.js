@@ -68,6 +68,8 @@ export const getDelivery = async () => {
 
 export const submitCustomerDetails = async (formData) => {
   try {
+    console.log("formData.orderAmount =", formData.orderAmount);
+
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
     const cartItemWithIds = Array.isArray(cart)
@@ -97,7 +99,6 @@ export const submitCustomerDetails = async (formData) => {
       postcode: formData.postcode || "",
       country: formData.country || "NZ",
       phone: formData.phone || "",
-      mobile: formData.mobile || "",
       studentId: parseInt(formData.studentId) || 0,
       message: formData.message || "",
       items: cart.map((item) => ({
@@ -118,6 +119,7 @@ export const submitCustomerDetails = async (formData) => {
       ceremonyId,
       degreeId,
       orderType,
+      orderAmount: Number(formData.orderAmount),
     };
 
     console.log("CustomerPayload=", customerPayload);
