@@ -28,7 +28,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
 
   const navigate = useNavigate();
 
-  // Use props if provided, otherwise load from localStorage
+  // Use props if provided, otherwise load from localStorage.
   const cart =
     items.length > 0 ? items : JSON.parse(localStorage.getItem("cart") || "[]");
   localStorage.setItem("customerDetails", JSON.stringify(formData));
@@ -41,12 +41,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
     return sum + price * (item.quantity || 1);
   }, 0);
 
-  useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      orderAmount: total,
-    }));
-  }, [total]);
+  const orderAmount = Math.round(total * 100);
 
   // Helper function to get item price based on hire/buy mode
   const getItemPrice = (item) => {
@@ -140,12 +135,28 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
         return;
       }
 
-      const [result] = await Promise.all([submitCustomerDetails(formData)]);
+      //const [result] = await Promise.all([submitCustomerDetails(formData)]);
+
+      const finalFormData = {
+        ...formData,
+        orderAmount,
+      };
+
+      console.log("total =", total);
+      console.log("orderAmount =", orderAmount);
+      console.log("finalFormData =", finalFormData);
+
+      debugger;
+
+      const [result] = await Promise.all([
+        submitCustomerDetails(finalFormData),
+      ]);
+
       const orderNo = result.referenceNo;
       const orderId = result.id;
 
       // save snapshot first (PaymentCompleted will use this)
-      const snapshot = { orderNo, customerDetails: formData, cart };
+      const snapshot = { orderNo, customerDetails: finalFormData, cart };
       localStorage.setItem("orderSnapshot", JSON.stringify(snapshot));
       console.log("orderid=", orderId);
       console.log("orderSnapshot=", JSON.stringify(snapshot));
