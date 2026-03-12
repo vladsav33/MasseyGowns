@@ -16,11 +16,12 @@
 }
 
 .cart-item.item-image-container {
-  flex: 1;               /* this makes the main card wide */
-  min-width: 760px;      /* prevents the middle collapsing */
+  flex: 1;
   display: flex;
   gap: 18px;
   align-items: flex-start;
+  width: 100%;
+  flex-wrap: wrap;
 }
 
 .items-list{

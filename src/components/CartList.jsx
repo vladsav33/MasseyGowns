@@ -121,9 +121,11 @@ function CartList({ step, items, setItems }) {
     .filter((item) => !item.isDonation)
     .reduce((acc, item) => {
       const price =
-        item.isHiring === false
-          ? getNumericPrice(item.buyPrice)
-          : getNumericPrice(item.hirePrice);
+        item.isDelivery === true
+          ? getNumericPrice(item.options[0]?.value?.price)
+          : item.isHiring === false
+            ? getNumericPrice(item.buyPrice)
+            : getNumericPrice(item.hirePrice);
       return acc + price * (item.quantity || 1);
     }, 0);
 
@@ -177,51 +179,49 @@ function CartList({ step, items, setItems }) {
             );
           })}
 
-          {step === 2 && (
-            <div>
-              {/* Donation */}
-              <div className="donation">
-                <h4>Make a donation to our Charitable Trust</h4>
-                <p>
-                  Graduate Women Manawatu Trust Inc., is a Charitable Trust
-                  supporting women in and beyond education.
-                </p>
+          <div>
+            {/* Donation */}
+            <div className="donation">
+              <h4>Make a donation to our Charitable Trust</h4>
+              <p>
+                Graduate Women Manawatu Trust Inc., is a Charitable Trust
+                supporting women in and beyond education.
+              </p>
 
-                <button
-                  className="donate-btn"
-                  onClick={() => setIsDialogOpen(true)}
-                  disabled={hasDonation}
-                >
-                  Donate
-                </button>
+              <button
+                className="donate-btn"
+                onClick={() => setIsDialogOpen(true)}
+                disabled={hasDonation}
+              >
+                Donate
+              </button>
+            </div>
+
+            {/* Order Summary */}
+            <div className="cart-summary">
+              <h3>Order Summary</h3>
+
+              <div className="summary-row">
+                <span>Total Items:</span>
+                <span>{items.length}</span>
               </div>
 
-              {/* Order Summary */}
-              <div className="cart-summary">
-                <h3>Order Summary</h3>
+              <div className="summary-row">
+                <span>Subtotal (Items):</span>
+                <span>${totalPrice.toFixed(2)}</span>
+              </div>
 
-                <div className="summary-row">
-                  <span>Total Items:</span>
-                  <span>{items.length}</span>
-                </div>
+              <div className="summary-row">
+                <span>Total Donation ({totalDonationCount} * $2):</span>
+                <span>${totalDonationPrice.toFixed(2)}</span>
+              </div>
 
-                <div className="summary-row">
-                  <span>Subtotal (Items):</span>
-                  <span>${totalPrice.toFixed(2)}</span>
-                </div>
-
-                <div className="summary-row">
-                  <span>Total Donation ({totalDonationCount} * $2):</span>
-                  <span>${totalDonationPrice.toFixed(2)}</span>
-                </div>
-
-                <div className="summary-row total">
-                  <span>Total Amount (Including GST):</span>
-                  <span>${grandTotal.toFixed(2)}</span>
-                </div>
+              <div className="summary-row total">
+                <span>Total Amount (Including GST):</span>
+                <span>${grandTotal.toFixed(2)}</span>
               </div>
             </div>
-          )}
+          </div>
         </>
       ) : (
         <div className="empty-cart">

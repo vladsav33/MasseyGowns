@@ -37,7 +37,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
   const total = cart.reduce((sum, item) => {
     // Use buyPrice if item is in buy mode (isHiring === false), otherwise use hirePrice
     const price =
-      item.isHiring === false ? item.buyPrice || 0 : item.hirePrice || 0;
+      item.isDelivery === true ? item.options[0]?.value?.price : (item.isHiring === false ? item.buyPrice || 0 : item.hirePrice || 0);
     return sum + price * (item.quantity || 1);
   }, 0);
 
@@ -45,7 +45,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
 
   // Helper function to get item price based on hire/buy mode
   const getItemPrice = (item) => {
-    return item.isHiring === false ? item.buyPrice || 0 : item.hirePrice || 0;
+    return item.isDelivery === true ? item.options[0]?.value?.price : (item.isHiring === false ? item.buyPrice || 0 : item.hirePrice || 0);
   };
 
   const handleDateChange = (date) => {
