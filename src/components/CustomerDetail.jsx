@@ -41,7 +41,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
     return sum + price * (item.quantity || 1);
   }, 0);
 
-  const orderAmount = Math.round(total * 100);
+  const orderAmount = total;
 
   // Helper function to get item price based on hire/buy mode
   const getItemPrice = (item) => {
@@ -142,11 +142,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
         orderAmount,
       };
 
-      console.log("total =", total);
-      console.log("orderAmount =", orderAmount);
-      console.log("finalFormData =", finalFormData);
-
-      debugger;
+      //console.log("finalFormData =", finalFormData);
 
       const [result] = await Promise.all([
         submitCustomerDetails(finalFormData),
