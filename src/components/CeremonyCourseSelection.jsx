@@ -38,14 +38,35 @@ function CeremonyCourseSelection({
   const [loadingItems, setLoadingItems] = useState(false);
   const [itemsError, setItemsError] = useState(null);
 
-  const [displayedItems, setDisplayedItems] = useState(saved.displayedItems || []);
+  const [displayedItems, setDisplayedItems] = useState(
+    saved.displayedItems || [],
+  );
   const [itemOptions, setItemOptions] = useState(saved.itemOptions || {});
   const [purchaseTypeByUiId, setPurchaseTypeByUiId] = useState(
     saved.purchaseTypeByUiId || {},
   );
-  
+
   const isHiringFor = (uiId) => purchaseTypeByUiId[uiId] ?? true;
-  
+
+  useEffect(() => {
+    setDisplayedItems([]);
+    setItemOptions({});
+    setPurchaseTypeByUiId({});
+    setItemsError(null);
+    setLoadingItems(false);
+
+    if (showCeremony) {
+      setCourse(null);
+      localStorage.removeItem("selectedCeremonyId");
+      localStorage.removeItem("selectedCourseId");
+    } else {
+      setCeremony(null);
+      setCourse(null);
+      localStorage.removeItem("selectedPhotoCeremonyId");
+      localStorage.removeItem("selectedPhotoCourseId");
+    }
+    localStorage.removeItem(TEMP_KEY);
+  }, [showCeremony, TEMP_KEY]);
 
   // restore dropdowns + temp selections
   useEffect(() => {
@@ -61,9 +82,11 @@ function CeremonyCourseSelection({
     if (savedCourseId) setCourse(Number(savedCourseId));
 
     const temp = readTemp();
-    if (Array.isArray(temp?.displayedItems)) setDisplayedItems(temp.displayedItems);
+    if (Array.isArray(temp?.displayedItems))
+      setDisplayedItems(temp.displayedItems);
     if (temp?.itemOptions) setItemOptions(temp.itemOptions);
-    if (temp?.purchaseTypeByUiId) setPurchaseTypeByUiId(temp.purchaseTypeByUiId);
+    if (temp?.purchaseTypeByUiId)
+      setPurchaseTypeByUiId(temp.purchaseTypeByUiId);
   }, [showCeremony, setCeremony, setCourse]);
 
   // persist temp exactly like buy step 1
@@ -87,7 +110,6 @@ function CeremonyCourseSelection({
       setCourse(null);
       localStorage.removeItem(TEMP_KEY);
     };
-
     window.addEventListener("hireStep1Reset", onReset);
     return () => window.removeEventListener("hireStep1Reset", onReset);
   }, [setCeremony, setCourse]);
@@ -375,7 +397,8 @@ function CeremonyCourseSelection({
                               <select
                                 className="option-select"
                                 value={
-                                  itemOptions[product.uiId]?.[option.label] || ""
+                                  itemOptions[product.uiId]?.[option.label] ||
+                                  ""
                                 }
                                 onChange={(e) =>
                                   handleOptionChange(
@@ -419,11 +442,19 @@ function CeremonyCourseSelection({
 
                       <div className="item-controls">
                         <div className="quantity-controls">
-                          <button className="quantity-btn" type="button" disabled>
+                          <button
+                            className="quantity-btn"
+                            type="button"
+                            disabled
+                          >
                             −
                           </button>
                           <span className="quantity">1</span>
-                          <button className="quantity-btn" type="button" disabled>
+                          <button
+                            className="quantity-btn"
+                            type="button"
+                            disabled
+                          >
                             +
                           </button>
                         </div>

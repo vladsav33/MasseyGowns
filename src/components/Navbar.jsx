@@ -85,9 +85,11 @@ function Navbar() {
     () =>
       cartItems.filter(Boolean).reduce((acc, item) => {
         const unit =
-          item.isHiring === false
-            ? getNumericPrice(item.buyPrice)
-            : getNumericPrice(item.hirePrice);
+          item.isDelivery === true
+            ? item.options[0]?.value?.price
+            : item.isHiring === false
+              ? getNumericPrice(item.buyPrice)
+              : getNumericPrice(item.hirePrice);
         return acc + unit * (item.quantity || 1);
       }, 0),
     [cartItems],
@@ -95,9 +97,11 @@ function Navbar() {
 
   const getItemPrice = (item) => {
     const unit =
-      item.isHiring === false
-        ? getNumericPrice(item.buyPrice)
-        : getNumericPrice(item.hirePrice);
+      item.isDelivery === true
+        ? item.options[0]?.value?.price
+        : item.isHiring === false
+          ? getNumericPrice(item.buyPrice)
+          : getNumericPrice(item.hirePrice);
     return unit * (item.quantity || 1);
   };
 
@@ -111,7 +115,8 @@ function Navbar() {
     const updated = cartItems.filter((item) => item.id !== itemId);
     setCartItems(updated);
 
-    if (updated.length > 0) localStorage.setItem("cart", JSON.stringify(updated));
+    if (updated.length > 0)
+      localStorage.setItem("cart", JSON.stringify(updated));
     else localStorage.removeItem("cart");
 
     window.dispatchEvent(new Event("cartUpdated"));
@@ -124,7 +129,8 @@ function Navbar() {
         state={{ step: 1 }}
         onClick={onClickLink}
         className={({ isActive }) => {
-          const isPhoto = new URLSearchParams(location.search).get("mode") === "photo";
+          const isPhoto =
+            new URLSearchParams(location.search).get("mode") === "photo";
           return isActive && !isPhoto ? "nav-link active" : "nav-link";
         }}
       >
@@ -135,7 +141,9 @@ function Navbar() {
         to="/buyregalia"
         state={{ step: 1 }}
         onClick={onClickLink}
-        className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+        className={({ isActive }) =>
+          isActive ? "nav-link active" : "nav-link"
+        }
       >
         BUY REGALIA
       </NavLink>
@@ -145,7 +153,8 @@ function Navbar() {
         state={{ step: 1 }}
         onClick={onClickLink}
         className={({ isActive }) => {
-          const isPhoto = new URLSearchParams(location.search).get("mode") === "photo";
+          const isPhoto =
+            new URLSearchParams(location.search).get("mode") === "photo";
           return isActive && isPhoto ? "nav-link active" : "nav-link";
         }}
       >
@@ -155,7 +164,9 @@ function Navbar() {
       <NavLink
         to="/faqs"
         onClick={onClickLink}
-        className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+        className={({ isActive }) =>
+          isActive ? "nav-link active" : "nav-link"
+        }
       >
         FAQs
       </NavLink>
@@ -163,7 +174,9 @@ function Navbar() {
       <NavLink
         to="/contactus"
         onClick={onClickLink}
-        className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+        className={({ isActive }) =>
+          isActive ? "nav-link active" : "nav-link"
+        }
       >
         CONTACT US
       </NavLink>
@@ -193,11 +206,17 @@ function Navbar() {
               onClick={() => setIsCartOpen((v) => !v)}
             >
               <i className="fa fa-shopping-bag" />
-              {totalItems > 0 && <span className="cart-badge">{totalItems}</span>}
+              {totalItems > 0 && (
+                <span className="cart-badge">{totalItems}</span>
+              )}
             </button>
 
             {isCartOpen && (
-              <div className="cart-dropdown" role="dialog" aria-label="Shopping cart">
+              <div
+                className="cart-dropdown"
+                role="dialog"
+                aria-label="Shopping cart"
+              >
                 <div className="cart-dropdown-header">
                   <h3>Shopping Cart</h3>
                 </div>
@@ -212,20 +231,29 @@ function Navbar() {
                               <div className="cart-item-name">{item.name}</div>
 
                               <div className="cart-item-details">
-                                <span className="cart-item-category">{item.category}</span>
-                                <span className="cart-item-quantity">Qty: {item.quantity || 1}</span>
+                                <span className="cart-item-category">
+                                  {item.category}
+                                </span>
+                                <span className="cart-item-quantity">
+                                  Qty: {item.quantity || 1}
+                                </span>
                               </div>
 
                               {item.selectedOptions &&
-                                Object.keys(item.selectedOptions).length > 0 && (
+                                Object.keys(item.selectedOptions).length >
+                                  0 && (
                                   <div className="cart-item-options">
                                     {(item.options || []).map((option) => {
-                                      const selectedId = item.selectedOptions?.[option.label];
+                                      const selectedId =
+                                        item.selectedOptions?.[option.label];
                                       if (!selectedId) return null;
 
-                                      const selectedChoice = (option.choices || []).find(
+                                      const selectedChoice = (
+                                        option.choices || []
+                                      ).find(
                                         (c) =>
-                                          String(c.id || c.value) === String(selectedId),
+                                          String(c.id || c.value) ===
+                                          String(selectedId),
                                       );
 
                                       const displayValue = selectedChoice
@@ -236,9 +264,16 @@ function Navbar() {
                                         : String(selectedId);
 
                                       return (
-                                        <div key={option.label} className="cart-option">
-                                          <span className="option-label">{option.label}:</span>
-                                          <span className="option-value">{displayValue}</span>
+                                        <div
+                                          key={option.label}
+                                          className="cart-option"
+                                        >
+                                          <span className="option-label">
+                                            {option.label}:
+                                          </span>
+                                          <span className="option-value">
+                                            {displayValue}
+                                          </span>
                                         </div>
                                       );
                                     })}
@@ -267,7 +302,11 @@ function Navbar() {
                         <div className="cart-total">
                           <strong>Total: ${totalPrice.toFixed(2)}</strong>
                         </div>
-                        <button className="view-cart-btn" onClick={handleViewCart} type="button">
+                        <button
+                          className="view-cart-btn"
+                          onClick={handleViewCart}
+                          type="button"
+                        >
                           View Cart
                         </button>
                       </div>
