@@ -35,9 +35,12 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
 
   // Calculate total - use buyPrice or hirePrice based on item mode
   const total = cart.reduce((sum, item) => {
-    // Use buyPrice if item is in buy mode (isHiring === false), otherwise use hirePrice
     const price =
-      item.isDelivery === true ? item.options[0]?.value?.price : (item.isHiring === false ? item.buyPrice || 0 : item.hirePrice || 0);
+      item.isDelivery === true
+        ? item.options[0]?.value?.price
+        : item.isHiring === false
+          ? item.buyPrice || 0
+          : item.hirePrice || 0;
     return sum + price * (item.quantity || 1);
   }, 0);
 
@@ -45,7 +48,11 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
 
   // Helper function to get item price based on hire/buy mode
   const getItemPrice = (item) => {
-    return item.isDelivery === true ? item.options[0]?.value?.price : (item.isHiring === false ? item.buyPrice || 0 : item.hirePrice || 0);
+    return item.isDelivery === true
+      ? item.options[0]?.value?.price
+      : item.isHiring === false
+        ? item.buyPrice || 0
+        : item.hirePrice || 0;
   };
 
   const handleDateChange = (date) => {
@@ -156,7 +163,12 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       localStorage.setItem("orderSnapshot", JSON.stringify(snapshot));
       console.log("orderid=", orderId);
       console.log("orderSnapshot=", JSON.stringify(snapshot));
-      localStorage.setItem("orderNo", orderNo);
+      //localStorage.setItem("orderNo", orderNo);
+      if (orderNo) {
+        localStorage.setItem("orderNo", orderNo);
+      } else {
+        localStorage.removeItem("orderNo");
+      }
       localStorage.setItem("orderId", orderId);
 
       // clear cart
