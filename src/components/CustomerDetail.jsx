@@ -62,12 +62,6 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
   };
 
   const today = new Date().toISOString().split("T")[0];
-
-  const selectedCeremonyId = localStorage.getItem("selectedCeremonyId") || 0;
-  const selectedPhotoCeremonyId = localStorage.getItem("selectedPhotoCeremonyId") || 0;
-  const selectedCourseId = localStorage.getItem("selectedCourseId") || 0;
-  const selectedPhotoCourseId = localStorage.getItem("selectedPhotoCourseId") || 0;
-
   const orderType = localStorage.getItem("orderType") || "0";
 
   const handleChange = (e) => {
@@ -593,11 +587,6 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
               <span>Total (Including GST)</span>
               <span>${total.toFixed(2)}</span>
             </div>
-
-            <div>ceremony - {selectedCeremonyId}</div>
-            {selectedPhotoCeremonyId}
-            <div>degree - {selectedCourseId}</div>
-            {selectedPhotoCourseId} || {orderType}
           </>
         ) : (
           <p>Your cart is empty.</p>
