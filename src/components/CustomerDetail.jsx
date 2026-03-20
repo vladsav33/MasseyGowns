@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useRef} from "react";
 import "./CustomerDetail.css";
 import { submitCustomerDetails } from "./../services/HireBuyRegaliaService.js";
 import "react-datepicker/dist/react-datepicker.css";
@@ -25,6 +25,8 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
     message: "",
     orderAmount: 0,
   });
+  
+  const purchaseOrderRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -62,35 +64,31 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
   const today = new Date().toISOString().split("T")[0];
 
   const selectedCeremonyId = localStorage.getItem("selectedCeremonyId") || 0;
+  const selectedPhotoCeremonyId = localStorage.getItem("selectedPhotoCeremonyId") || 0;
+  const selectedCourseId = localStorage.getItem("selectedCourseId") || 0;
+  const selectedPhotoCourseId = localStorage.getItem("selectedPhotoCourseId") || 0;
+
+  const orderType = localStorage.getItem("orderType") || "0";
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
   };
 
   const handlePurchaseOrderChange = (e) => {
     let value = e.target.value;
 
-    // Always ensure it starts with 'PN'
     if (value.length < 2 || !value.startsWith("PN")) {
       const additionalText = value.replace(/^P?N?/i, "");
       value = "PN" + additionalText;
     }
 
-    setFormData((prev) => ({
-      ...prev,
-      purchaseOrder: value,
-    }));
+    // Clear native error as user types
+    purchaseOrderRef.current?.setCustomValidity("");
+    setFormData((prev) => ({ ...prev, purchaseOrder: value }));
   };
 
   const ensureCursorAfterPN = (input) => {
@@ -132,6 +130,18 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (formData.paymentMethod === "3") {
+      const poValue = formData.purchaseOrder;
+      if (!/^PN\d{6}$/.test(poValue)) {
+        purchaseOrderRef.current?.setCustomValidity(
+          "Purchase Order must be PN followed by 6 digits (e.g. PN123456)",
+        );
+        purchaseOrderRef.current?.reportValidity();
+        return;
+      }
+      purchaseOrderRef.current?.setCustomValidity("");
+    }
 
     try {
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
@@ -377,7 +387,9 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
           {/* Student ID & Phone Number */}
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Student ID*</label>
+              <label className="form-label">
+                Student ID{formData.paymentMethod === "1" ? "*" : ""}
+              </label>
               <input
                 type="text"
                 name="studentId"
@@ -385,7 +397,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
                 onChange={handleInputChange}
                 placeholder="Student ID"
                 className="form-input"
-                required
+                required={formData.paymentMethod === "1"}
               />
             </div>
 
@@ -403,7 +415,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
             </div>
           </div>
 
-          {selectedCeremonyId === 2 && (
+          {orderType == 3 && (
             <div>
               <label className="form-label">
                 What date do you plan to take the photos?
@@ -480,6 +492,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
               </label>
               {formData.paymentMethod === "3" && (
                 <input
+                  ref={purchaseOrderRef}
                   type="text"
                   name="purchaseOrder"
                   value={formData.purchaseOrder}
@@ -489,7 +502,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
                   onFocus={handlePurchaseOrderInteraction}
                   onSelect={handlePurchaseOrderInteraction}
                   onKeyUp={handlePurchaseOrderInteraction}
-                  placeholder="Enter ID after PN"
+                  placeholder="Enter ID after PN (e.g. PN123456)"
                   className="form-input purchase-order-input"
                   required
                 />
@@ -580,6 +593,11 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
               <span>Total (Including GST)</span>
               <span>${total.toFixed(2)}</span>
             </div>
+
+            <div>ceremony - {selectedCeremonyId}</div>
+            {selectedPhotoCeremonyId}
+            <div>degree - {selectedCourseId}</div>
+            {selectedPhotoCourseId} || {orderType}
           </>
         ) : (
           <p>Your cart is empty.</p>

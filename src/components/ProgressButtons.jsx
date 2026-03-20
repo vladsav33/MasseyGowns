@@ -14,10 +14,13 @@ function ProgressButtons({
   showCeremony,
   cardOptionsComplete = true,
   hireTempKey,
+  orderType: orderTypeProp,
 }) {
   const navigate = useNavigate();
 
-  const orderType = Number(localStorage.getItem("orderType") || 0);
+  const orderType = Number(
+    orderTypeProp ?? localStorage.getItem("orderType") ?? 0,
+  );
   const HIRE_TEMP_KEY = hireTempKey;
 
   const [replaceDialogOpen, setReplaceDialogOpen] = useState(false);
@@ -213,6 +216,7 @@ function ProgressButtons({
         };
       });
 
+      localStorage.setItem("orderType", String(orderType));
       const updated = [...preserved, ...hireCartItems];
       localStorage.setItem("cart", JSON.stringify(updated));
       window.dispatchEvent(new Event("cartUpdated"));
@@ -290,6 +294,7 @@ function ProgressButtons({
         };
       });
 
+      localStorage.setItem("orderType", String(orderType));
       const updated = [...preserved, ...buyCartItems];
       localStorage.setItem("cart", JSON.stringify(updated));
       window.dispatchEvent(new Event("cartUpdated"));

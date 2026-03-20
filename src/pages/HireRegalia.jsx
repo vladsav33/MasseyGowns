@@ -22,10 +22,6 @@ function HireRegalia() {
   const pageOrderType = mode === "photo" ? 3 : 1;
   const hireTempKey = `hireStep1Temp_${pageOrderType}`;
 
-  useEffect(() => {
-    localStorage.setItem("orderType", String(pageOrderType));
-  }, [pageOrderType]);
-
   const [step, setStep] = useState(() => {
     if (location.state?.step) return Number(location.state.step);
     return Number(localStorage.getItem("step")) || 1;

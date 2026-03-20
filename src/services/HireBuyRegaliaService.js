@@ -99,6 +99,7 @@ export const submitCustomerDetails = async (formData) => {
       postcode: formData.postcode || "",
       country: formData.country || "NZ",
       phone: formData.phone || "",
+      note: formData.eventDate || "",
       studentId: parseInt(formData.studentId) || 0,
       message: formData.message || "",
       items: cart.map((item) => ({

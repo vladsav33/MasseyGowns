@@ -5,26 +5,15 @@ import Contact from "../components/Contact";
 import ProgressBar from "../components/ProgressBar";
 import ProgressButtons from "../components/ProgressButtons";
 import BuySelectRegalia from "../components/BuySelectRegalia";
-import CartList from "../components/CartList";
-import CustomerDetail from "../components/CustomerDetail";
-import Payment from "../components/Payment";
 import { useLocation, useNavigate } from "react-router-dom";
-import PaymentCompleted from "../components/PaymentCompleted";
 
 function BuyRegalia() {
-  // Set orderType in localStorage when component mounts
-  useEffect(() => {
-    localStorage.setItem("orderType", "2"); // 2 for buy
-  }, []);
+
+  const orderType = 2;
 
   const navigate = useNavigate();
 
-  const paymentMethod = localStorage.getItem("paymentMethod");
-
   const location = useLocation();
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   const [step, setStep] = useState(() => {
     if (location.state?.step) {
@@ -81,6 +70,7 @@ function BuyRegalia() {
               setStep={setStep}
               steps={steps}
               cardOptionsComplete={buyStep1Complete}
+              orderType={orderType}
             />
             <Contact />
           </div>
