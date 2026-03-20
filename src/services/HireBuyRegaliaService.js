@@ -68,7 +68,6 @@ export const getDelivery = async () => {
 
 export const submitCustomerDetails = async (formData) => {
   try {
-    console.log("formData.orderAmount =", formData.orderAmount);
 
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
@@ -105,7 +104,7 @@ export const submitCustomerDetails = async (formData) => {
       items: cart.map((item) => ({
         itemId: parseInt(item.id?.toString()) || 0,
         sizeId:
-          parseInt(item.selectedOptions?.["My Full height"]) ||
+          parseInt(item.selectedOptions?.["My full height"]) ||
           parseInt(item.selectedOptions?.["Head Size"]) ||
           0,
         hatId: parseInt(item.selectedOptions?.["Head Size"]) || 0,
@@ -113,7 +112,7 @@ export const submitCustomerDetails = async (formData) => {
         hoodId: parseInt(item.selectedOptions?.["Hood Type"]) || 0,
         hire: item.isHiring ?? false,
         quantity: item.quantity || 1,
-        category: item.category,
+        category: item.category || "",
       })),
       paid: false,
       paymentMethod: parseInt(formData.paymentMethod) || 1,
@@ -124,8 +123,6 @@ export const submitCustomerDetails = async (formData) => {
       orderType,
       orderAmount: Number(formData.orderAmount),
     };
-
-    console.log("CustomerPayload=", customerPayload);
 
     const response = await axios.post(`${API_URL}/orders`, customerPayload);
     if (response.data) {
