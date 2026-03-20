@@ -50,18 +50,6 @@ function PaymentCompleted() {
           orderNo,
         )}&email=${encodeURIComponent(email)}`;
 
-        console.log("snapshot:", snapshot);
-        console.log(
-          "orderId raw:",
-          snapshot?.orderId,
-          snapshot?.id,
-          localStorage.getItem("orderId"),
-        );
-        console.log("orderId final:", orderId);
-        console.log("orderNo final:", orderNo);
-        console.log("email final:", email);
-        console.log("url final:", url);
-
         const resp = await fetch(url, {
           method: "GET",
           headers: {

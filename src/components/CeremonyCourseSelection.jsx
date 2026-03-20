@@ -49,6 +49,11 @@ function CeremonyCourseSelection({
   const isHiringFor = (uiId) => purchaseTypeByUiId[uiId] ?? true;
 
   useEffect(() => {
+    if (!showCeremony) localStorage.setItem("selectedPhotoCeremonyId", 2);
+    else localStorage.removeItem("selectedPhotoCeremonyId");
+  }, [showCeremony]);
+
+  useEffect(() => {
     setDisplayedItems([]);
     setItemOptions({});
     setPurchaseTypeByUiId({});
@@ -72,7 +77,7 @@ function CeremonyCourseSelection({
   useEffect(() => {
     const savedCeremonyId = showCeremony
       ? localStorage.getItem("selectedCeremonyId")
-      : localStorage.getItem("selectedPhotoCeremonyId") || 2;
+      : localStorage.getItem("selectedPhotoCeremonyId");
 
     const savedCourseId = showCeremony
       ? localStorage.getItem("selectedCourseId")
@@ -130,10 +135,6 @@ function CeremonyCourseSelection({
     if (id !== null && showCeremony)
       localStorage.setItem("selectedCeremonyId", String(id));
     else localStorage.removeItem("selectedCeremonyId");
-
-    if (id !== null && !showCeremony)
-      localStorage.setItem("selectedPhotoCeremonyId", String(id));
-    else localStorage.removeItem("selectedPhotoCeremonyId");
   };
 
   const handleCourseChange = (e) => {

@@ -66,24 +66,6 @@ const BuySelectRegalia = ({ onOptionsComplete }) => {
     getValue("buyRegaliaIntro") ||
     "Thank you for your order to purchase your own Massey University regalia. Please allow four weeks for manufacture - this may be longer during the graduation season due to the increase in demand on our supplies around this time. For more information and a detailed quote email us info@masseygowns.org.nz";
 
-  const isProductOptionsComplete = (product, itemOptions) => {
-    const opts = Array.isArray(product?.options) ? product.options : [];
-    if (opts.length === 0) return true;
-
-    const selected = itemOptions?.[product.uiId] || {};
-    return opts.every((opt) => {
-      const label = opt?.label;
-      const val = label ? selected[label] : null;
-      return val !== undefined && val !== null && String(val).trim() !== "";
-    });
-  };
-
-  const areAllDisplayedItemsComplete = (displayedItems, itemOptions) => {
-    const list = Array.isArray(displayedItems) ? displayedItems : [];
-    if (list.length === 0) return false; // must add at least one item to proceed
-    return list.every((p) => isProductOptionsComplete(p, itemOptions));
-  };
-
   // fetch items
   useEffect(() => {
     const fetchItems = async () => {
@@ -200,9 +182,7 @@ const BuySelectRegalia = ({ onOptionsComplete }) => {
     if (!selectedItemType || !selectedDegree) return [];
     const filtered = items
       .filter((item) => item.category === selectedItemType)
-      .filter(
-        (item) => item.degreeName && item.degreeName.includes(selectedDegree),
-      )
+      .filter((item) => item.degreeName && item.degreeName === selectedDegree)
       .map((item) => ({
         ...item,
         uiId: `${item.degreeId ?? "deg"}-${item.id}`,
@@ -635,7 +615,7 @@ const BuySelectRegalia = ({ onOptionsComplete }) => {
               <div className="items-list">
                 {displayedItems.map((product) => {
                   const isDelivery = product.__kind === "delivery";
-                  const isSet = product.__kind === "set";
+                  // const isSet = product.__kind === "set";
                   const price = isDelivery
                     ? Number(product.price ?? 0)
                     : Number(product.buyPrice ?? 0);

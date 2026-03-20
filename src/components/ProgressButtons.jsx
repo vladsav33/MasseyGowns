@@ -295,7 +295,26 @@ function ProgressButtons({
       });
 
       localStorage.setItem("orderType", String(orderType));
-      const updated = [...preserved, ...buyCartItems];
+      localStorage.removeItem("selectedCeremonyId");
+      localStorage.removeItem("selectedCourseId");
+      localStorage.removeItem("selectedPhotoCeremonyId");
+      localStorage.removeItem("selectedPhotoCourseId");
+
+      // Deduplicate delivery — only one allowed
+      const dedupedBuyItems = buyCartItems.reduce((acc, item) => {
+        if (item.isDelivery) {
+          if (!acc.some((i) => i.isDelivery)) acc.push(item);
+        } else {
+          acc.push(item);
+        }
+        return acc;
+      }, []);
+
+      // Remove stale delivery from preserved when orderType is 2
+      const cleanPreserved =
+        orderType === 2 ? preserved.filter((i) => !i.isDelivery) : preserved;
+
+      const updated = [...cleanPreserved, ...dedupedBuyItems];
       localStorage.setItem("cart", JSON.stringify(updated));
       window.dispatchEvent(new Event("cartUpdated"));
 

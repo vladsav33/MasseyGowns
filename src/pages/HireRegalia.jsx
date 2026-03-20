@@ -1,5 +1,3 @@
-// HireRegalia.jsx (only the parts you MUST add/change)
-//  Add these new state + handler + pass onEditItems to ProgressButtons
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import "./HireRegalia.css";
@@ -82,21 +80,18 @@ function HireRegalia() {
         setSelectedCourseId(null);
         return;
       }
-      if (!showCeremony) {
-        // casual hire can still have courses without ceremony depending on your API;
-        // if your API still needs ceremony, keep the same logic as above.
-      }
 
       try {
         setLoading(true);
         setError(null);
 
-        if (selectedCeremonyId) {
-          const data = await getCoursesByCeremonyId(selectedCeremonyId);
+        const id = showCeremony ? selectedCeremonyId : 2;
+        // if (id) {
+          const data = await getCoursesByCeremonyId(id);
           setCourses(Array.isArray(data) ? data : []);
-        } else {
-          setCourses([]);
-        }
+        // } else {
+        //   setCourses([]);
+        // }
       } catch (err) {
         setError(err.message);
       } finally {
