@@ -101,6 +101,7 @@ function CeremonyCourseSelection({
       itemOptions,
       purchaseTypeByUiId,
     });
+    window.dispatchEvent(new Event("hireTempUpdated"));
   }, [displayedItems, itemOptions, purchaseTypeByUiId]);
 
   // listen for reset after Add to Cart
@@ -347,6 +348,9 @@ function CeremonyCourseSelection({
               No items available for the selected qualification.
             </p>
           )}
+        {!loadingItems && !itemsError && !course && (
+          <p className="muted">Please select a qualification to view items.</p>
+        )}
 
         {!loadingItems && !itemsError && displayedItems.length > 0 && (
           <div className="filtered-items">

@@ -63,6 +63,40 @@ function ProgressButtons({
     };
   }, []);
 
+  const [hireStep1HasItems, setHireStep1HasItems] = useState(() => {
+    try {
+      const temp = JSON.parse(localStorage.getItem(HIRE_TEMP_KEY) || "{}");
+      return (
+        Array.isArray(temp.displayedItems) && temp.displayedItems.length > 0
+      );
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    const syncHireItems = () => {
+      try {
+        const temp = JSON.parse(localStorage.getItem(HIRE_TEMP_KEY) || "{}");
+        setHireStep1HasItems(
+          Array.isArray(temp.displayedItems) && temp.displayedItems.length > 0,
+        );
+      } catch {
+        setHireStep1HasItems(false);
+      }
+    };
+
+    window.addEventListener("hireStep1Reset", syncHireItems);
+    window.addEventListener("hireTempUpdated", syncHireItems);
+    window.addEventListener("storage", syncHireItems);
+
+    return () => {
+      window.removeEventListener("hireStep1Reset", syncHireItems);
+      window.removeEventListener("hireTempUpdated", syncHireItems);
+      window.removeEventListener("storage", syncHireItems);
+    };
+  }, [HIRE_TEMP_KEY]);
+
   const cartCount = cartData.length;
 
   const stepsLen = Array.isArray(steps) ? steps.length : 0;
@@ -371,7 +405,7 @@ function ProgressButtons({
     }
   };
 
-  const getBuyStep1HasItems = () => {
+  const [buyStep1HasItems, setBuyStep1HasItems] = useState(() => {
     try {
       const temp = JSON.parse(localStorage.getItem("buyStep1Temp") || "{}");
       const displayed = Array.isArray(temp.displayedItems)
@@ -381,14 +415,39 @@ function ProgressButtons({
     } catch {
       return false;
     }
-  };
+  });
 
-  const buyStep1HasItems = getBuyStep1HasItems();
+  useEffect(() => {
+    const syncBuyItems = () => {
+      try {
+        const temp = JSON.parse(localStorage.getItem("buyStep1Temp") || "{}");
+        const displayed = Array.isArray(temp.displayedItems)
+          ? temp.displayedItems
+          : [];
+        setBuyStep1HasItems(
+          displayed.some((x) => x && x.__kind !== "delivery"),
+        );
+      } catch {
+        setBuyStep1HasItems(false);
+      }
+    };
+
+    window.addEventListener("buyTempUpdated", syncBuyItems);
+    window.addEventListener("cartUpdated", syncBuyItems);
+    window.addEventListener("storage", syncBuyItems);
+
+    return () => {
+      window.removeEventListener("buyTempUpdated", syncBuyItems);
+      window.removeEventListener("cartUpdated", syncBuyItems);
+      window.removeEventListener("storage", syncBuyItems);
+    };
+  }, []);
+
+  const isHireLike = orderType === 1 || orderType === 3;
+  const isBuy = orderType === 2;
 
   // --- Config per orderType ---
   const cfg = useMemo(() => {
-    const isHireLike = orderType === 1 || orderType === 3;
-    const isBuy = orderType === 2;
 
     return {
       isHireLike,
@@ -450,6 +509,7 @@ function ProgressButtons({
     cartCount,
     cartOptionsComplete,
     buyStep1HasItems,
+    hireStep1HasItems
   ]);
 
   const goNext = async () => {
@@ -493,13 +553,18 @@ function ProgressButtons({
         )}
 
         {step < 3 && (
-          <button
-            className={`btn next ${disableNext ? "disabled" : ""}`}
-            onClick={goNext}
-            disabled={disableNext}
-          >
-            {step === 1 ? "Add to Cart" : "Next"}
-          </button>
+          <>
+            {(isHireLike && step === 1 && !hireStep1HasItems) ||
+            (isBuy && step === 1 && !buyStep1HasItems) ? null : (
+              <button
+                className={`btn next ${disableNext ? "disabled" : ""}`}
+                onClick={goNext}
+                disabled={disableNext}
+              >
+                {step === 1 ? "Add to Cart" : "Next"}
+              </button>
+            )}
+          </>
         )}
       </div>
 

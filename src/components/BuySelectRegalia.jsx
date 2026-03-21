@@ -111,6 +111,7 @@ const BuySelectRegalia = ({ onOptionsComplete }) => {
       itemOptions,
       lastSelectionKey: lastSelectionKeyRef.current,
     });
+    window.dispatchEvent(new Event("buyTempUpdated"));
   }, [
     activeTab,
     selectedItemType,
