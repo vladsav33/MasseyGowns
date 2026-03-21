@@ -57,6 +57,7 @@ const BuySelectRegalia = ({ onOptionsComplete }) => {
     saved.displayedItems || [],
   );
   const [itemOptions, setItemOptions] = useState(saved.itemOptions || {});
+  const [setGridOptions, setSetGridOptions] = useState({});
 
   const lastSelectionKeyRef = useRef(saved.lastSelectionKey || "");
   const itemTypeSelectRef = useRef(null);
@@ -217,6 +218,9 @@ const BuySelectRegalia = ({ onOptionsComplete }) => {
       for (const it of filteredItems) map.set(it.uiId, it);
       return Array.from(map.values());
     });
+    setSelectedItemType("");
+    setSelectedDegree("");
+    lastSelectionKeyRef.current = "";
   }, [selectedItemType, selectedDegree, filteredItems]);
 
   useEffect(() => {
@@ -266,7 +270,7 @@ const BuySelectRegalia = ({ onOptionsComplete }) => {
   const areAllOptionsSelected = (product) => {
     if (!product?.options || product.options.length === 0) return true;
     const key = product.uiId ?? product.id;
-    const selected = itemOptions[key] || {};
+    const selected = setGridOptions[key] || {};
     return product.options.every(
       (opt) => selected[opt.label] && selected[opt.label] !== "",
     );
@@ -276,10 +280,9 @@ const BuySelectRegalia = ({ onOptionsComplete }) => {
     const uiId = `set-${setItem.id}`;
     const tempSet = { ...setItem, uiId, __kind: "set" };
 
-    // validate ONLY this set’s options
     const opts = Array.isArray(tempSet?.options) ? tempSet.options : [];
     if (opts.length > 0) {
-      const selected = itemOptions?.[uiId] || {};
+      const selected = setGridOptions?.[uiId] || {};
       const missing = opts.find((opt) => {
         const val = selected?.[opt.label];
         return val === undefined || val === null || String(val).trim() === "";
@@ -290,11 +293,32 @@ const BuySelectRegalia = ({ onOptionsComplete }) => {
       }
     }
 
-    setDisplayedItems((prev) => {
-      const map = new Map(prev.map((p) => [p.uiId, p]));
-      map.set(uiId, tempSet);
-      return Array.from(map.values());
+    const selectedOptions = setGridOptions?.[uiId] || {};
+
+    // Generate a unique cartItemId so the same set can be added multiple times
+    const cartItemId = crypto.randomUUID();
+    const uniqueUiId = `set-${setItem.id}-${cartItemId}`;
+
+    setDisplayedItems((prev) => [
+      ...prev,
+      { ...tempSet, uiId: uniqueUiId, cartItemId, selectedOptions },
+    ]);
+
+    setItemOptions((prev) => ({
+      ...prev,
+      [uniqueUiId]: selectedOptions,
+    }));
+
+    setSetGridOptions((prev) => {
+      const next = { ...prev };
+      delete next[uiId];
+      return next;
     });
+
+    setTimeout(() => {
+      const el = document.querySelector(".filtered-items");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
   };
 
   // -------------------- DELIVERY TEMP CARD --------------------
@@ -458,16 +482,18 @@ const BuySelectRegalia = ({ onOptionsComplete }) => {
                                       <select
                                         className="option-select"
                                         value={
-                                          itemOptions[setUiId]?.[
+                                          setGridOptions[setUiId]?.[
                                             option.label
                                           ] || ""
                                         }
                                         onChange={(e) =>
-                                          handleOptionChange(
-                                            setUiId,
-                                            option.label,
-                                            e.target.value,
-                                          )
+                                          setSetGridOptions((prev) => ({
+                                            ...prev,
+                                            [setUiId]: {
+                                              ...(prev[setUiId] || {}),
+                                              [option.label]: e.target.value,
+                                            },
+                                          }))
                                         }
                                       >
                                         <option value="">
@@ -543,7 +569,6 @@ const BuySelectRegalia = ({ onOptionsComplete }) => {
           {activeTab === "individual" && (
             <div>
               <h2 className="section-title">Shop Individual Items</h2>
-
               <div className="cascading-dropdowns">
                 <div className="dropdown-row">
                   <div className="dropdown-group">
@@ -577,11 +602,7 @@ const BuySelectRegalia = ({ onOptionsComplete }) => {
                       onChange={(e) => setSelectedDegree(e.target.value)}
                       disabled={!selectedItemType}
                     >
-                      <option value="">
-                        {selectedItemType
-                          ? "Select Degree..."
-                          : "Select Item Type First"}
-                      </option>
+                      <option value="">Select Degree...</option>
                       {availableDegrees.map((degree) => (
                         <option key={degree} value={degree}>
                           {degree}
@@ -595,6 +616,26 @@ const BuySelectRegalia = ({ onOptionsComplete }) => {
               <div className="items-section">
                 {loading && <p className="muted">Loading items…</p>}
                 {error && <p className="error-text">{error}</p>}
+
+                {!loading &&
+                  selectedItemType &&
+                  availableDegrees.length === 0 && (
+                    <p className="muted">
+                      No degrees available for the selected item type.
+                    </p>
+                  )}
+
+                {!loading &&
+                  selectedItemType &&
+                  selectedDegree &&
+                  filteredItems.length === 0 && (
+                    <p className="muted">
+                      No items available for the selected degree.
+                    </p>
+                  )}
+                {displayedItems.length === 0 && (
+                  <p className="muted">No items available</p>
+                )}
               </div>
             </div>
           )}

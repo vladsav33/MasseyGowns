@@ -25,6 +25,7 @@ function ProgressButtons({
 
   const [replaceDialogOpen, setReplaceDialogOpen] = useState(false);
   const [pendingResolve, setPendingResolve] = useState(null);
+  const [replaceReason, setReplaceReason] = useState("orderType");
 
   const handleConfirmReplace = () => {
     if (pendingResolve) pendingResolve(true);
@@ -135,12 +136,47 @@ function ProgressButtons({
         (item) => Number(item.orderType) !== orderType,
       );
 
-      if (!hasDifferentOrderType) return Promise.resolve(true);
+      if (hasDifferentOrderType) {
+        return new Promise((resolve) => {
+          setReplaceReason("orderType");
+          setPendingResolve(() => resolve);
+          setReplaceDialogOpen(true);
+        });
+      }
 
-      return new Promise((resolve) => {
-        setPendingResolve(() => resolve);
-        setReplaceDialogOpen(true);
-      });
+      // for hire (orderType 1), check ceremony ID mismatch
+      if (orderType === 1 && selectedCeremonyId) {
+        const hasDifferentCeremony = existingItems.some(
+          (item) =>
+            item.ceremonyId &&
+            Number(item.ceremonyId) !== Number(selectedCeremonyId),
+        );
+
+        if (hasDifferentCeremony) {
+          return new Promise((resolve) => {
+            setReplaceReason("ceremony");
+            setPendingResolve(() => resolve);
+            setReplaceDialogOpen(true);
+          });
+        }
+      }
+      // for hire (orderType 1), check ceremony ID mismatch
+      if (orderType === 1 && selectedCourseId) {
+        const hasDifferentCourse = existingItems.some(
+          (item) =>
+            item.courseId && Number(item.courseId) !== Number(selectedCourseId),
+        );
+
+        if (hasDifferentCourse) {
+          return new Promise((resolve) => {
+            setReplaceReason("course");
+            setPendingResolve(() => resolve);
+            setReplaceDialogOpen(true);
+          });
+        }
+      }
+
+      return Promise.resolve(true);
     } catch {
       return Promise.resolve(true);
     }
@@ -171,9 +207,17 @@ function ProgressButtons({
       }
 
       const prev = JSON.parse(localStorage.getItem("cart") || "[]");
-      const preserved = (Array.isArray(prev) ? prev : []).filter(
-        (i) => i.isDonation || Number(i.orderType) === orderType,
-      );
+      const preserved = (Array.isArray(prev) ? prev : []).filter((i) => {
+        if (i.isDonation) return true;
+        if (Number(i.orderType) !== orderType) return false;
+        if (orderType === 1 && selectedCeremonyId && i.ceremonyId) {
+          if (Number(i.ceremonyId) !== Number(selectedCeremonyId)) return false;
+        }
+        if (orderType === 1 && selectedCourseId && i.courseId) {
+          if (Number(i.courseId) !== Number(selectedCourseId)) return false;
+        }
+        return true;
+      });
 
       const temp = JSON.parse(localStorage.getItem(HIRE_TEMP_KEY) || "{}");
       const displayedItems = Array.isArray(temp.displayedItems)
@@ -194,6 +238,7 @@ function ProgressButtons({
 
         return {
           id: p.id,
+          cartItemId: p.cartItemId ?? crypto.randomUUID(),
           name: p.name,
           category: p.category,
           description: p.description,
@@ -469,11 +514,38 @@ function ProgressButtons({
             </div>
 
             <div className="dialog-content">
-              <p>Your cart already contains items from another order type.</p>
-              <p>
-                Continuing will replace those items and keep only donation
-                items.
-              </p>
+              {replaceReason === "ceremony" ? (
+                <>
+                  <p>
+                    Your cart already contains items from a different ceremony.
+                  </p>
+                  <p>
+                    Continuing will replace those items and keep only donation
+                    items.
+                  </p>
+                </>
+              ) : replaceReason === "course" ? (
+                <>
+                  <p>
+                    Your cart already contains items from a different
+                    qualification.
+                  </p>
+                  <p>
+                    Continuing will replace those items and keep only donation
+                    items.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p>
+                    Your cart already contains items from another order type.
+                  </p>
+                  <p>
+                    Continuing will replace those items and keep only donation
+                    items.
+                  </p>
+                </>
+              )}
               <p>Do you want to continue?</p>
             </div>
 

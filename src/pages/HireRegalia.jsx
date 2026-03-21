@@ -86,12 +86,8 @@ function HireRegalia() {
         setError(null);
 
         const id = showCeremony ? selectedCeremonyId : 2;
-        // if (id) {
-          const data = await getCoursesByCeremonyId(id);
-          setCourses(Array.isArray(data) ? data : []);
-        // } else {
-        //   setCourses([]);
-        // }
+        const data = await getCoursesByCeremonyId(id);
+        setCourses(Array.isArray(data) ? data : []);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -108,9 +104,11 @@ function HireRegalia() {
   }, [step, navigate]);
 
   return (
-    <div>
+    <div
+      style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
+    >
       <Navbar />
-      <div className="content">
+      <div className="content" style={{ flex: 1 }}>
         <ProgressBar step={step} steps={steps} className="progressbar" />
 
         {step === 1 && (
@@ -165,9 +163,8 @@ function HireRegalia() {
           hireTempKey={hireTempKey}
           orderType={pageOrderType}
         />
-
-        <Contact />
       </div>
+      <Contact />
     </div>
   );
 }

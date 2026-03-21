@@ -1,4 +1,4 @@
-import React, { useState, useEffect , useRef} from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./CustomerDetail.css";
 import { submitCustomerDetails } from "./../services/HireBuyRegaliaService.js";
 import "react-datepicker/dist/react-datepicker.css";
@@ -529,12 +529,13 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
         {cart.length > 0 ? (
           <>
             {cart.map((item) => {
+              const rowId = item.cartItemId ?? item.uiId ?? item.id;
               const itemPrice = getItemPrice(item);
               const itemTotal = itemPrice * (item.quantity || 1);
 
               return (
                 <div
-                  key={item.id}
+                  key={rowId}
                   className="summary-card"
                   style={{ position: "relative" }}
                 >

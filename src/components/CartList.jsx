@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CartItem from "./CartItem.jsx";
 import "./CartList.css";
 
@@ -18,60 +18,68 @@ function CartList({ step, items, setItems }) {
       } else {
         localStorage.removeItem("cart");
       }
-      window.dispatchEvent(new Event("cartUpdated"));
-
       return updated;
     });
+    setTimeout(() => window.dispatchEvent(new Event("cartUpdated")), 0);
   };
 
   // --- Cart actions ---
   const handleAddDonationToCart = () => {
     const donationItem = {
       id: 20,
+      cartItemId: crypto.randomUUID(),
       name: "Donation",
       category: "Graduate Women Manawatu Charitable Trust Inc.",
       hirePrice: 2,
       quantity: donationQuantity,
       isDonation: true,
     };
-
     setDonationQuantity(1);
     updateCart((prev) => [...prev, donationItem]);
     setIsDialogOpen(false);
   };
 
-  const handleIncrease = (id) => {
+  const handleIncrease = (rowId) => {
     updateCart((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, quantity: (item.quantity || 1) + 1 } : item,
-      ),
+      prev.map((item) => {
+        const id = item.cartItemId ?? item.uiId ?? item.id;
+        return id === rowId
+          ? { ...item, quantity: (item.quantity || 1) + 1 }
+          : item;
+      }),
     );
   };
 
-  const handleDecrease = (id) => {
+  const handleDecrease = (rowId) => {
     updateCart((prev) =>
-      prev.map((item) =>
-        item.id === id && (item.quantity || 1) > 1
+      prev.map((item) => {
+        const id = item.cartItemId ?? item.uiId ?? item.id;
+        return id === rowId && (item.quantity || 1) > 1
           ? { ...item, quantity: (item.quantity || 1) - 1 }
-          : item,
-      ),
+          : item;
+      }),
     );
   };
 
-  const handleRemove = (id) => {
-    updateCart((prev) => prev.filter((it) => it.id !== id));
-    if (editingItemId === id) {
+  const handleRemove = (rowId) => {
+    updateCart((prev) =>
+      prev.filter((item) => {
+        const id = item.cartItemId ?? item.uiId ?? item.id;
+        return id !== rowId;
+      }),
+    );
+    if (editingItemId === rowId) {
       setEditingItemId(null);
       setBackupItems(null);
     }
   };
 
-  const handleOptionChange = (itemId, optionLabel, newValue) => {
-    if (editingItemId !== itemId) return;
-
+  const handleOptionChange = (rowId, optionLabel, newValue) => {
+    if (editingItemId !== rowId) return;
     updateCart((prev) =>
       prev.map((item) => {
-        if (item.id !== itemId) return item;
+        const id = item.cartItemId ?? item.uiId ?? item.id;
+        if (id !== rowId) return item;
         return {
           ...item,
           selectedOptions: {
@@ -83,23 +91,29 @@ function CartList({ step, items, setItems }) {
     );
   };
 
-  const handleDeliveryChange = (itemId, newPrice) => {
-    if (editingItemId !== itemId) return;
-
+  const handleDeliveryChange = (rowId, newPrice) => {
+    if (editingItemId !== rowId) return;
     updateCart((prev) =>
-      prev.map((item) =>
-        item.id === itemId ? { ...item, hirePrice: newPrice } : item,
-      ),
+      prev.map((item) => {
+        const id = item.cartItemId ?? item.uiId ?? item.id;
+        return id === rowId ? { ...item, hirePrice: newPrice } : item;
+      }),
     );
   };
 
-  // edit controls
-  const startEdit = (id) => {
-    // allow one item at a time
-    if (editingItemId && editingItemId !== id) return;
+  const startEdit = (rowId) => {
+    if (editingItemId && editingItemId !== rowId) return;
+    setBackupItems(items);
+    setEditingItemId(rowId);
+  };
 
-    setBackupItems(items); // snapshot for cancel
-    setEditingItemId(id);
+  const onTogglePurchaseType = (rowId, newIsHiring) => {
+    updateCart((prev) =>
+      prev.map((item) => {
+        const id = item.cartItemId ?? item.uiId ?? item.id;
+        return id === rowId ? { ...item, isHiring: newIsHiring } : item;
+      }),
+    );
   };
 
   const saveEdit = () => {
@@ -138,15 +152,9 @@ function CartList({ step, items, setItems }) {
     .reduce((acc, item) => acc + (item.quantity || 1), 0);
 
   const grandTotal = totalPrice + totalDonationPrice;
-  localStorage.setItem("grandTotal", String(grandTotal));
-
-  const onTogglePurchaseType = (itemId, newIsHiring) => {
-    updateCart((prev) =>
-      prev.map((it) =>
-        it.id === itemId ? { ...it, isHiring: newIsHiring } : it,
-      ),
-    );
-  };
+  useEffect(() => {
+    localStorage.setItem("grandTotal", String(grandTotal));
+  }, [grandTotal]);
 
   const hasDonation = items.some((item) => item.isDonation);
 
@@ -157,22 +165,22 @@ function CartList({ step, items, setItems }) {
           <h4>You have {items.length} items in your cart</h4>
 
           {items.map((item) => {
-            const isEditing = editingItemId === item.id;
+            const rowId = item.cartItemId ?? item.uiId ?? item.id;
 
             return (
               <CartItem
-                key={item.id}
+                key={rowId}
                 item={item}
                 step={step}
                 quantity={item.quantity || 1}
-                onIncrease={() => handleIncrease(item.id)}
-                onDecrease={() => handleDecrease(item.id)}
-                onRemove={() => handleRemove(item.id)}
+                onIncrease={() => handleIncrease(rowId)}
+                onDecrease={() => handleDecrease(rowId)}
+                onRemove={() => handleRemove(rowId)}
                 onOptionChange={handleOptionChange}
                 onDeliveryChange={handleDeliveryChange}
                 onTogglePurchaseType={onTogglePurchaseType}
-                isEditing={editingItemId === item.id}
-                onEdit={() => startEdit(item.id)}
+                isEditing={editingItemId === rowId}
+                onEdit={() => startEdit(rowId)}
                 onSave={saveEdit}
                 onCancel={cancelEdit}
               />

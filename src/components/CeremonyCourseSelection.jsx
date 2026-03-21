@@ -179,6 +179,7 @@ function CeremonyCourseSelection({
         const withUiId = list.map((it) => ({
           ...it,
           uiId: `${course}-${it.id}`,
+          cartItemId: it.cartItemId ?? crypto.randomUUID(),
         }));
 
         const seen = new Set();
