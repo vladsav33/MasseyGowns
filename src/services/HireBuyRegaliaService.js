@@ -121,6 +121,7 @@ export const submitCustomerDetails = async (formData) => {
       ceremonyId,
       degreeId,
       orderType,
+      status: 1,
       orderAmount: Number(formData.orderAmount),
     };
 
