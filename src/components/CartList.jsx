@@ -75,7 +75,6 @@ function CartList({ step, items, setItems }) {
   };
 
   const handleOptionChange = (rowId, optionLabel, newValue) => {
-    if (editingItemId !== rowId) return;
     updateCart((prev) =>
       prev.map((item) => {
         const id = item.cartItemId ?? item.uiId ?? item.id;
@@ -92,7 +91,6 @@ function CartList({ step, items, setItems }) {
   };
 
   const handleDeliveryChange = (rowId, newPrice) => {
-    if (editingItemId !== rowId) return;
     updateCart((prev) =>
       prev.map((item) => {
         const id = item.cartItemId ?? item.uiId ?? item.id;
@@ -134,12 +132,20 @@ function CartList({ step, items, setItems }) {
   const totalPrice = items
     .filter((item) => !item.isDonation)
     .reduce((acc, item) => {
-      const price =
-        item.isDelivery === true
-          ? getNumericPrice(item.options[0]?.value?.price)
-          : item.isHiring === false
-            ? getNumericPrice(item.buyPrice)
-            : getNumericPrice(item.hirePrice);
+      let price;
+
+      if (item.isDelivery === true) {
+        const selectedDeliveryId = item.selectedOptions?.["Delivery Type"];
+        const matchedOption = item.options[0].choices.find(
+          (opt) => opt.id == selectedDeliveryId,
+        );
+        price = getNumericPrice(matchedOption?.price);
+      } else if (item.isHiring === false) {
+        price = getNumericPrice(item.buyPrice);
+      } else {
+        price = getNumericPrice(item.hirePrice);
+      }
+
       return acc + price * (item.quantity || 1);
     }, 0);
 
@@ -176,8 +182,12 @@ function CartList({ step, items, setItems }) {
                 onIncrease={() => handleIncrease(rowId)}
                 onDecrease={() => handleDecrease(rowId)}
                 onRemove={() => handleRemove(rowId)}
-                onOptionChange={handleOptionChange}
-                onDeliveryChange={handleDeliveryChange}
+                onOptionChange={(itemId, optionLabel, newValue) =>
+                  handleOptionChange(rowId, optionLabel, newValue)
+                }
+                onDeliveryChange={(itemId, newPrice) =>
+                  handleDeliveryChange(rowId, newPrice)
+                }
                 onTogglePurchaseType={onTogglePurchaseType}
                 isEditing={editingItemId === rowId}
                 onEdit={() => startEdit(rowId)}

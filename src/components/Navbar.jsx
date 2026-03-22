@@ -81,29 +81,34 @@ function Navbar() {
     [cartItems],
   );
 
-  const totalPrice = useMemo(
-    () =>
-      cartItems.filter(Boolean).reduce((acc, item) => {
-        const unit =
-          item.isDelivery === true
-            ? item.options[0]?.value?.price
-            : item.isHiring === false
-              ? getNumericPrice(item.buyPrice)
-              : getNumericPrice(item.hirePrice);
-        return acc + unit * (item.quantity || 1);
-      }, 0),
-    [cartItems],
-  );
+  const getDeliveryPrice = (item) => {
+    const selectedId = item.selectedOptions?.["Delivery Type"];
+    const choices = Array.isArray(item.options?.[0]?.choices)
+      ? item.options[0].choices
+      : [];
+    const matched = choices.find(
+      (c) => String(c?.id ?? c?.value ?? "") === String(selectedId ?? ""),
+    );
+    return getNumericPrice(matched?.price);
+  };
 
   const getItemPrice = (item) => {
     const unit =
       item.isDelivery === true
-        ? item.options[0]?.value?.price
+        ? getDeliveryPrice(item)
         : item.isHiring === false
           ? getNumericPrice(item.buyPrice)
           : getNumericPrice(item.hirePrice);
     return unit * (item.quantity || 1);
   };
+
+  const totalPrice = useMemo(
+    () =>
+      cartItems
+        .filter(Boolean)
+        .reduce((acc, item) => acc + getItemPrice(item), 0),
+    [cartItems],
+  );
 
   const handleViewCart = () => {
     setIsCartOpen(false);

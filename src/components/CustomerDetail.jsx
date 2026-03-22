@@ -25,7 +25,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
     message: "",
     orderAmount: 0,
   });
-  
+
   const purchaseOrderRef = useRef(null);
 
   const navigate = useNavigate();
@@ -34,28 +34,31 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
   const cart =
     items.length > 0 ? items : JSON.parse(localStorage.getItem("cart") || "[]");
   localStorage.setItem("customerDetails", JSON.stringify(formData));
-
-  // Calculate total - use buyPrice or hirePrice based on item mode
-  const total = cart.reduce((sum, item) => {
-    const price =
-      item.isDelivery === true
-        ? item.options[0]?.value?.price
-        : item.isHiring === false
-          ? item.buyPrice || 0
-          : item.hirePrice || 0;
-    return sum + price * (item.quantity || 1);
-  }, 0);
-
-  const orderAmount = total;
-
+  
   // Helper function to get item price based on hire/buy mode
+  const getDeliveryPrice = (item) => {
+    const selectedId = item.selectedOptions?.["Delivery Type"];
+    const choices = Array.isArray(item.options?.[0]?.choices)
+      ? item.options[0].choices
+      : [];
+      const matched = choices.find(
+        (c) => String(c?.id ?? c?.value ?? "") === String(selectedId ?? ""),
+      );
+    return parseFloat(matched?.price ?? 0);
+  };
+
   const getItemPrice = (item) => {
     return item.isDelivery === true
-      ? item.options[0]?.value?.price
+      ? getDeliveryPrice(item)
       : item.isHiring === false
         ? item.buyPrice || 0
         : item.hirePrice || 0;
-  };
+      };
+      
+  const total = cart.reduce((sum, item) => {
+    return sum + getItemPrice(item) * (item.quantity || 1);
+  }, 0);
+  const orderAmount = total;
 
   const handleDateChange = (date) => {
     setFormData({ ...formData, eventDate: date });
