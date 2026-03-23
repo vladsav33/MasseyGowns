@@ -14,14 +14,18 @@ function ProgressButtons({
   showCeremony,
   cardOptionsComplete = true,
   hireTempKey,
+  orderType: orderTypeProp,
 }) {
   const navigate = useNavigate();
 
-  const orderType = Number(localStorage.getItem("orderType") || 0);
+  const orderType = Number(
+    orderTypeProp ?? localStorage.getItem("orderType") ?? 0,
+  );
   const HIRE_TEMP_KEY = hireTempKey;
 
   const [replaceDialogOpen, setReplaceDialogOpen] = useState(false);
   const [pendingResolve, setPendingResolve] = useState(null);
+  const [replaceReason, setReplaceReason] = useState("orderType");
 
   const handleConfirmReplace = () => {
     if (pendingResolve) pendingResolve(true);
@@ -58,6 +62,40 @@ function ProgressButtons({
       window.removeEventListener("storage", syncCart);
     };
   }, []);
+
+  const [hireStep1HasItems, setHireStep1HasItems] = useState(() => {
+    try {
+      const temp = JSON.parse(localStorage.getItem(HIRE_TEMP_KEY) || "{}");
+      return (
+        Array.isArray(temp.displayedItems) && temp.displayedItems.length > 0
+      );
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    const syncHireItems = () => {
+      try {
+        const temp = JSON.parse(localStorage.getItem(HIRE_TEMP_KEY) || "{}");
+        setHireStep1HasItems(
+          Array.isArray(temp.displayedItems) && temp.displayedItems.length > 0,
+        );
+      } catch {
+        setHireStep1HasItems(false);
+      }
+    };
+
+    window.addEventListener("hireStep1Reset", syncHireItems);
+    window.addEventListener("hireTempUpdated", syncHireItems);
+    window.addEventListener("storage", syncHireItems);
+
+    return () => {
+      window.removeEventListener("hireStep1Reset", syncHireItems);
+      window.removeEventListener("hireTempUpdated", syncHireItems);
+      window.removeEventListener("storage", syncHireItems);
+    };
+  }, [HIRE_TEMP_KEY]);
 
   const cartCount = cartData.length;
 
@@ -132,12 +170,47 @@ function ProgressButtons({
         (item) => Number(item.orderType) !== orderType,
       );
 
-      if (!hasDifferentOrderType) return Promise.resolve(true);
+      if (hasDifferentOrderType) {
+        return new Promise((resolve) => {
+          setReplaceReason("orderType");
+          setPendingResolve(() => resolve);
+          setReplaceDialogOpen(true);
+        });
+      }
 
-      return new Promise((resolve) => {
-        setPendingResolve(() => resolve);
-        setReplaceDialogOpen(true);
-      });
+      // for hire (orderType 1), check ceremony ID mismatch
+      if (orderType === 1 && selectedCeremonyId) {
+        const hasDifferentCeremony = existingItems.some(
+          (item) =>
+            item.ceremonyId &&
+            Number(item.ceremonyId) !== Number(selectedCeremonyId),
+        );
+
+        if (hasDifferentCeremony) {
+          return new Promise((resolve) => {
+            setReplaceReason("ceremony");
+            setPendingResolve(() => resolve);
+            setReplaceDialogOpen(true);
+          });
+        }
+      }
+      // for hire (orderType 1), check ceremony ID mismatch
+      if (orderType === 1 && selectedCourseId) {
+        const hasDifferentCourse = existingItems.some(
+          (item) =>
+            item.courseId && Number(item.courseId) !== Number(selectedCourseId),
+        );
+
+        if (hasDifferentCourse) {
+          return new Promise((resolve) => {
+            setReplaceReason("course");
+            setPendingResolve(() => resolve);
+            setReplaceDialogOpen(true);
+          });
+        }
+      }
+
+      return Promise.resolve(true);
     } catch {
       return Promise.resolve(true);
     }
@@ -168,9 +241,17 @@ function ProgressButtons({
       }
 
       const prev = JSON.parse(localStorage.getItem("cart") || "[]");
-      const preserved = (Array.isArray(prev) ? prev : []).filter(
-        (i) => i.isDonation || Number(i.orderType) === orderType,
-      );
+      const preserved = (Array.isArray(prev) ? prev : []).filter((i) => {
+        if (i.isDonation) return true;
+        if (Number(i.orderType) !== orderType) return false;
+        if (orderType === 1 && selectedCeremonyId && i.ceremonyId) {
+          if (Number(i.ceremonyId) !== Number(selectedCeremonyId)) return false;
+        }
+        if (orderType === 1 && selectedCourseId && i.courseId) {
+          if (Number(i.courseId) !== Number(selectedCourseId)) return false;
+        }
+        return true;
+      });
 
       const temp = JSON.parse(localStorage.getItem(HIRE_TEMP_KEY) || "{}");
       const displayedItems = Array.isArray(temp.displayedItems)
@@ -191,6 +272,7 @@ function ProgressButtons({
 
         return {
           id: p.id,
+          cartItemId: p.cartItemId ?? crypto.randomUUID(),
           name: p.name,
           category: p.category,
           description: p.description,
@@ -213,6 +295,7 @@ function ProgressButtons({
         };
       });
 
+      localStorage.setItem("orderType", String(orderType));
       const updated = [...preserved, ...hireCartItems];
       localStorage.setItem("cart", JSON.stringify(updated));
       window.dispatchEvent(new Event("cartUpdated"));
@@ -290,7 +373,27 @@ function ProgressButtons({
         };
       });
 
-      const updated = [...preserved, ...buyCartItems];
+      localStorage.setItem("orderType", String(orderType));
+      localStorage.removeItem("selectedCeremonyId");
+      localStorage.removeItem("selectedCourseId");
+      localStorage.removeItem("selectedPhotoCeremonyId");
+      localStorage.removeItem("selectedPhotoCourseId");
+
+      // Deduplicate delivery — only one allowed
+      const dedupedBuyItems = buyCartItems.reduce((acc, item) => {
+        if (item.isDelivery) {
+          if (!acc.some((i) => i.isDelivery)) acc.push(item);
+        } else {
+          acc.push(item);
+        }
+        return acc;
+      }, []);
+
+      // Remove stale delivery from preserved when orderType is 2
+      const cleanPreserved =
+        orderType === 2 ? preserved.filter((i) => !i.isDelivery) : preserved;
+
+      const updated = [...cleanPreserved, ...dedupedBuyItems];
       localStorage.setItem("cart", JSON.stringify(updated));
       window.dispatchEvent(new Event("cartUpdated"));
 
@@ -302,7 +405,7 @@ function ProgressButtons({
     }
   };
 
-  const getBuyStep1HasItems = () => {
+  const [buyStep1HasItems, setBuyStep1HasItems] = useState(() => {
     try {
       const temp = JSON.parse(localStorage.getItem("buyStep1Temp") || "{}");
       const displayed = Array.isArray(temp.displayedItems)
@@ -312,14 +415,39 @@ function ProgressButtons({
     } catch {
       return false;
     }
-  };
+  });
 
-  const buyStep1HasItems = getBuyStep1HasItems();
+  useEffect(() => {
+    const syncBuyItems = () => {
+      try {
+        const temp = JSON.parse(localStorage.getItem("buyStep1Temp") || "{}");
+        const displayed = Array.isArray(temp.displayedItems)
+          ? temp.displayedItems
+          : [];
+        setBuyStep1HasItems(
+          displayed.some((x) => x && x.__kind !== "delivery"),
+        );
+      } catch {
+        setBuyStep1HasItems(false);
+      }
+    };
+
+    window.addEventListener("buyTempUpdated", syncBuyItems);
+    window.addEventListener("cartUpdated", syncBuyItems);
+    window.addEventListener("storage", syncBuyItems);
+
+    return () => {
+      window.removeEventListener("buyTempUpdated", syncBuyItems);
+      window.removeEventListener("cartUpdated", syncBuyItems);
+      window.removeEventListener("storage", syncBuyItems);
+    };
+  }, []);
+
+  const isHireLike = orderType === 1 || orderType === 3;
+  const isBuy = orderType === 2;
 
   // --- Config per orderType ---
   const cfg = useMemo(() => {
-    const isHireLike = orderType === 1 || orderType === 3;
-    const isBuy = orderType === 2;
 
     return {
       isHireLike,
@@ -381,6 +509,7 @@ function ProgressButtons({
     cartCount,
     cartOptionsComplete,
     buyStep1HasItems,
+    hireStep1HasItems
   ]);
 
   const goNext = async () => {
@@ -424,13 +553,18 @@ function ProgressButtons({
         )}
 
         {step < 3 && (
-          <button
-            className={`btn next ${disableNext ? "disabled" : ""}`}
-            onClick={goNext}
-            disabled={disableNext}
-          >
-            {step === 1 ? "Add to Cart" : "Next"}
-          </button>
+          <>
+            {(isHireLike && step === 1 && !hireStep1HasItems) ||
+            (isBuy && step === 1 && !buyStep1HasItems) ? null : (
+              <button
+                className={`btn next ${disableNext ? "disabled" : ""}`}
+                onClick={goNext}
+                disabled={disableNext}
+              >
+                {step === 1 ? "Add to Cart" : "Next"}
+              </button>
+            )}
+          </>
         )}
       </div>
 
@@ -445,11 +579,38 @@ function ProgressButtons({
             </div>
 
             <div className="dialog-content">
-              <p>Your cart already contains items from another order type.</p>
-              <p>
-                Continuing will replace those items and keep only donation
-                items.
-              </p>
+              {replaceReason === "ceremony" ? (
+                <>
+                  <p>
+                    Your cart already contains items from a different ceremony.
+                  </p>
+                  <p>
+                    Continuing will replace those items and keep only donation
+                    items.
+                  </p>
+                </>
+              ) : replaceReason === "course" ? (
+                <>
+                  <p>
+                    Your cart already contains items from a different
+                    qualification.
+                  </p>
+                  <p>
+                    Continuing will replace those items and keep only donation
+                    items.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p>
+                    Your cart already contains items from another order type.
+                  </p>
+                  <p>
+                    Continuing will replace those items and keep only donation
+                    items.
+                  </p>
+                </>
+              )}
               <p>Do you want to continue?</p>
             </div>
 

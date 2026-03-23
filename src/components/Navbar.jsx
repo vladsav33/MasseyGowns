@@ -81,29 +81,34 @@ function Navbar() {
     [cartItems],
   );
 
-  const totalPrice = useMemo(
-    () =>
-      cartItems.filter(Boolean).reduce((acc, item) => {
-        const unit =
-          item.isDelivery === true
-            ? item.options[0]?.value?.price
-            : item.isHiring === false
-              ? getNumericPrice(item.buyPrice)
-              : getNumericPrice(item.hirePrice);
-        return acc + unit * (item.quantity || 1);
-      }, 0),
-    [cartItems],
-  );
+  const getDeliveryPrice = (item) => {
+    const selectedId = item.selectedOptions?.["Delivery Type"];
+    const choices = Array.isArray(item.options?.[0]?.choices)
+      ? item.options[0].choices
+      : [];
+    const matched = choices.find(
+      (c) => String(c?.id ?? c?.value ?? "") === String(selectedId ?? ""),
+    );
+    return getNumericPrice(matched?.price);
+  };
 
   const getItemPrice = (item) => {
     const unit =
       item.isDelivery === true
-        ? item.options[0]?.value?.price
+        ? getDeliveryPrice(item)
         : item.isHiring === false
           ? getNumericPrice(item.buyPrice)
           : getNumericPrice(item.hirePrice);
     return unit * (item.quantity || 1);
   };
+
+  const totalPrice = useMemo(
+    () =>
+      cartItems
+        .filter(Boolean)
+        .reduce((acc, item) => acc + getItemPrice(item), 0),
+    [cartItems],
+  );
 
   const handleViewCart = () => {
     setIsCartOpen(false);
@@ -111,8 +116,11 @@ function Navbar() {
     navigate("/cart");
   };
 
-  const removeFromCart = (itemId) => {
-    const updated = cartItems.filter((item) => item.id !== itemId);
+  const removeFromCart = (cartItemId, itemId) => {
+    const updated = cartItems.filter((item) => {
+      const rowId = item.cartItemId ?? item.uiId ?? item.id;
+      return rowId !== cartItemId;
+    });
     setCartItems(updated);
 
     if (updated.length > 0)
@@ -225,77 +233,76 @@ function Navbar() {
                   {cartItems.length > 0 ? (
                     <>
                       <div className="cart-items-list">
-                        {cartItems.map((item) => (
-                          <div key={item.id} className="cart-dropdown-item">
-                            <div className="cart-item-info">
-                              <div className="cart-item-name">{item.name}</div>
-
-                              <div className="cart-item-details">
-                                <span className="cart-item-category">
-                                  {item.category}
-                                </span>
-                                <span className="cart-item-quantity">
-                                  Qty: {item.quantity || 1}
-                                </span>
+                        {cartItems.map((item) => {
+                          const rowId = item.cartItemId ?? item.uiId ?? item.id;
+                          return (
+                            <div key={rowId} className="cart-dropdown-item">
+                              <div className="cart-item-info">
+                                <div className="cart-item-name">
+                                  {item.name}
+                                </div>
+                                <div className="cart-item-details">
+                                  <span className="cart-item-category">
+                                    {item.category}
+                                  </span>
+                                  <span className="cart-item-quantity">
+                                    Qty: {item.quantity || 1}
+                                  </span>
+                                </div>
+                                {item.selectedOptions &&
+                                  Object.keys(item.selectedOptions).length >
+                                    0 && (
+                                    <div className="cart-item-options">
+                                      {(item.options || []).map((option) => {
+                                        const selectedId =
+                                          item.selectedOptions?.[option.label];
+                                        if (!selectedId) return null;
+                                        const selectedChoice = (
+                                          option.choices || []
+                                        ).find(
+                                          (c) =>
+                                            String(c.id || c.value) ===
+                                            String(selectedId),
+                                        );
+                                        const displayValue = selectedChoice
+                                          ? selectedChoice.value ||
+                                            selectedChoice.size ||
+                                            selectedChoice.name ||
+                                            String(selectedChoice)
+                                          : String(selectedId);
+                                        return (
+                                          <div
+                                            key={option.label}
+                                            className="cart-option"
+                                          >
+                                            <span className="option-label">
+                                              {option.label}:
+                                            </span>
+                                            <span className="option-value">
+                                              {displayValue}
+                                            </span>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
                               </div>
-
-                              {item.selectedOptions &&
-                                Object.keys(item.selectedOptions).length >
-                                  0 && (
-                                  <div className="cart-item-options">
-                                    {(item.options || []).map((option) => {
-                                      const selectedId =
-                                        item.selectedOptions?.[option.label];
-                                      if (!selectedId) return null;
-
-                                      const selectedChoice = (
-                                        option.choices || []
-                                      ).find(
-                                        (c) =>
-                                          String(c.id || c.value) ===
-                                          String(selectedId),
-                                      );
-
-                                      const displayValue = selectedChoice
-                                        ? selectedChoice.value ||
-                                          selectedChoice.size ||
-                                          selectedChoice.name ||
-                                          String(selectedChoice)
-                                        : String(selectedId);
-
-                                      return (
-                                        <div
-                                          key={option.label}
-                                          className="cart-option"
-                                        >
-                                          <span className="option-label">
-                                            {option.label}:
-                                          </span>
-                                          <span className="option-value">
-                                            {displayValue}
-                                          </span>
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                )}
-                            </div>
-
-                            <div className="cart-item-actions">
-                              <div className="cart-item-price">
-                                ${getItemPrice(item).toFixed(2)}
+                              <div className="cart-item-actions">
+                                <div className="cart-item-price">
+                                  ${getItemPrice(item).toFixed(2)}
+                                </div>
+                                <button
+                                  className="remove-item-btn"
+                                  onClick={() => removeFromCart(rowId)}
+                                  aria-label="Remove item"
+                                  type="button"
+                                >
+                                  ×
+                                </button>
                               </div>
-                              <button
-                                className="remove-item-btn"
-                                onClick={() => removeFromCart(item.id)}
-                                aria-label="Remove item"
-                                type="button"
-                              >
-                                ×
-                              </button>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
 
                       <div className="cart-dropdown-footer">
