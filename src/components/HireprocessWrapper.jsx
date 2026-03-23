@@ -3,7 +3,6 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import Hireprocess from "./Hireprocess";
 
-// 不同学位对应的标题 & 流程步骤
 const degreeConfig = {
   certificate: {
     title: "Certificate Hire Process",
@@ -80,7 +79,6 @@ const degreeConfig = {
 export default function HireprocessWrapper() {
   const { degree } = useParams();
 
-  // 根据 URL 参数找对应配置
   const config = degreeConfig[degree] || {
     title: "Hire Process",
     steps: [
