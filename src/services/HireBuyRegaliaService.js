@@ -123,6 +123,8 @@ export const submitCustomerDetails = async (formData) => {
       orderType,
       status: 1,
       orderAmount: Number(formData.orderAmount),
+      donation: Number(formData.donationTotal),
+      freight: Number(formData.totalFreight),
     };
 
     const response = await axios.post(`${API_URL}/orders`, customerPayload);

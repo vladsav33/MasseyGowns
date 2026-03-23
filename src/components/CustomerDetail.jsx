@@ -34,6 +34,9 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
   const cart =
     items.length > 0 ? items : JSON.parse(localStorage.getItem("cart") || "[]");
   localStorage.setItem("customerDetails", JSON.stringify(formData));
+
+  const donationTotal = parseInt(localStorage.getItem("totalDonation"));
+  const totalFreight = parseInt(localStorage.getItem("totalFreight"));
   
   // Helper function to get item price based on hire/buy mode
   const getDeliveryPrice = (item) => {
@@ -59,10 +62,6 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
     return sum + getItemPrice(item) * (item.quantity || 1);
   }, 0);
   const orderAmount = total;
-
-  const handleDateChange = (date) => {
-    setFormData({ ...formData, eventDate: date });
-  };
 
   const today = new Date().toISOString().split("T")[0];
   const orderType = localStorage.getItem("orderType") || "0";
@@ -153,10 +152,10 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
 
       const finalFormData = {
         ...formData,
+        donationTotal,
         orderAmount,
+        totalFreight
       };
-
-      //console.log("finalFormData =", finalFormData);
 
       const [result] = await Promise.all([
         submitCustomerDetails(finalFormData),
@@ -179,6 +178,8 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       localStorage.setItem("orderId", orderId);
 
       // clear cart
+      localStorage.removeItem("totalFreight");
+      localStorage.removeItem("totalDonation");
       localStorage.removeItem("cart");
       localStorage.removeItem("item");
       localStorage.removeItem("selectedCeremonyId");
@@ -427,13 +428,6 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
                 className="form-input"
                 required
               />
-              {/* <DatePicker
-                selected={formData.eventDate}
-                onChange={handleDateChange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="DD/MM/YYYY"
-                className="form-input"
-              /> */}
             </div>
           )}
           {/* Terms */}

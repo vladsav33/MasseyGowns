@@ -157,9 +157,25 @@ function CartList({ step, items, setItems }) {
     .filter((item) => item.isDonation)
     .reduce((acc, item) => acc + (item.quantity || 1), 0);
 
+  const totalFreight = items
+    .filter((item) => item.isDelivery === true || item.id === 21)
+    .reduce((acc, item) => {
+      const selectedDeliveryId = item.selectedOptions?.["Delivery Type"];
+      const choices = Array.isArray(item.options?.[0]?.choices)
+        ? item.options[0].choices
+        : [];
+      const matched = choices.find(
+        (opt) => String(opt?.id ?? "") === String(selectedDeliveryId ?? ""),
+      );
+      const price = getNumericPrice(matched?.price);
+      return acc + price * (item.quantity || 1);
+    }, 0);
+
   const grandTotal = totalPrice + totalDonationPrice;
   useEffect(() => {
     localStorage.setItem("grandTotal", String(grandTotal));
+    localStorage.setItem("totalDonation", String(totalDonationPrice));
+    localStorage.setItem("totalFreight", String(totalFreight));
   }, [grandTotal]);
 
   const hasDonation = items.some((item) => item.isDonation);
