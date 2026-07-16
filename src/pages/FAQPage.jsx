@@ -3,9 +3,13 @@ import { Search, Plus, Minus } from "lucide-react";
 import PropTypes from "prop-types";
 import Navbar from "../components/Navbar";
 import { fetchFAQs } from "../api/FAQApi";
+import { fetchVisibleCeremonyLinks } from "../api/CeremonyApi";
 import { Link } from "react-router-dom";
 
 // ---------- helpers ----------
+
+const CEREMONY_LINKS_PLACEHOLDER_KEY =
+  "Collections & Return Times.Collections & Return Times.linkintro";
 
 const slug = (s) =>
   String(s || "uncategorized")
@@ -90,7 +94,6 @@ const renderTextWithLinks = (text, query) => {
       );
     }
 
-    // Normal text – just apply highlighting
     return (
       <React.Fragment key={i}>
         <Highlighter query={query}>{part}</Highlighter>
@@ -122,12 +125,10 @@ const isQuestionItem = (item) => {
   if (isIntroItem(item)) return false;
 
   const label = (item.label || "").trim();
-  // Text items without a label are treated as extra content only
   return label.length > 0;
 };
 
-// Extract a baseKey, e.g.
-// "Ordering and Payment.How to order.intro" -> "Ordering and Payment.How to order"
+// Extract a baseKey
 const getBaseKey = (key) => (key || "").split(".").slice(0, -1).join(".");
 
 const getInternalWhatToWearRoute = (label) => {
@@ -153,13 +154,51 @@ const getInternalWhatToWearRoute = (label) => {
   return routeMap[text] || null;
 };
 
-// Render a single content block (no title, no BACK TO TOP)
-const renderFaqContent = (item, query) => {
+const isCeremonyLinksPlaceholder = (item) =>
+  item?.key === CEREMONY_LINKS_PLACEHOLDER_KEY;
+
+function CeremonyLinks({ ceremonies, query }) {
+  if (!Array.isArray(ceremonies) || ceremonies.length === 0) return null;
+
+  return (
+    <div className="mt-3 space-y-3">
+      {ceremonies.map((c) => (
+        <div key={c.id}>
+          <Link
+            to={`/ceremonies/${c.id}`}
+            className="inline-flex items-center gap-1 text-black hover:underline"
+          >
+            <span>&gt;</span>
+            <Highlighter query={query}>{c.name}</Highlighter>
+          </Link>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+CeremonyLinks.propTypes = {
+  ceremonies: PropTypes.array,
+  query: PropTypes.string,
+};
+
+// Render a single content block
+const renderFaqContent = (item, query, ceremonies) => {
   const value = String(item.value || "");
 
   if (item.type === "text") {
-    if (!value) return null;
-    return <div className="space-y-3">{renderParagraphs(value, query)}</div>;
+    const shouldShowCeremonyLinks = isCeremonyLinksPlaceholder(item);
+
+    if (!value && !shouldShowCeremonyLinks) return null;
+
+    return (
+      <div className="space-y-3">
+        {value ? renderParagraphs(value, query) : null}
+        {shouldShowCeremonyLinks && (
+          <CeremonyLinks ceremonies={ceremonies} query={query} />
+        )}
+      </div>
+    );
   }
 
   if (item.type === "list") {
@@ -208,7 +247,6 @@ const renderFaqContent = (item, query) => {
     );
   }
 
-  // Table type – backend sends { columns, rows } parsed from Excel
   if (item.type === "table") {
     const t = item.parsedTable;
     if (!t || !Array.isArray(t.columns) || !Array.isArray(t.rows)) {
@@ -243,25 +281,6 @@ const renderFaqContent = (item, query) => {
     );
   }
 
-  // File attachment (Excel etc.) – keeping this for later if needed
-  /*
-  if (item.type === "file") {
-    if (!item.value) return null;
-    const displayLabel =
-      (item.label || "").replace(/\.file$/i, "") || "Download file";
-    return (
-      <a
-        href={item.value}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 text-sky-700 hover:underline"
-      >
-        <Highlighter query={query}>{displayLabel}</Highlighter>
-      </a>
-    );
-  }
-  */
-
   return null;
 };
 
@@ -271,6 +290,7 @@ export default function FAQPage() {
   const [query, setQuery] = useState("");
   const [openSections, setOpenSections] = useState(new Set());
   const [groups, setGroups] = useState([]);
+  const [ceremonies, setCeremonies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -282,7 +302,6 @@ export default function FAQPage() {
   };
   const anchorId = (id) => `faq-q-${id}`;
 
-  // Load /faq data
   useEffect(() => {
     let cancelled = false;
 
@@ -291,15 +310,18 @@ export default function FAQPage() {
         setLoading(true);
         setError("");
 
-        const data = await fetchFAQs();
-        const array = Array.isArray(data) ? data : [];
+        const [faqData, ceremonyData] = await Promise.all([
+          fetchFAQs(),
+          fetchVisibleCeremonyLinks(),
+        ]);
+
+        const array = Array.isArray(faqData) ? faqData : [];
 
         const normalized = array.map((x) => {
           let parsedLink = null;
           let parsedTable = null;
           let parsedAnswer = null;
 
-          // Parse legacy / special answer JSON if present
           if (typeof x.answer === "string") {
             try {
               parsedAnswer = JSON.parse(x.answer);
@@ -345,7 +367,6 @@ export default function FAQPage() {
           normalized.reduce((acc, item) => {
             const sec = item.section || "Other";
 
-            // Hide nested What to Wear content pages from top-level FAQ sections
             if (sec.startsWith("What to Wear.")) {
               return acc;
             }
@@ -358,15 +379,9 @@ export default function FAQPage() {
           }, {}),
         );
 
-        const whatToWearGroup = grouped.find(
-          (g) => g.section === "What to Wear",
-        );
-        console.log("What to Wear group:", whatToWearGroup);
-
         if (!cancelled) {
-          console.log("normalized faq data:", normalized);
           setGroups(grouped);
-          // Start with everything collapsed
+          setCeremonies(Array.isArray(ceremonyData) ? ceremonyData : []);
           setOpenSections(new Set());
         }
       } catch (e) {
@@ -382,7 +397,6 @@ export default function FAQPage() {
     };
   }, []);
 
-  // Build search index
   const indexedGroups = useMemo(
     () =>
       groups.map((g) => ({
@@ -391,8 +405,8 @@ export default function FAQPage() {
           const valText = String(item.value || "");
           const linkName = item.parsedLink?.name || "";
           const linkUrl = item.parsedLink?.url || "";
+          const ceremonyNames = ceremonies.map((c) => c.name).join(" ");
 
-          // For tables, just fold the JSON into the search string
           const tableText =
             item.type === "table" && item.parsedTable
               ? JSON.stringify(item.parsedTable)
@@ -405,14 +419,16 @@ export default function FAQPage() {
             linkName,
             linkUrl,
             tableText,
+            ceremonyNames,
           ]
             .filter(Boolean)
             .join(" ")
             .toLowerCase();
+
           return { ...item, __search: searchText };
         }),
       })),
-    [groups],
+    [groups, ceremonies],
   );
 
   const filteredGroups = useMemo(() => {
@@ -473,7 +489,6 @@ export default function FAQPage() {
           Browse by section, search, and click a question to see the answer.
         </p>
 
-        {/* Search */}
         <div className="mt-6">
           <div className="relative">
             <Search
@@ -522,7 +537,6 @@ export default function FAQPage() {
           </div>
         </div>
 
-        {/* Content */}
         <div className="mt-6 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white">
           {error && <div className="p-6 text-sm text-red-600">{error}</div>}
 
@@ -539,7 +553,6 @@ export default function FAQPage() {
               const contentId = `faq-panel-${slug(group.section)}`;
               const buttonId = `faq-button-${slug(group.section)}`;
 
-              // Merge items with the same baseKey into one “question block”
               const questions = [];
               const loose = [];
               let currentQuestion = null;
@@ -560,10 +573,8 @@ export default function FAQPage() {
                   baseKey &&
                   baseKey === currentQuestion.baseKey
                 ) {
-                  // Extra content belonging to the current question (list/link/file/table etc.)
                   currentQuestion.items.push(item);
                 } else {
-                  // Standalone content for this section, such as section-level intro
                   loose.push(item);
                 }
               });
@@ -604,7 +615,6 @@ export default function FAQPage() {
                       aria-labelledby={buttonId}
                     >
                       <div className="px-5 pb-5 text-slate-600 space-y-6">
-                        {/* Mini table of contents – show only question titles */}
                         {tocQuestions.length > 0 && (
                           <div className="rounded-xl bg-yellow-50/50 p-4">
                             <ul className="list-disc pl-6 space-y-1">
@@ -628,14 +638,12 @@ export default function FAQPage() {
                           </div>
                         )}
 
-                        {/* Standalone content in this section (no question title) */}
                         {loose.map((it) => (
                           <div key={it.id} className="py-2">
-                            {renderFaqContent(it, query)}
+                            {renderFaqContent(it, query, ceremonies)}
                           </div>
                         ))}
 
-                        {/* Question blocks: title + all related content + BACK TO TOP */}
                         {questions.map((q) => (
                           <div
                             key={q.id}
@@ -650,7 +658,7 @@ export default function FAQPage() {
                             <div className="mt-2 space-y-3">
                               {q.items.map((block) => (
                                 <div key={block.id}>
-                                  {renderFaqContent(block, query)}
+                                  {renderFaqContent(block, query, ceremonies)}
                                 </div>
                               ))}
                             </div>

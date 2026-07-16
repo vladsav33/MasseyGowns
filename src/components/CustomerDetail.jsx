@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./CustomerDetail.css";
 import { submitCustomerDetails } from "./../services/HireBuyRegaliaService.js";
 import "react-datepicker/dist/react-datepicker.css";
@@ -23,64 +23,68 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
     paymentMethod: "1",
     termsAccepted: false,
     message: "",
+    orderAmount: 0,
   });
+
+  const purchaseOrderRef = useRef(null);
 
   const navigate = useNavigate();
 
-  // Use props if provided, otherwise load from localStorage
+  // Use props if provided, otherwise load from localStorage.
   const cart =
     items.length > 0 ? items : JSON.parse(localStorage.getItem("cart") || "[]");
   localStorage.setItem("customerDetails", JSON.stringify(formData));
 
-  // Calculate total - use buyPrice or hirePrice based on item mode
-  const total = cart.reduce((sum, item) => {
-    // Use buyPrice if item is in buy mode (isHiring === false), otherwise use hirePrice
-    const price =
-      item.isHiring === false ? item.buyPrice || 0 : item.hirePrice || 0;
-    return sum + price * (item.quantity || 1);
-  }, 0);
-
+  const donationTotal = parseInt(localStorage.getItem("totalDonation"));
+  const totalFreight = parseInt(localStorage.getItem("totalFreight"));
+  
   // Helper function to get item price based on hire/buy mode
-  const getItemPrice = (item) => {
-    return item.isHiring === false ? item.buyPrice || 0 : item.hirePrice || 0;
+  const getDeliveryPrice = (item) => {
+    const selectedId = item.selectedOptions?.["Delivery Type"];
+    const choices = Array.isArray(item.options?.[0]?.choices)
+      ? item.options[0].choices
+      : [];
+      const matched = choices.find(
+        (c) => String(c?.id ?? c?.value ?? "") === String(selectedId ?? ""),
+      );
+    return parseFloat(matched?.price ?? 0);
   };
 
-  const handleDateChange = (date) => {
-    setFormData({ ...formData, eventDate: date });
-  };
+  const getItemPrice = (item) => {
+    return item.isDelivery === true
+      ? getDeliveryPrice(item)
+      : item.isHiring === false
+        ? item.buyPrice || 0
+        : item.hirePrice || 0;
+      };
+      
+  const total = cart.reduce((sum, item) => {
+    return sum + getItemPrice(item) * (item.quantity || 1);
+  }, 0);
+  const orderAmount = total;
 
   const today = new Date().toISOString().split("T")[0];
+  const orderType = localStorage.getItem("orderType") || "0";
 
-  const selectedCeremonyId = localStorage.getItem("selectedCeremonyId") || 0;
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
   };
 
   const handlePurchaseOrderChange = (e) => {
     let value = e.target.value;
 
-    // Always ensure it starts with 'PN'
     if (value.length < 2 || !value.startsWith("PN")) {
       const additionalText = value.replace(/^P?N?/i, "");
       value = "PN" + additionalText;
     }
 
-    setFormData((prev) => ({
-      ...prev,
-      purchaseOrder: value,
-    }));
+    // Clear native error as user types
+    purchaseOrderRef.current?.setCustomValidity("");
+    setFormData((prev) => ({ ...prev, purchaseOrder: value }));
   };
 
   const ensureCursorAfterPN = (input) => {
@@ -123,6 +127,18 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (formData.paymentMethod === "3") {
+      const poValue = formData.purchaseOrder;
+      if (!/^PN\d{6}$/.test(poValue)) {
+        purchaseOrderRef.current?.setCustomValidity(
+          "Purchase Order must be PN followed by 6 digits (e.g. PN123456)",
+        );
+        purchaseOrderRef.current?.reportValidity();
+        return;
+      }
+      purchaseOrderRef.current?.setCustomValidity("");
+    }
+
     try {
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
@@ -132,19 +148,38 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
         return;
       }
 
-      const [result] = await Promise.all([submitCustomerDetails(formData)]);
+      //const [result] = await Promise.all([submitCustomerDetails(formData)]);
+
+      const finalFormData = {
+        ...formData,
+        donationTotal,
+        orderAmount,
+        totalFreight
+      };
+
+      const [result] = await Promise.all([
+        submitCustomerDetails(finalFormData),
+      ]);
+
       const orderNo = result.referenceNo;
       const orderId = result.id;
 
       // save snapshot first (PaymentCompleted will use this)
-      const snapshot = { orderNo, customerDetails: formData, cart };
+      const snapshot = { orderNo, customerDetails: finalFormData, cart };
       localStorage.setItem("orderSnapshot", JSON.stringify(snapshot));
       console.log("orderid=", orderId);
       console.log("orderSnapshot=", JSON.stringify(snapshot));
-      localStorage.setItem("orderNo", orderNo);
+      //localStorage.setItem("orderNo", orderNo);
+      if (orderNo) {
+        localStorage.setItem("orderNo", orderNo);
+      } else {
+        localStorage.removeItem("orderNo");
+      }
       localStorage.setItem("orderId", orderId);
 
       // clear cart
+      localStorage.removeItem("totalFreight");
+      localStorage.removeItem("totalDonation");
       localStorage.removeItem("cart");
       localStorage.removeItem("item");
       localStorage.removeItem("selectedCeremonyId");
@@ -350,7 +385,9 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
           {/* Student ID & Phone Number */}
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Student ID*</label>
+              <label className="form-label">
+                Student ID{formData.paymentMethod === "1" ? "*" : ""}
+              </label>
               <input
                 type="text"
                 name="studentId"
@@ -358,7 +395,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
                 onChange={handleInputChange}
                 placeholder="Student ID"
                 className="form-input"
-                required
+                required={formData.paymentMethod === "1"}
               />
             </div>
 
@@ -376,7 +413,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
             </div>
           </div>
 
-          {selectedCeremonyId === 2 && (
+          {orderType == 3 && (
             <div>
               <label className="form-label">
                 What date do you plan to take the photos?
@@ -391,13 +428,6 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
                 className="form-input"
                 required
               />
-              {/* <DatePicker
-                selected={formData.eventDate}
-                onChange={handleDateChange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="DD/MM/YYYY"
-                className="form-input"
-              /> */}
             </div>
           )}
           {/* Terms */}
@@ -453,6 +483,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
               </label>
               {formData.paymentMethod === "3" && (
                 <input
+                  ref={purchaseOrderRef}
                   type="text"
                   name="purchaseOrder"
                   value={formData.purchaseOrder}
@@ -462,7 +493,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
                   onFocus={handlePurchaseOrderInteraction}
                   onSelect={handlePurchaseOrderInteraction}
                   onKeyUp={handlePurchaseOrderInteraction}
-                  placeholder="Enter ID after PN"
+                  placeholder="Enter ID after PN (e.g. PN123456)"
                   className="form-input purchase-order-input"
                   required
                 />
@@ -495,12 +526,13 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
         {cart.length > 0 ? (
           <>
             {cart.map((item) => {
+              const rowId = item.cartItemId ?? item.uiId ?? item.id;
               const itemPrice = getItemPrice(item);
               const itemTotal = itemPrice * (item.quantity || 1);
 
               return (
                 <div
-                  key={item.id}
+                  key={rowId}
                   className="summary-card"
                   style={{ position: "relative" }}
                 >

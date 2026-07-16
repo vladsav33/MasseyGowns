@@ -13,6 +13,7 @@ import PaymentCompleted from "./components/PaymentCompleted.jsx";
 import ShoppingCart from "./pages/ShoppingCart.jsx";
 import CustomerDetailsPage from "./pages/CustomerDetailsPage.jsx";
 import WhatToWearGuidePage from "./pages/WhatToWearGuidePage.jsx";
+import CeremonyDetailPage from "./pages/CeremonyDetailPage.jsx";
 
 export default function App() {
   return (
@@ -54,6 +55,7 @@ export default function App() {
       />
       <Route path="/" element={<HomePage />} />
       <Route path="/faqs" element={<FAQPage />} />
+      <Route path="/ceremonies/:id" element={<CeremonyDetailPage />} />
       <Route path="/hireregalia" element={<HireRegalia />} />
       <Route path="/buyregalia" element={<BuyRegalia />} />
       <Route path="/cart" element={<ShoppingCart />} />

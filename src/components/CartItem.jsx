@@ -154,7 +154,7 @@ function CartItem({
               <div className="buy-ribbon">Buy</div>
             ))}
 
-          {step === 1 ? (
+          {/* {step === 1 ? (
             // Step 1 view (editable)
             <div className="item-details">
               <div className="title-container">
@@ -172,8 +172,8 @@ function CartItem({
 
               {renderOptionDropdowns()}
             </div>
-          ) : (
-            // Step 2 view
+          ) : ( */}
+            {/* Step 2 view */}
             <div className="item-details">
               <p>
                 <span className="item-title">{item.name} </span>
@@ -181,7 +181,7 @@ function CartItem({
               </p>
 
               {/* Edit controls for step 2 (not for donation) */}
-              {step === 2 && !item.isDonation && item.name !== "Donation" && (
+              {!item.isDonation && item.name !== "Donation" && (
                 <div className="cart-edit-actions">
                   {!isEditing ? (
                     <button
@@ -286,7 +286,7 @@ function CartItem({
                 </div>
               </div>
             </div>
-          )}
+          {/* )} */}
 
           {/* Controls */}
           <div className="item-controls">

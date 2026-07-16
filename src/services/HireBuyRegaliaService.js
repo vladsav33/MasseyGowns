@@ -68,6 +68,7 @@ export const getDelivery = async () => {
 
 export const submitCustomerDetails = async (formData) => {
   try {
+
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
     const cartItemWithIds = Array.isArray(cart)
@@ -97,19 +98,21 @@ export const submitCustomerDetails = async (formData) => {
       postcode: formData.postcode || "",
       country: formData.country || "NZ",
       phone: formData.phone || "",
-      mobile: formData.mobile || "",
+      note: formData.eventDate || "",
       studentId: parseInt(formData.studentId) || 0,
       message: formData.message || "",
       items: cart.map((item) => ({
         itemId: parseInt(item.id?.toString()) || 0,
         sizeId:
+          parseInt(item.selectedOptions?.["My full height"]) ||
           parseInt(item.selectedOptions?.["Head Size"]) ||
-          parseInt(item.selectedOptions?.["My Full height"]) ||
           0,
+        hatId: parseInt(item.selectedOptions?.["Head Size"]) || 0,
         fitId: parseInt(item.selectedOptions?.["Gown Size"]) || 0,
         hoodId: parseInt(item.selectedOptions?.["Hood Type"]) || 0,
         hire: item.isHiring ?? false,
         quantity: item.quantity || 1,
+        category: item.category || "",
       })),
       paid: false,
       paymentMethod: parseInt(formData.paymentMethod) || 1,
@@ -118,9 +121,11 @@ export const submitCustomerDetails = async (formData) => {
       ceremonyId,
       degreeId,
       orderType,
+      status: 1,
+      orderAmount: Number(formData.orderAmount),
+      donation: Number(formData.donationTotal),
+      freight: Number(formData.totalFreight),
     };
-
-    console.log("CustomerPayload=", customerPayload);
 
     const response = await axios.post(`${API_URL}/orders`, customerPayload);
     if (response.data) {

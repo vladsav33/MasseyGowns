@@ -13,16 +13,16 @@ export default function Payment() {
     setLoading(true);
     try {
       const grandTotal = localStorage.getItem("grandTotal");
-      const orderNo = localStorage.getItem("orderNo");
+      const orderId = localStorage.getItem("orderId");
 
-      console.log("Order Number=", orderNo);
+      console.log("Order ID =", orderId);
 
       const res = await fetch(`${API_URL}/api/payment/create-payment`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", OrderNo: orderNo },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           PayAmount: parseFloat(grandTotal) * 100,
-          OrderNo: orderNo,
+          OrderId: parseInt(orderId, 10),
         }),
       });
       const data = await res.json();

@@ -1,5 +1,3 @@
-// HireRegalia.jsx (only the parts you MUST add/change)
-//  Add these new state + handler + pass onEditItems to ProgressButtons
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import "./HireRegalia.css";
@@ -21,10 +19,6 @@ function HireRegalia() {
 
   const pageOrderType = mode === "photo" ? 3 : 1;
   const hireTempKey = `hireStep1Temp_${pageOrderType}`;
-
-  useEffect(() => {
-    localStorage.setItem("orderType", String(pageOrderType));
-  }, [pageOrderType]);
 
   const [step, setStep] = useState(() => {
     if (location.state?.step) return Number(location.state.step);
@@ -86,21 +80,14 @@ function HireRegalia() {
         setSelectedCourseId(null);
         return;
       }
-      if (!showCeremony) {
-        // casual hire can still have courses without ceremony depending on your API;
-        // if your API still needs ceremony, keep the same logic as above.
-      }
 
       try {
         setLoading(true);
         setError(null);
 
-        if (selectedCeremonyId) {
-          const data = await getCoursesByCeremonyId(selectedCeremonyId);
-          setCourses(Array.isArray(data) ? data : []);
-        } else {
-          setCourses([]);
-        }
+        const id = showCeremony ? selectedCeremonyId : 2;
+        const data = await getCoursesByCeremonyId(id);
+        setCourses(Array.isArray(data) ? data : []);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -117,9 +104,11 @@ function HireRegalia() {
   }, [step, navigate]);
 
   return (
-    <div>
+    <div
+      style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
+    >
       <Navbar />
-      <div className="content">
+      <div className="content" style={{ flex: 1 }}>
         <ProgressBar step={step} steps={steps} className="progressbar" />
 
         {step === 1 && (
@@ -174,9 +163,8 @@ function HireRegalia() {
           hireTempKey={hireTempKey}
           orderType={pageOrderType}
         />
-
-        <Contact />
       </div>
+      <Contact />
     </div>
   );
 }

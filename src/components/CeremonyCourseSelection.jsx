@@ -38,20 +38,46 @@ function CeremonyCourseSelection({
   const [loadingItems, setLoadingItems] = useState(false);
   const [itemsError, setItemsError] = useState(null);
 
-  const [displayedItems, setDisplayedItems] = useState(saved.displayedItems || []);
+  const [displayedItems, setDisplayedItems] = useState(
+    saved.displayedItems || [],
+  );
   const [itemOptions, setItemOptions] = useState(saved.itemOptions || {});
   const [purchaseTypeByUiId, setPurchaseTypeByUiId] = useState(
     saved.purchaseTypeByUiId || {},
   );
-  
+
   const isHiringFor = (uiId) => purchaseTypeByUiId[uiId] ?? true;
-  
+
+  useEffect(() => {
+    if (!showCeremony) localStorage.setItem("selectedPhotoCeremonyId", 2);
+    else localStorage.removeItem("selectedPhotoCeremonyId");
+  }, [showCeremony]);
+
+  useEffect(() => {
+    setDisplayedItems([]);
+    setItemOptions({});
+    setPurchaseTypeByUiId({});
+    setItemsError(null);
+    setLoadingItems(false);
+
+    if (showCeremony) {
+      setCourse(null);
+      localStorage.removeItem("selectedCeremonyId");
+      localStorage.removeItem("selectedCourseId");
+    } else {
+      setCeremony(null);
+      setCourse(null);
+      localStorage.removeItem("selectedPhotoCeremonyId");
+      localStorage.removeItem("selectedPhotoCourseId");
+    }
+    localStorage.removeItem(TEMP_KEY);
+  }, [showCeremony, TEMP_KEY]);
 
   // restore dropdowns + temp selections
   useEffect(() => {
     const savedCeremonyId = showCeremony
       ? localStorage.getItem("selectedCeremonyId")
-      : localStorage.getItem("selectedPhotoCeremonyId") || 2;
+      : localStorage.getItem("selectedPhotoCeremonyId");
 
     const savedCourseId = showCeremony
       ? localStorage.getItem("selectedCourseId")
@@ -61,9 +87,11 @@ function CeremonyCourseSelection({
     if (savedCourseId) setCourse(Number(savedCourseId));
 
     const temp = readTemp();
-    if (Array.isArray(temp?.displayedItems)) setDisplayedItems(temp.displayedItems);
+    if (Array.isArray(temp?.displayedItems))
+      setDisplayedItems(temp.displayedItems);
     if (temp?.itemOptions) setItemOptions(temp.itemOptions);
-    if (temp?.purchaseTypeByUiId) setPurchaseTypeByUiId(temp.purchaseTypeByUiId);
+    if (temp?.purchaseTypeByUiId)
+      setPurchaseTypeByUiId(temp.purchaseTypeByUiId);
   }, [showCeremony, setCeremony, setCourse]);
 
   // persist temp exactly like buy step 1
@@ -73,6 +101,7 @@ function CeremonyCourseSelection({
       itemOptions,
       purchaseTypeByUiId,
     });
+    window.dispatchEvent(new Event("hireTempUpdated"));
   }, [displayedItems, itemOptions, purchaseTypeByUiId]);
 
   // listen for reset after Add to Cart
@@ -87,7 +116,6 @@ function CeremonyCourseSelection({
       setCourse(null);
       localStorage.removeItem(TEMP_KEY);
     };
-
     window.addEventListener("hireStep1Reset", onReset);
     return () => window.removeEventListener("hireStep1Reset", onReset);
   }, [setCeremony, setCourse]);
@@ -108,12 +136,6 @@ function CeremonyCourseSelection({
     if (id !== null && showCeremony)
       localStorage.setItem("selectedCeremonyId", String(id));
     else localStorage.removeItem("selectedCeremonyId");
-
-    if (id !== null && !showCeremony)
-      localStorage.setItem("selectedPhotoCeremonyId", String(id));
-    else localStorage.removeItem("selectedPhotoCeremonyId");
-
-    console.log("Id=", id, " ShowCeremony=", showCeremony );
   };
 
   const handleCourseChange = (e) => {
@@ -158,6 +180,7 @@ function CeremonyCourseSelection({
         const withUiId = list.map((it) => ({
           ...it,
           uiId: `${course}-${it.id}`,
+          cartItemId: it.cartItemId ?? crypto.randomUUID(),
         }));
 
         const seen = new Set();
@@ -325,6 +348,9 @@ function CeremonyCourseSelection({
               No items available for the selected qualification.
             </p>
           )}
+        {!loadingItems && !itemsError && !course && (
+          <p className="muted">Please select a qualification to view items.</p>
+        )}
 
         {!loadingItems && !itemsError && displayedItems.length > 0 && (
           <div className="filtered-items">
@@ -377,7 +403,8 @@ function CeremonyCourseSelection({
                               <select
                                 className="option-select"
                                 value={
-                                  itemOptions[product.uiId]?.[option.label] || ""
+                                  itemOptions[product.uiId]?.[option.label] ||
+                                  ""
                                 }
                                 onChange={(e) =>
                                   handleOptionChange(
@@ -421,11 +448,19 @@ function CeremonyCourseSelection({
 
                       <div className="item-controls">
                         <div className="quantity-controls">
-                          <button className="quantity-btn" type="button" disabled>
+                          <button
+                            className="quantity-btn"
+                            type="button"
+                            disabled
+                          >
                             −
                           </button>
                           <span className="quantity">1</span>
-                          <button className="quantity-btn" type="button" disabled>
+                          <button
+                            className="quantity-btn"
+                            type="button"
+                            disabled
+                          >
                             +
                           </button>
                         </div>

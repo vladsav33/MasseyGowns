@@ -29,6 +29,21 @@ export default function ShoppingCart() {
     "Payment Completed",
   ];
 
+  useEffect(() => {
+    const syncCart = () => {
+      const saved = localStorage.getItem("cart");
+      setItems(saved ? JSON.parse(saved) : []);
+    };
+
+    window.addEventListener("cartUpdated", syncCart);
+    window.addEventListener("storage", syncCart);
+
+    return () => {
+      window.removeEventListener("cartUpdated", syncCart);
+      window.removeEventListener("storage", syncCart);
+    };
+  }, []);
+
   const step = 2;
 
   const areAllOptionsSelected = () => {
@@ -48,7 +63,6 @@ export default function ShoppingCart() {
   useEffect(() => {
     if (items?.length) localStorage.setItem("cart", JSON.stringify(items));
     else localStorage.removeItem("cart");
-    window.dispatchEvent(new Event("cartUpdated"));
   }, [items]);
 
   const onNext = () => {
