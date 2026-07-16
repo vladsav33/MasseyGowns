@@ -204,17 +204,18 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       // Try REST Countries (preferred)
       try {
         const res = await fetch(
-          "https://restcountries.com/v3.1/all?fields=name,cca2,flags",
-        );
-        if (!res.ok) throw new Error(`REST Countries HTTP ${res.status}`);
-        const data = await res.json();
-        if (!Array.isArray(data)) throw new Error("Unexpected shape");
+            'https://countriesnow.space/api/v0.1/countries'
+        )
 
-        const list = data
+        if (!res.ok) throw new Error(`REST Countries HTTP ${res.status}`);
+        const result = await res.json();
+        if (!Array.isArray(result.data)) throw new Error("Unexpected shape");
+
+        const list = result.data
           .map((c) => ({
-            label: c?.name?.common ?? "",
-            value: c?.cca2 ?? "",
-            flag: c?.flags?.png ?? c?.flags?.svg ?? "",
+            label: c?.country ?? "",
+            value: c?.iso2 ?? "",
+            flag: "",
           }))
           .filter((c) => c.label && c.value)
           .sort((a, b) => a.label.localeCompare(b.label));
