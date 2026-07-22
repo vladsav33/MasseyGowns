@@ -281,6 +281,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
             <input
               type="email"
               name="email"
+              maxLength={30}
               placeholder="Email"
               value={formData.email}
               onChange={handleInputChange}
@@ -296,6 +297,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
               <input
                 type="text"
                 name="firstName"
+                maxLength={30}
                 value={formData.firstName}
                 onChange={handleInputChange}
                 placeholder="First Name"
@@ -308,6 +310,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
               <input
                 type="text"
                 name="lastName"
+                maxLength={30}
                 value={formData.lastName}
                 onChange={handleInputChange}
                 placeholder="Last Name"
@@ -335,6 +338,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
             <input
               type="text"
               name="city"
+              maxLength={30}
               value={formData.city}
               onChange={handleInputChange}
               placeholder="City"

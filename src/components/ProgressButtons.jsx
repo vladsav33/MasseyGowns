@@ -394,6 +394,9 @@ function ProgressButtons({
         orderType === 2 ? preserved.filter((i) => !i.isDelivery) : preserved;
 
       const updated = [...cleanPreserved, ...dedupedBuyItems];
+
+      console.log("Updated=", JSON.stringify(updated).length/1024);
+      
       localStorage.setItem("cart", JSON.stringify(updated));
       window.dispatchEvent(new Event("cartUpdated"));
 
@@ -513,9 +516,11 @@ function ProgressButtons({
   ]);
 
   const goNext = async () => {
+    console.log("GoNext");
     const ok = await cfg.beforeNext();
     if (!ok) return;
 
+    console.log(nextPath);
     if (nextPath) {
       localStorage.setItem("step", String(step + 1));
       navigate(nextPath);
@@ -523,6 +528,7 @@ function ProgressButtons({
       return;
     }
 
+    console.log("step=", step);
     if (setStep && step < stepsLen) {
       const newStep = step + 1;
       setStep(newStep);
