@@ -281,7 +281,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
             <input
               type="email"
               name="email"
-              maxLength={30}
+              maxLength={90}
               placeholder="Email"
               value={formData.email}
               onChange={handleInputChange}
