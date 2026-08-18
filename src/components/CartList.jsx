@@ -195,8 +195,8 @@ function CartList({ step, items, setItems }) {
                 item={item}
                 step={step}
                 quantity={item.quantity || 1}
-                onIncrease={() => handleIncrease(rowId)}
-                onDecrease={() => handleDecrease(rowId)}
+                // onIncrease={() => handleIncrease(rowId)}
+                // onDecrease={() => handleDecrease(rowId)}
                 onRemove={() => handleRemove(rowId)}
                 onOptionChange={(itemId, optionLabel, newValue) =>
                   handleOptionChange(rowId, optionLabel, newValue)

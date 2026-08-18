@@ -37,16 +37,16 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
 
   const donationTotal = parseInt(localStorage.getItem("totalDonation"));
   const totalFreight = parseInt(localStorage.getItem("totalFreight"));
-  
+
   // Helper function to get item price based on hire/buy mode
   const getDeliveryPrice = (item) => {
     const selectedId = item.selectedOptions?.["Delivery Type"];
     const choices = Array.isArray(item.options?.[0]?.choices)
       ? item.options[0].choices
       : [];
-      const matched = choices.find(
-        (c) => String(c?.id ?? c?.value ?? "") === String(selectedId ?? ""),
-      );
+    const matched = choices.find(
+      (c) => String(c?.id ?? c?.value ?? "") === String(selectedId ?? ""),
+    );
     return parseFloat(matched?.price ?? 0);
   };
 
@@ -56,8 +56,8 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       : item.isHiring === false
         ? item.buyPrice || 0
         : item.hirePrice || 0;
-      };
-      
+  };
+
   const total = cart.reduce((sum, item) => {
     return sum + getItemPrice(item) * (item.quantity || 1);
   }, 0);
@@ -154,7 +154,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
         ...formData,
         donationTotal,
         orderAmount,
-        totalFreight
+        totalFreight,
       };
 
       const [result] = await Promise.all([
@@ -204,8 +204,8 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
       // Try REST Countries (preferred)
       try {
         const res = await fetch(
-            'https://countriesnow.space/api/v0.1/countries'
-        )
+          "https://countriesnow.space/api/v0.1/countries",
+        );
 
         if (!res.ok) throw new Error(`REST Countries HTTP ${res.status}`);
         const result = await res.json();
@@ -319,6 +319,10 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
               />
             </div>
           </div>
+          <span className="student-name-note">
+            *Please use the name on the back of your Student ID card (or
+            something similar)
+          </span>
 
           {/* Address */}
           <div className="form-group">
@@ -513,7 +517,7 @@ function CustomerDetail({ item, items = [], step, setStep, steps }) {
               name="message"
               value={formData.message}
               onChange={handleInputChange}
-              placeholder="If you require a wide gown or have any other queries..."
+              placeholder=""
               className="form-textarea"
               rows="4"
             />

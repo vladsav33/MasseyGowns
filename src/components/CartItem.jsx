@@ -8,8 +8,8 @@ function CartItem({
   item,
   quantity,
   step,
-  onIncrease,
-  onDecrease,
+  // onIncrease,
+  // onDecrease,
   onRemove,
   onOptionChange,
   onDeliveryChange,
@@ -288,8 +288,16 @@ function CartItem({
             </div>
           {/* )} */}
 
+          <button
+            onClick={onRemove}
+            className="remove-btn"
+            aria-label="Remove item"
+          >
+            Remove
+          </button>
+          
           {/* Controls */}
-          <div className="item-controls">
+          {/* <div className="item-controls">
             <div className="quantity-controls">
               <button
                 onClick={onDecrease}
@@ -308,14 +316,7 @@ function CartItem({
                 +
               </button>
             </div>
-            <button
-              onClick={onRemove}
-              className="remove-btn"
-              aria-label="Remove item"
-            >
-              Remove
-            </button>
-          </div>
+          </div> */}
 
           {/* Dialog Box */}
           {isDialogOpen && (

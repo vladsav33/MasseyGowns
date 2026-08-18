@@ -446,7 +446,15 @@ function CeremonyCourseSelection({
                           ))}
                       </div>
 
-                      <div className="item-controls">
+                      <button
+                        type="button"
+                        className="remove-btn"
+                        onClick={() => removeDisplayedItem(product.uiId)}
+                      >
+                        Remove
+                      </button>
+
+                      {/* <div className="item-controls">
                         <div className="quantity-controls">
                           <button
                             className="quantity-btn"
@@ -465,14 +473,7 @@ function CeremonyCourseSelection({
                           </button>
                         </div>
 
-                        <button
-                          type="button"
-                          className="remove-btn"
-                          onClick={() => removeDisplayedItem(product.uiId)}
-                        >
-                          Remove
-                        </button>
-                      </div>
+                      </div> */}
                     </div>
 
                     <div className="purchase-box">

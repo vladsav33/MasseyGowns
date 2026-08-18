@@ -104,7 +104,7 @@ export const submitCustomerDetails = async (formData) => {
       items: cart.map((item) => ({
         itemId: parseInt(item.id?.toString()) || 0,
         sizeId:
-          parseInt(item.selectedOptions?.["My full height"]) ||
+          parseInt(item.selectedOptions?.["Height"]) ||
           parseInt(item.selectedOptions?.["Head Size"]) ||
           0,
         hatId: parseInt(item.selectedOptions?.["Head Size"]) || 0,
